@@ -17,11 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.AbstractModule
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{CompileAndSubmitService, StubCompileAndSubmitService}
 
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
-
     bind(classOf[AppConfig]).asEagerSingleton()
+    bind(classOf[CompileAndSubmitService]).to(classOf[StubCompileAndSubmitService])
+
   }
 }
