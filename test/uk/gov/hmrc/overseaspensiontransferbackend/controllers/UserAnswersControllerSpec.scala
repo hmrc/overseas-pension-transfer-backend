@@ -26,20 +26,16 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.services.CompileAndSubmitService
 import play.api.inject.bind
 import play.api.Application
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
 import java.time.Instant
 import scala.concurrent.Future
 
 class UserAnswersControllerSpec
-    extends SpecBase
-    with ArgumentMatchersSugar
-    with MockitoSugar {
+    extends SpecBase {
 
-
-
-  private val testId = "test-id"
-  private val now: Instant = Instant.parse("2025-04-11T12:00:00Z")
+  private val now: Instant     = Instant.parse("2025-04-11T12:00:00Z")
   private val userAnswersRoute = s"/overseas-pension-transfer-backend/user-answers/$testId"
 
   "UserAnswersController.getAnswers" - {
@@ -50,8 +46,9 @@ class UserAnswersControllerSpec
 
       val userAnswers = UserAnswers(testId, Json.obj("someField" -> "someValue"), now)
 
-      when(mockCompileAndSubmitService.getAnswers(testId))
-        .thenReturn(Future.successful(Some(userAnswers)))
+      when(
+        mockCompileAndSubmitService.getAnswers(eqTo(testId))(any[HeaderCarrier])
+      ).thenReturn(Future.successful(Some(userAnswers)))
 
       val application: Application =
         applicationBuilder()
@@ -61,20 +58,23 @@ class UserAnswersControllerSpec
           .build()
 
       running(application) {
-        val request  = FakeRequest(GET, userAnswersRoute)
-        val result   = route(application, request).value
+        val request = FakeRequest(GET, userAnswersRoute)
+        val result  = route(application, request).value
 
-        status(result)          mustEqual OK
-        contentAsJson(result)   mustEqual Json.toJson(userAnswers)
-        verify(mockCompileAndSubmitService).getAnswers(testId)
+        status(result) mustEqual OK
+        contentAsJson(result) mustEqual Json.toJson(userAnswers)
+        verify(mockCompileAndSubmitService)
+          .getAnswers(eqTo(testId))(any[HeaderCarrier])
       }
     }
 
     "return 404 (NOT_FOUND) if the service returns None" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
 
-      when(mockCompileAndSubmitService.getAnswers(eqTo(testId)))
-        .thenReturn(Future.successful(None))
+      when(
+        mockCompileAndSubmitService.getAnswers(eqTo(testId))(any[HeaderCarrier])
+      ).thenReturn(Future.successful(None))
+
 
       val application: Application =
         applicationBuilder()
@@ -88,7 +88,8 @@ class UserAnswersControllerSpec
         val result  = route(application, request).value
 
         status(result) mustEqual NOT_FOUND
-        verify(mockCompileAndSubmitService).getAnswers(eqTo(testId))
+        verify(mockCompileAndSubmitService)
+          .getAnswers(eqTo(testId))(any[HeaderCarrier])
       }
     }
   }
@@ -97,7 +98,7 @@ class UserAnswersControllerSpec
 
     "return 200 (OK) and the updated JSON if JSON parsing and upsert succeed" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
-      val incomingJson = Json.obj(
+      val incomingJson                = Json.obj(
         "id"          -> "ignored-in-request-body",
         "data"        -> Json.obj("someField" -> "someIncomingValue"),
         "lastUpdated" -> "2025-04-11T12:00:00Z"
@@ -109,7 +110,7 @@ class UserAnswersControllerSpec
         lastUpdated = now
       )
 
-      when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswers]))
+      when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswers])(any[HeaderCarrier]))
         .thenReturn(Future.successful(userAnswers))
 
       val application: Application =
@@ -123,12 +124,12 @@ class UserAnswersControllerSpec
         val request = FakeRequest(PUT, userAnswersRoute).withJsonBody(incomingJson)
         val result  = route(application, request).value
 
-        status(result)        mustEqual OK
+        status(result) mustEqual OK
         contentAsJson(result) mustEqual Json.toJson(userAnswers)
 
         val captor = ArgCaptor[UserAnswers]
-        verify(mockCompileAndSubmitService).upsertAnswers(captor)
-        captor.value.id          mustEqual testId
+        verify(mockCompileAndSubmitService).upsertAnswers(captor)(any[HeaderCarrier])
+        captor.value.id mustEqual testId
         captor.value.lastUpdated mustEqual now
       }
     }
@@ -136,7 +137,7 @@ class UserAnswersControllerSpec
     "return 400 (BAD_REQUEST) if JSON validation fails" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
 
-      val badJson = Json.obj("id" -> testId) // missing data, lastUpdated
+      val badJson = Json.obj("id" -> testId)
 
       val application: Application =
         applicationBuilder()
@@ -149,8 +150,8 @@ class UserAnswersControllerSpec
         val request = FakeRequest(PUT, userAnswersRoute).withJsonBody(badJson)
         val result  = route(application, request).value
 
-        status(result)            mustEqual BAD_REQUEST
-        contentAsString(result)   must include("Invalid JSON")
+        status(result) mustEqual BAD_REQUEST
+        contentAsString(result) must include("Invalid JSON")
 
         verifyNoMoreInteractions(mockCompileAndSubmitService)
       }

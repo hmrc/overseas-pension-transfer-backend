@@ -18,8 +18,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.services.CompileAndSubmitService
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +38,10 @@ class UserAnswersController @Inject() (
    * Calls the service to retrieve user answers for the provided ID.
    * Returns 200 + JSON if found, 404 otherwise.
    */
-  def getAnswers(id: String): Action[AnyContent] = Action.async {
+  def getAnswers(id: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier =
+      HeaderCarrierConverter.fromRequest(request)
+
     compileAndSubmitService.getAnswers(id).map {
       case Some(a) => Ok(Json.toJson(a))
       case None    => NotFound
@@ -48,6 +53,9 @@ class UserAnswersController @Inject() (
    * Validates incoming JSON as UserAnswers, then delegates to service to upsert.
    */
   def putAnswers(id: String): Action[JsValue] = Action.async(parse.json) { request =>
+    implicit val hc: HeaderCarrier =
+      HeaderCarrierConverter.fromRequest(request)
+
     request.body.validate[UserAnswers] match {
       case JsSuccess(userAnswers, _) =>
         val updatedAnswers = userAnswers.copy(id = id)

@@ -16,24 +16,50 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
+import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{OptionValues, TryValues}
-import play.api.inject.bind
+import org.scalatest.{EitherValues, OptionValues, TryValues}
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{CompileAndSubmitConnector, CompileAndSubmitStubConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{CompileAndSubmitService, StubCompileAndSubmitService}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import java.time.Instant
+import scala.concurrent.ExecutionContext
 
 trait SpecBase
     extends AnyFreeSpec
     with Matchers
+    with ArgumentMatchersSugar
     with TryValues
     with OptionValues
+    with EitherValues
     with ScalaFutures
-    with IntegrationPatience {
+    with IntegrationPatience
+    with MockitoSugar
+    with GuiceOneAppPerSuite {
 
-  val userAnswersId: String = "test-id"
+  implicit lazy val hc: HeaderCarrier                          = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext                       = scala.concurrent.ExecutionContext.Implicits.global
+  val mockHttpClient: HttpClientV2                             = mock[HttpClientV2]
+  val mockAppConfig: AppConfig                                 = mock[AppConfig]
+
+  val testId: String = "test-id"
+
+  val simpleUserAnswers: UserAnswers = UserAnswers(
+    id          = testId,
+    data        = Json.obj("field" -> "value"),
+    lastUpdated = Instant.parse("2025-04-11T12:00:00Z")
+  )
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
