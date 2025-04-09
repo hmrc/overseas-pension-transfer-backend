@@ -18,7 +18,6 @@ lazy val microservice = Project("overseas-pension-transfer-backend", file("."))
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
-
   Test / unmanagedResourceDirectories +=
     (baseDirectory.value / "test" / "uk" / "gov" / "hmrc" / "overseaspensiontransferbackend" / "resources")
 )

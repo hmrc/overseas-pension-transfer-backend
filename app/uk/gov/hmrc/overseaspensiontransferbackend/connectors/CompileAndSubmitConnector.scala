@@ -36,10 +36,8 @@ trait CompileAndSubmitConnector {
 class CompileAndSubmitStubConnectorImpl @Inject()(httpClient: HttpClientV2, appConfig: AppConfig)
   extends CompileAndSubmitConnector {
 
-  private val stubsBaseUrl: String = appConfig.stubs
-
   private def stubUrl(id: String): URL =
-    url"$stubsBaseUrl/stub-answers/$id"
+    url"${appConfig.stubStoreAnswers}/$id"
 
   override def getAnswers(id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Either[UpstreamErrorResponse, UserAnswers]] = {
