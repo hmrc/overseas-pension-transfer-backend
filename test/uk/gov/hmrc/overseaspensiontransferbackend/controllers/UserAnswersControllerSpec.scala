@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
-import org.mockito.ArgumentMatchersSugar
-import org.mockito.MockitoSugar
 import org.mockito.captor.ArgCaptor
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -111,7 +109,7 @@ class UserAnswersControllerSpec
       )
 
       when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswers])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(userAnswers))
+        .thenReturn(Future.successful(Some(userAnswers)))
 
       val application: Application =
         applicationBuilder()

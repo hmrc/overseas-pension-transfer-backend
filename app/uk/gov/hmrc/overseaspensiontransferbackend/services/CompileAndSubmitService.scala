@@ -26,7 +26,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait CompileAndSubmitService {
   def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Option[UserAnswers]]
-  def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier): Future[UserAnswers]
+  def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier): Future[Option[UserAnswers]]
 }
 
 @Singleton
@@ -42,20 +42,17 @@ class CompileAndSubmitServiceImpl @Inject() (
       case Left(error) =>
         if (error.statusCode == 404) None
         else throw error
-    }.recover {
-      case e: Exception =>
-        logger.warn(s"Failed to get answers for ID '$id': ${e.getMessage}", e)
-          None
     }
   }
 
-  override def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier): Future[UserAnswers] = {
+  override def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier): Future[Option[UserAnswers]] = {
     connector
       .upsertAnswers(answers)
-      .recover {
-        case e: Exception =>
-          logger.error(s"Failed to upsert answers for ID '${answers.id}': ${e.getMessage}", e)
-          throw e
+      .map {
+        case Right(userAnswers) => Some(userAnswers)
+        case Left(error) =>
+          if (error.statusCode == 404) None
+          else throw error
       }
   }
 }
