@@ -24,6 +24,7 @@ class AppConfig @Inject() (config: Configuration) {
 
   val appName: String = config.get[String]("appName")
 
-  val stubStoreAnswers: String = s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/store-answers"
+  val stubStoreAnswers: String =
+    s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/overseas-pension-transfer-stubs/store-answers"
 
 }
