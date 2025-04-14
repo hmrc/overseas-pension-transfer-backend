@@ -19,7 +19,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.services.CompileAndSubmitService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter

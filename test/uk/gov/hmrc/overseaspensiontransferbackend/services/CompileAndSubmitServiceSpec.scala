@@ -21,8 +21,10 @@ import play.api.test.Helpers.running
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.CompileAndSubmitConnector
+
 import scala.concurrent.Future
 import play.api.Application
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
 class CompileAndSubmitServiceSpec
     extends SpecBase {
@@ -122,7 +124,7 @@ class CompileAndSubmitServiceSpec
 
         running(application) {
           val service = application.injector.instanceOf[CompileAndSubmitService]
-          val result  = service.upsertAnswers(simpleUserAnswers).futureValue
+          val result  = service.upsertAnswers(UserAnswersDTO.fromUserAnswers(simpleUserAnswers)).futureValue
           result mustBe Some(updatedAnswers)
           verify(mockConnector).upsertAnswers(eqTo(simpleUserAnswers))(any[HeaderCarrier], any)
         }
@@ -145,7 +147,7 @@ class CompileAndSubmitServiceSpec
         running(application) {
           val service = application.injector.instanceOf[CompileAndSubmitService]
           val ex      = intercept[RuntimeException] {
-            service.upsertAnswers(simpleUserAnswers).futureValue
+            service.upsertAnswers(UserAnswersDTO.fromUserAnswers(simpleUserAnswers)).futureValue
           }
           ex.getMessage must include("Stub error")
         }

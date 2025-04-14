@@ -26,6 +26,7 @@ import play.api.inject.bind
 import play.api.Application
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
 import java.time.Instant
 import scala.concurrent.Future
@@ -96,10 +97,18 @@ class UserAnswersControllerSpec
 
     "return 200 (OK) and the updated JSON if JSON parsing and upsert succeed" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
-      val incomingJson                = Json.obj(
-        "id"          -> "ignored-in-request-body",
-        "data"        -> Json.obj("someField" -> "someIncomingValue"),
-        "lastUpdated" -> "2025-04-11T12:00:00Z"
+      val now = Instant.parse("2025-04-11T12:00:00Z")
+
+      val incomingJson = Json.obj(
+        "id" -> "ignored-in-request-body",
+        "data" -> Json.obj("someField" -> "someIncomingValue"),
+        "lastUpdated" -> now
+      )
+
+      val userAnswersDTO = UserAnswersDTO(
+        id          = testId,
+        data        = Json.obj("someField" -> "someIncomingValue"),
+        lastUpdated = now
       )
 
       val userAnswers = UserAnswers(
@@ -108,7 +117,7 @@ class UserAnswersControllerSpec
         lastUpdated = now
       )
 
-      when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswers])(any[HeaderCarrier]))
+      when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswersDTO])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Some(userAnswers)))
 
       val application: Application =
@@ -123,14 +132,16 @@ class UserAnswersControllerSpec
         val result  = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsJson(result) mustEqual Json.toJson(userAnswers)
 
-        val captor = ArgCaptor[UserAnswers]
+        contentAsJson(result) mustEqual Json.toJson(userAnswersDTO)
+
+        val captor = ArgCaptor[UserAnswersDTO]
         verify(mockCompileAndSubmitService).upsertAnswers(captor)(any[HeaderCarrier])
         captor.value.id mustEqual testId
         captor.value.lastUpdated mustEqual now
       }
     }
+
 
     "return 400 (BAD_REQUEST) if JSON validation fails" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
