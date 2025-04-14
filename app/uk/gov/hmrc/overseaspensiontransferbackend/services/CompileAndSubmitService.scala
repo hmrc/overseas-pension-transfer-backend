@@ -33,15 +33,15 @@ trait CompileAndSubmitService {
 
 @Singleton
 class CompileAndSubmitServiceImpl @Inject() (
-                                              connector: CompileAndSubmitConnector
-                                            )(implicit ec: ExecutionContext)
-  extends CompileAndSubmitService
+    connector: CompileAndSubmitConnector
+  )(implicit ec: ExecutionContext
+  ) extends CompileAndSubmitService
     with Logging {
 
   override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Option[UserAnswers]] = {
     connector.getAnswers(id).map {
       case Right(userAnswers) => Some(userAnswers)
-      case Left(error) =>
+      case Left(error)        =>
         if (error.statusCode == 404) None
         else throw error
     }
@@ -49,11 +49,11 @@ class CompileAndSubmitServiceImpl @Inject() (
 
   override def upsertAnswers(answersDTO: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Option[UserAnswers]] = {
     connector
-      //TODO: it seems likely we'll need another DTO and service layer here rather than sending UA to the API
+      // TODO: it seems likely we'll need another DTO and service layer here rather than sending UA to the API
       .upsertAnswers(toUserAnswers(answersDTO))
       .map {
         case Right(userAnswers) => Some(userAnswers)
-        case Left(error) =>
+        case Left(error)        =>
           if (error.statusCode == 404) None
           else throw error
       }

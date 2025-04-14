@@ -33,21 +33,19 @@ trait CompileAndSubmitConnector {
 }
 
 @Singleton()
-class CompileAndSubmitStubConnectorImpl @Inject()(httpClient: HttpClientV2, appConfig: AppConfig)
-  extends CompileAndSubmitConnector {
+class CompileAndSubmitStubConnectorImpl @Inject() (httpClient: HttpClientV2, appConfig: AppConfig)
+    extends CompileAndSubmitConnector {
 
   private def stubUrl(id: String): URL =
     url"${appConfig.stubStoreAnswers}/$id"
 
-  override def getAnswers(id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext)
-  : Future[Either[UpstreamErrorResponse, UserAnswers]] = {
+  override def getAnswers(id: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[UpstreamErrorResponse, UserAnswers]] = {
     httpClient
       .get(stubUrl(id))
       .execute[Either[UpstreamErrorResponse, UserAnswers]]
   }
 
-  override def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier, ec: ExecutionContext)
-  : Future[Either[UpstreamErrorResponse, UserAnswers]] = {
+  override def upsertAnswers(answers: UserAnswers)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[UpstreamErrorResponse, UserAnswers]] = {
     httpClient
       .put(stubUrl(answers.id))
       .withBody(Json.toJson(answers))

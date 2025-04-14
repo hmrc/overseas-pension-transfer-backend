@@ -28,10 +28,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UserAnswersController @Inject() (
-                                        cc: ControllerComponents,
-                                        compileAndSubmitService: CompileAndSubmitService
-                                      )(implicit ec: ExecutionContext)
-  extends AbstractController(cc) {
+    cc: ControllerComponents,
+    compileAndSubmitService: CompileAndSubmitService
+  )(implicit ec: ExecutionContext
+  ) extends AbstractController(cc) {
 
   def getAnswers(id: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier =

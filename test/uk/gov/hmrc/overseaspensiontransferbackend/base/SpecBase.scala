@@ -48,10 +48,10 @@ trait SpecBase
     with MockitoSugar
     with GuiceOneAppPerSuite {
 
-  implicit lazy val hc: HeaderCarrier                          = HeaderCarrier()
-  implicit lazy val ec: ExecutionContext                       = scala.concurrent.ExecutionContext.Implicits.global
-  val mockHttpClient: HttpClientV2                             = mock[HttpClientV2]
-  val mockAppConfig: AppConfig                                 = mock[AppConfig]
+  implicit lazy val hc: HeaderCarrier    = HeaderCarrier()
+  implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  val mockHttpClient: HttpClientV2       = mock[HttpClientV2]
+  val mockAppConfig: AppConfig           = mock[AppConfig]
 
   val testId: String = "test-id"
 

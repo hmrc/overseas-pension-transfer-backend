@@ -29,7 +29,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 
 trait BaseISpec
-  extends AnyWordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with OptionValues
     with BeforeAndAfterAll
@@ -38,14 +38,14 @@ trait BaseISpec
     with WireMockHelper {
 
   def servicesConfig: Map[String, String] = Map(
-    "play.filters.csrf.header.bypassHeaders.Csrf-Token"            -> "nocheck",
-    "microservice.services.overseas-pension-transfer-stubs.host"   -> WireMockHelper.wireMockHost,
-    "microservice.services.overseas-pension-transfer-stubs.port"   -> WireMockHelper.wireMockPort.toString,
-    "microservice.services.auth.host"                              -> WireMockHelper.wireMockHost,
-    "microservice.services.auth.port"                              -> WireMockHelper.wireMockPort.toString
+    "play.filters.csrf.header.bypassHeaders.Csrf-Token"          -> "nocheck",
+    "microservice.services.overseas-pension-transfer-stubs.host" -> WireMockHelper.wireMockHost,
+    "microservice.services.overseas-pension-transfer-stubs.port" -> WireMockHelper.wireMockPort.toString,
+    "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
+    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
   )
 
-  override implicit lazy val app: Application =
+  implicit override lazy val app: Application =
     new GuiceApplicationBuilder()
       .in(Environment.simple(mode = Mode.Test))
       .configure(servicesConfig)
@@ -69,7 +69,8 @@ trait BaseISpec
   override def beforeEach(): Unit = {
     super.beforeEach()
   }
-  override def afterEach(): Unit = {
+
+  override def afterEach(): Unit  = {
     super.afterEach()
   }
 }

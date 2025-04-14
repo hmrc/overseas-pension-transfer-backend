@@ -74,7 +74,6 @@ class UserAnswersControllerSpec
         mockCompileAndSubmitService.getAnswers(eqTo(testId))(any[HeaderCarrier])
       ).thenReturn(Future.successful(None))
 
-
       val application: Application =
         applicationBuilder()
           .overrides(
@@ -97,11 +96,11 @@ class UserAnswersControllerSpec
 
     "return 200 (OK) and the updated JSON if JSON parsing and upsert succeed" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
-      val now = Instant.parse("2025-04-11T12:00:00Z")
+      val now                         = Instant.parse("2025-04-11T12:00:00Z")
 
       val incomingJson = Json.obj(
-        "id" -> "ignored-in-request-body",
-        "data" -> Json.obj("someField" -> "someIncomingValue"),
+        "id"          -> "ignored-in-request-body",
+        "data"        -> Json.obj("someField" -> "someIncomingValue"),
         "lastUpdated" -> now
       )
 
@@ -141,7 +140,6 @@ class UserAnswersControllerSpec
         captor.value.lastUpdated mustEqual now
       }
     }
-
 
     "return 400 (BAD_REQUEST) if JSON validation fails" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
