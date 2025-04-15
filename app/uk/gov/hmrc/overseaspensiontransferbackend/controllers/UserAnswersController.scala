@@ -43,21 +43,14 @@ class UserAnswersController @Inject() (
     }
   }
 
-  def putAnswers(id: String): Action[JsValue] = Action.async(parse.json) { request =>
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromRequest(request)
-
-    request.body.validate[UserAnswersDTO] match {
-      case JsSuccess(userAnswersDTO, _) =>
-        val updatedAnswers = userAnswersDTO.copy(id = id)
-
-        compileAndSubmitService.upsertAnswers(updatedAnswers).map { saved =>
-          val savedDTO = saved.map(UserAnswersDTO.fromUserAnswers)
-          Ok(Json.toJson(savedDTO))
-        }
-
-      case JsError(e) =>
-        Future.successful(BadRequest(s"Invalid JSON for UserAnswers: $e"))
+  def putAnswers(id: String): Action[UserAnswersDTO] =
+    Action.async(parse.json[UserAnswersDTO]) { request =>
+      implicit val hc: HeaderCarrier =
+        HeaderCarrierConverter.fromRequest(request)
+      val userAnswersDTO = request.body.copy(id = id)
+      compileAndSubmitService.upsertAnswers(userAnswersDTO).map {
+        case Some(savedDTO) => Ok(Json.toJson(savedDTO))
+        case None           => NotFound
+      }
     }
-  }
 }
