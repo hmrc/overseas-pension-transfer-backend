@@ -28,26 +28,22 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
-import java.time.Instant
 import scala.concurrent.Future
 
 class UserAnswersControllerSpec
     extends SpecBase {
 
-  private val now: Instant     = Instant.parse("2025-04-11T12:00:00Z")
   private val userAnswersRoute = s"/overseas-pension-transfer-backend/user-answers/$testId"
 
   "UserAnswersController.getAnswers" - {
 
-    "return 200 (OK) and the JSON if the service returns Some(UserAnswers)" in {
+    "return 200 (OK) and the JSON if the service returns Some(UserAnswersDTO)" in {
 
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
 
-      val userAnswers = UserAnswers(testId, Json.obj("someField" -> "someValue"), now)
-
       when(
         mockCompileAndSubmitService.getAnswers(eqTo(testId))(any[HeaderCarrier])
-      ).thenReturn(Future.successful(Some(userAnswers)))
+      ).thenReturn(Future.successful(Some(simpleUserAnswersDTO)))
 
       val application: Application =
         applicationBuilder()
@@ -61,7 +57,7 @@ class UserAnswersControllerSpec
         val result  = route(application, request).value
 
         status(result) mustEqual OK
-        contentAsJson(result) mustEqual Json.toJson(userAnswers)
+        contentAsJson(result) mustEqual Json.toJson(simpleUserAnswersDTO)
         verify(mockCompileAndSubmitService)
           .getAnswers(eqTo(testId))(any[HeaderCarrier])
       }
@@ -96,28 +92,9 @@ class UserAnswersControllerSpec
 
     "return 200 (OK) and the updated JSON if JSON parsing and upsert succeed" in {
       val mockCompileAndSubmitService = mock[CompileAndSubmitService]
-      val now                         = Instant.parse("2025-04-11T12:00:00Z")
-
-      val incomingJson = Json.obj(
-        "id"          -> "ignored-in-request-body",
-        "data"        -> Json.obj("someField" -> "someIncomingValue"),
-        "lastUpdated" -> now
-      )
-
-      val userAnswersDTO = UserAnswersDTO(
-        id          = testId,
-        data        = Json.obj("someField" -> "someIncomingValue"),
-        lastUpdated = now
-      )
-
-      val userAnswers = UserAnswers(
-        id          = testId,
-        data        = Json.obj("someField" -> "someIncomingValue"),
-        lastUpdated = now
-      )
 
       when(mockCompileAndSubmitService.upsertAnswers(any[UserAnswersDTO])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Some(userAnswers)))
+        .thenReturn(Future.successful(Some(simpleUserAnswersDTO)))
 
       val application: Application =
         applicationBuilder()
@@ -132,7 +109,7 @@ class UserAnswersControllerSpec
 
         status(result) mustEqual OK
 
-        contentAsJson(result) mustEqual Json.toJson(userAnswersDTO)
+        contentAsJson(result) mustEqual Json.toJson(simpleUserAnswersDTO)
 
         val captor = ArgCaptor[UserAnswersDTO]
         verify(mockCompileAndSubmitService).upsertAnswers(captor)(any[HeaderCarrier])
@@ -158,7 +135,7 @@ class UserAnswersControllerSpec
         val result  = route(application, request).value
 
         status(result) mustEqual BAD_REQUEST
-        contentAsString(result) must include("Invalid JSON")
+        contentAsString(result) must include("Json validation error")
 
         verifyNoMoreInteractions(mockCompileAndSubmitService)
       }

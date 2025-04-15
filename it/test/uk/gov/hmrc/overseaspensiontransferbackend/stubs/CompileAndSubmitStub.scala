@@ -23,9 +23,11 @@ import play.api.libs.json.Json
 
 object CompileAndSubmitStub {
 
+  def stubStoreAnswersUrl(id: String) = s"/overseas-pension-transfer-stubs/store-answers/$id"
+
   def stubGetAnswersSuccess(id: String): Unit = {
     stubFor(
-      get(urlEqualTo(s"/stub-answers/$id"))
+      get(urlEqualTo(stubStoreAnswersUrl(id)))
         .willReturn(
           aResponse()
             .withStatus(OK)
@@ -42,7 +44,7 @@ object CompileAndSubmitStub {
 
   def stubGetAnswersNotFound(id: String): Unit = {
     stubFor(
-      get(urlEqualTo(s"/stub-answers/$id"))
+      get(urlEqualTo(stubStoreAnswersUrl(id)))
         .willReturn(
           aResponse()
             .withStatus(NOT_FOUND)
@@ -53,7 +55,7 @@ object CompileAndSubmitStub {
 
   def stubGetAnswersServerError(id: String): Unit = {
     stubFor(
-      get(urlEqualTo(s"/stub-answers/$id"))
+      get(urlEqualTo(stubStoreAnswersUrl(id)))
         .willReturn(
           aResponse()
             .withStatus(INTERNAL_SERVER_ERROR)
@@ -64,7 +66,7 @@ object CompileAndSubmitStub {
 
   def stubUpsertAnswersSuccess(answers: UserAnswers): Unit = {
     stubFor(
-      put(urlEqualTo(s"/stub-answers/${answers.id}"))
+      put(urlEqualTo(stubStoreAnswersUrl(answers.id)))
         .withRequestBody(equalToJson(Json.toJson(answers).toString()))
         .willReturn(
           aResponse()
@@ -82,7 +84,7 @@ object CompileAndSubmitStub {
 
   def stubUpsertAnswersBadRequest(answers: UserAnswers): Unit = {
     stubFor(
-      put(urlEqualTo(s"/stub-answers/${answers.id}"))
+      put(urlEqualTo(stubStoreAnswersUrl(answers.id)))
         .withRequestBody(equalToJson(Json.toJson(answers).toString()))
         .willReturn(
           aResponse()

@@ -25,6 +25,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.CompileAndSubmitCon
 import scala.concurrent.Future
 import play.api.Application
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromUserAnswers
 
 class CompileAndSubmitServiceSpec
     extends SpecBase {
@@ -33,7 +34,7 @@ class CompileAndSubmitServiceSpec
 
     "getAnswers" - {
 
-      "must return Some(...) if connector returns Right(UserAnswers)" in {
+      "must return Some(...) if connector returns Right(UserAnswersDTO)" in {
         val mockConnector = mock[CompileAndSubmitConnector]
 
         when(
@@ -51,7 +52,7 @@ class CompileAndSubmitServiceSpec
           val service = application.injector.instanceOf[CompileAndSubmitService]
 
           val result = service.getAnswers(testId).futureValue
-          result mustBe Some(simpleUserAnswers)
+          result mustBe Some(simpleUserAnswersDTO)
 
           verify(mockConnector).getAnswers(eqTo(testId))(any[HeaderCarrier], any)
         }
@@ -105,7 +106,7 @@ class CompileAndSubmitServiceSpec
 
     "upsertAnswers" - {
 
-      "must return the updated UserAnswers on success" in {
+      "must return the updated UserAnswersDTO on success" in {
         val mockConnector = mock[CompileAndSubmitConnector]
 
         val updatedAnswers =
@@ -124,8 +125,8 @@ class CompileAndSubmitServiceSpec
 
         running(application) {
           val service = application.injector.instanceOf[CompileAndSubmitService]
-          val result  = service.upsertAnswers(UserAnswersDTO.fromUserAnswers(simpleUserAnswers)).futureValue
-          result mustBe Some(updatedAnswers)
+          val result  = service.upsertAnswers(simpleUserAnswersDTO).futureValue
+          result mustBe Some(fromUserAnswers(updatedAnswers))
           verify(mockConnector).upsertAnswers(eqTo(simpleUserAnswers))(any[HeaderCarrier], any)
         }
       }
