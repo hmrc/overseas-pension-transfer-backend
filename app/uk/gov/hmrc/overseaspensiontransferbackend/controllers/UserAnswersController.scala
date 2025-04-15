@@ -47,7 +47,7 @@ class UserAnswersController @Inject() (
     Action.async(parse.json[UserAnswersDTO]) { request =>
       implicit val hc: HeaderCarrier =
         HeaderCarrierConverter.fromRequest(request)
-      val userAnswersDTO = request.body.copy(id = id)
+      val userAnswersDTO             = request.body.copy(id = id)
       compileAndSubmitService.upsertAnswers(userAnswersDTO).map {
         case Some(savedDTO) => Ok(Json.toJson(savedDTO))
         case None           => NotFound
