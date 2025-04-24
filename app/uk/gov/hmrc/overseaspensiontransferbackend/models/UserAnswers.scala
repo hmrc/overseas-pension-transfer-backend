@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.config
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.libs.json.{JsObject, Json, OFormat}
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+import java.time.Instant
 
-  val appName: String = config.get[String]("appName")
+case class UserAnswers(
+    id: String,
+    data: JsObject,
+    lastUpdated: Instant
+  )
 
-  val stubStoreAnswers: String =
-    s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/overseas-pension-transfer-stubs/store-answers"
-
+object UserAnswers {
+  implicit val format: OFormat[UserAnswers] = Json.format
 }
