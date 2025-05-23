@@ -1,6 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.overseaspensiontransferbackend.controllers.MicroserviceHelloWorldController.hello
-
 GET        /user-answers/:id        uk.gov.hmrc.overseaspensiontransferbackend.controllers.UserAnswersController.getAnswers(id)
 PUT        /user-answers/:id        uk.gov.hmrc.overseaspensiontransferbackend.controllers.UserAnswersController.putAnswers(id)

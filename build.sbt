@@ -12,12 +12,11 @@ lazy val microservice = Project("overseas-pension-transfer-backend", file("."))
     scalacOptions += "-Wconf:src=routes/.*:s",
     scalafmtOnCompile := true
   )
-  .settings(inConfig(Test)(testSettings): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
-  .settings(CodeCoverageSettings.settings: _*)
+  .settings(inConfig(Test)(testSettings) *)
+  .settings(CodeCoverageSettings.settings *)
   .settings(PlayKeys.playDefaultPort := 15601)
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   Test / unmanagedResourceDirectories +=
     (baseDirectory.value / "test" / "uk" / "gov" / "hmrc" / "overseaspensiontransferbackend" / "resources")
