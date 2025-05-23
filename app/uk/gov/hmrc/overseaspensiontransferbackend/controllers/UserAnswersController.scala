@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
@@ -24,7 +24,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.services.CompileAndSubmitServi
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class UserAnswersController @Inject() (
