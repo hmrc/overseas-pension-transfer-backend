@@ -27,4 +27,5 @@ class AppConfig @Inject() (config: Configuration) {
   val stubStoreAnswers: String =
     s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/overseas-pension-transfer-stubs/store-answers"
 
+  val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 }

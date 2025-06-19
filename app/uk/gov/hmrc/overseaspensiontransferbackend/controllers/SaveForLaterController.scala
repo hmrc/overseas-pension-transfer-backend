@@ -20,37 +20,38 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.services.CompileAndSubmitService
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromSavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class UserAnswersController @Inject() (
+class SaveForLaterController @Inject() (
     cc: ControllerComponents,
-    compileAndSubmitService: CompileAndSubmitService
+    saveForLaterService: SaveForLaterService
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def getAnswers(id: String): Action[AnyContent] = Action.async { implicit request =>
+  def getAnswers(referenceID: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromRequest(request)
 
-    compileAndSubmitService.getAnswers(id).map {
+    saveForLaterService.getAnswers(referenceID).map {
       case Some(a) => Ok(Json.toJson(a))
       case None    => NotFound
     }
   }
 
-  def putAnswers(id: String): Action[UserAnswersDTO] =
+  def saveAnswers(referenceId: String): Action[UserAnswersDTO] =
     Action.async(parse.json[UserAnswersDTO]) { request =>
       implicit val hc: HeaderCarrier =
         HeaderCarrierConverter.fromRequest(request)
-      val userAnswersDTO             = request.body.copy(id = id)
-      compileAndSubmitService.upsertAnswers(userAnswersDTO).map {
-        case Some(savedDTO) => Ok(Json.toJson(savedDTO))
-        case None           => NotFound
+      val userAnswersDTO             = request.body.copy(referenceId = referenceId)
+      saveForLaterService.saveAnswers(userAnswersDTO).map {
+        case Some(savedAnswers) => Created(Json.toJson(fromSavedUserAnswers(savedAnswers)))
+        case None               => InternalServerError
       }
     }
 }

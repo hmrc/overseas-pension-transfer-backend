@@ -1,4 +1,4 @@
 # microservice specific routes
 
-GET        /user-answers/:id        uk.gov.hmrc.overseaspensiontransferbackend.controllers.UserAnswersController.getAnswers(id)
-PUT        /user-answers/:id        uk.gov.hmrc.overseaspensiontransferbackend.controllers.UserAnswersController.putAnswers(id)
+GET         /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.getAnswers(referenceId)
+POST        /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.saveAnswers(referenceId)

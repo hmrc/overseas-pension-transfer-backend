@@ -21,34 +21,28 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
-import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{CompileAndSubmitConnector, CompileAndSubmitStubConnectorImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromUserAnswers
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromSavedUserAnswers
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
 
 trait SpecBase
-    extends AnyFreeSpec
-    with Matchers
+    extends Matchers
     with ArgumentMatchersSugar
     with TryValues
     with OptionValues
     with EitherValues
     with ScalaFutures
     with IntegrationPatience
-    with MockitoSugar
-    with GuiceOneAppPerSuite {
+    with MockitoSugar {
 
   implicit lazy val hc: HeaderCarrier    = HeaderCarrier()
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -60,19 +54,19 @@ trait SpecBase
   val now: Instant = Instant.parse("2025-04-11T12:00:00Z")
 
   val incomingJson: JsObject = Json.obj(
-    "id"          -> "ignored-in-request-body",
+    "referenceId" -> "ignored-in-request-body",
     "data"        -> Json.obj("someField" -> "someIncomingValue"),
     "lastUpdated" -> now
   )
 
-  val simpleUserAnswers: UserAnswers = UserAnswers(
-    id          = testId,
+  val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(
+    referenceId = testId,
     data        = Json.obj("field" -> "value"),
     lastUpdated = Instant.parse("2025-04-11T12:00:00Z")
   )
 
-  val simpleUserAnswersDTO: UserAnswersDTO = fromUserAnswers(simpleUserAnswers)
+  val simpleUserAnswersDTO: UserAnswersDTO = fromSavedUserAnswers(simpleSavedUserAnswers)
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(userAnswers: Option[SavedUserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
 }

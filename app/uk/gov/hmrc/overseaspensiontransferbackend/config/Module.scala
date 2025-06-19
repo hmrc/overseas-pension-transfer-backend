@@ -17,14 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.AbstractModule
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{CompileAndSubmitConnector, CompileAndSubmitStubConnectorImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{CompileAndSubmitService, CompileAndSubmitServiceImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
+
+import java.time.{Clock, ZoneOffset}
 
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[CompileAndSubmitConnector]).to(classOf[CompileAndSubmitStubConnectorImpl])
-    bind(classOf[CompileAndSubmitService]).to(classOf[CompileAndSubmitServiceImpl])
+    bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
+    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }
 }
