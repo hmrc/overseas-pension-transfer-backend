@@ -18,11 +18,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.UserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 import java.time.Instant
 
 final case class UserAnswersDTO(
-    id: String,
+    referenceId: String,
     data: JsObject,
     lastUpdated: Instant
   )
@@ -31,13 +31,13 @@ object UserAnswersDTO {
 
   implicit val format: OFormat[UserAnswersDTO] = {
     val reads: Reads[UserAnswersDTO] = (
-      (__ \ "id").read[String] and
+      (__ \ "referenceId").read[String] and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read[Instant]
     )(UserAnswersDTO.apply _)
 
     val writes: OWrites[UserAnswersDTO] = (
-      (__ \ "id").write[String] and
+      (__ \ "referenceId").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write[Instant]
     )(unlift(UserAnswersDTO.unapply))
@@ -45,16 +45,16 @@ object UserAnswersDTO {
     OFormat(reads, writes)
   }
 
-  def fromUserAnswers(ua: UserAnswers): UserAnswersDTO =
+  def fromSavedUserAnswers(ua: SavedUserAnswers): UserAnswersDTO =
     UserAnswersDTO(
-      id          = ua.id,
+      referenceId = ua.referenceId,
       data        = ua.data,
       lastUpdated = ua.lastUpdated
     )
 
-  def toUserAnswers(dto: UserAnswersDTO): UserAnswers =
-    UserAnswers(
-      id          = dto.id,
+  def toSavedUserAnswers(dto: UserAnswersDTO): SavedUserAnswers =
+    SavedUserAnswers(
+      referenceId = dto.referenceId,
       data        = dto.data,
       lastUpdated = dto.lastUpdated
     )
