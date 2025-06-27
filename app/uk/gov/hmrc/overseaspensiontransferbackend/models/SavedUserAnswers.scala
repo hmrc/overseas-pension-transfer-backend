@@ -24,17 +24,27 @@ import java.time.Instant
 
 final case class SavedUserAnswers(
     referenceId: String,
-    // This should be replaced by a mapping of the user answers data
-    data: JsObject       = Json.obj(),
+    data: AnswersData,
     lastUpdated: Instant = Instant.now
   )
+
+final case class AnswersData(
+    memberDetails: Option[MemberDetails],
+    qropsDetails: Option[QropsDetails],
+    schemeManagerDetails: Option[SchemeManagerDetails],
+    transferDetails: Option[TransferDetails]
+  )
+
+object AnswersData {
+  implicit val format: OFormat[AnswersData] = Json.format
+}
 
 object SavedUserAnswers {
 
   val reads: Reads[SavedUserAnswers] = {
     (
       (__ \ "referenceId").read[String] and
-        (__ \ "data").read[JsObject] and
+        (__ \ "data").read[AnswersData] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(SavedUserAnswers.apply _)
   }
@@ -44,7 +54,7 @@ object SavedUserAnswers {
       (__ \ "referenceId").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    )(ua => (ua.referenceId, ua.data, ua.lastUpdated))
+    )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 
   implicit val format: OFormat[SavedUserAnswers] = OFormat(reads, writes)

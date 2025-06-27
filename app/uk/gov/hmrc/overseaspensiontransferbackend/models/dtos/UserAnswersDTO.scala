@@ -18,7 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+
 import java.time.Instant
 
 final case class UserAnswersDTO(
@@ -44,18 +45,4 @@ object UserAnswersDTO {
 
     OFormat(reads, writes)
   }
-
-  def fromSavedUserAnswers(ua: SavedUserAnswers): UserAnswersDTO =
-    UserAnswersDTO(
-      referenceId = ua.referenceId,
-      data        = ua.data,
-      lastUpdated = ua.lastUpdated
-    )
-
-  def toSavedUserAnswers(dto: UserAnswersDTO): SavedUserAnswers =
-    SavedUserAnswers(
-      referenceId = dto.referenceId,
-      data        = dto.data,
-      lastUpdated = dto.lastUpdated
-    )
 }
