@@ -37,7 +37,7 @@ object UserAnswersTransformer {
     }
   }
 
-  private def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] = {
+  def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] = {
     val transformers: Seq[JsObject => Either[JsError, JsObject]] = Seq(
       MemberDetailsTransformer.cleanse
       // Add others here
@@ -49,7 +49,7 @@ object UserAnswersTransformer {
     }
   }
 
-  private def applyEnrichTransforms(json: JsObject): Either[JsError, JsObject] = {
+  def applyEnrichTransforms(json: JsObject): Either[JsError, JsObject] = {
     val transformers: Seq[JsObject => Either[JsError, JsObject]] = Seq(
       MemberDetailsTransformer.enrich
       // Add others here

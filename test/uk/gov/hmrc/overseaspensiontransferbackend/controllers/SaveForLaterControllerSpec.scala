@@ -77,7 +77,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       val mockService = mock[SaveForLaterService]
       val expected    = simpleSavedUserAnswers
 
-      when(mockService.saveAnswers(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
         .thenReturn(Future.successful(Some(expected)))
 
       val app: Application =
@@ -100,7 +100,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
     "saveAnswers should return 500 InternalServerError if save fails" in {
       val mockService = mock[SaveForLaterService]
 
-      when(mockService.saveAnswers(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
         .thenReturn(Future.successful(None))
 
       val app: Application =

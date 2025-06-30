@@ -82,7 +82,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
         running(app) {
           val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswers(simpleUserAnswersDTO).futureValue
+          val result  = service.saveAnswer(simpleUserAnswersDTO).futureValue
 
           result mustBe Some(simpleSavedUserAnswers.copy(lastUpdated = result.value.lastUpdated))
           verify(mockRepository).set(eqTo(simpleSavedUserAnswers))
@@ -100,7 +100,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
         running(app) {
           val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswers(simpleUserAnswersDTO).futureValue
+          val result  = service.saveAnswer(simpleUserAnswersDTO).futureValue
 
           result mustBe None
           verify(mockRepository).set(eqTo(simpleSavedUserAnswers))

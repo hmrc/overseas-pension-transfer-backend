@@ -39,15 +39,14 @@ class SaveForLaterController @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     saveForLaterService.getAnswers(referenceId).map {
-      case Right(saved) =>
+      case Right(saved)                       =>
         Ok(Json.toJson(saved))
       case Left(TransformationError(message)) =>
         InternalServerError(Json.obj("error" -> "Failed to transform saved data", "details" -> message))
-      case Left(_) =>
+      case Left(_)                            =>
         NotFound
     }
   }
-
 
   def saveAnswers(referenceId: String): Action[UserAnswersDTO] =
     Action.async(parse.json[UserAnswersDTO]) { request =>
@@ -55,12 +54,12 @@ class SaveForLaterController @Inject() (
 
       val userAnswersDTO = request.body.copy(referenceId = referenceId)
 
-      saveForLaterService.saveAnswers(userAnswersDTO).map {
-        case Right(saved) =>
+      saveForLaterService.saveAnswer(userAnswersDTO).map {
+        case Right(saved)                       =>
           Ok(Json.toJson(saved))
         case Left(TransformationError(message)) =>
           BadRequest(Json.obj("error" -> "Transformation failed", "details" -> message))
-        case Left(_) =>
+        case Left(_)                            =>
           InternalServerError(Json.obj("error" -> "Unexpected error"))
       }
     }
