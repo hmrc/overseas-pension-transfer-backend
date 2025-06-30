@@ -46,68 +46,72 @@ class SaveForLaterServiceImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends SaveForLaterService with Logging {
 
-  import SaveForLaterError._
-
-  override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] =
+  override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
     repository.get(id).map {
       case Some(saved) =>
-        UserAnswersTransformer.fromSaved(saved) match {
-          case Right(dto) => Right(dto)
-          case Left(err)  => Left(TransformationError(Json.stringify(JsError.toJson(err))))
+        enrich(Json.toJsObject(saved.data)) match {
+          case Right(enriched) =>
+            Right(UserAnswersDTO(saved.referenceId, enriched, saved.lastUpdated))
+
+          case Left(error) =>
+            Left(error)
         }
 
       case None =>
-        Left(NotFound)
+        Left(SaveForLaterError.NotFound)
     }
+  }
 
   override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
-    UserAnswersTransformer.applyCleanseTransforms(dto.data) match {
-      case Left(JsError(errors)) =>
-        Future.successful(Left(TransformationError(Json.prettyPrint(JsError.toJson(errors)))))
+    cleanse(dto.data) match {
+      case Left(err) => Future.successful(Left(err))
 
       case Right(transformedInput) =>
-        repository.get(dto.referenceId).flatMap {
+        repository.get(dto.referenceId).flatMap { maybeExisting =>
+          val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
 
-          case Some(existing) =>
-            val existingJson = Json.toJsObject(existing.data)
-            val mergedJson   = existingJson.deepMerge(transformedInput)
+          enrich(transformedInput) match {
+            case Left(err) => Future.successful(Left(err))
 
-            UserAnswersTransformer.applyEnrichTransforms(transformedInput) match {
-              case Left(JsError(errors)) =>
-                Future.successful(Left(TransformationError(Json.prettyPrint(JsError.toJson(errors)))))
+            case Right(enrichedPartial) =>
+              validate(mergedJson) match {
+                case Left(err) => Future.successful(Left(err))
 
-              case Right(enrichedPartial) =>
-                mergedJson.validate[AnswersData] match {
-                  case JsSuccess(mergedAnswersData, _) =>
-                    val saved = SavedUserAnswers(dto.referenceId, mergedAnswersData, dto.lastUpdated)
-                    repository.set(saved).map {
-                      case true  => Right(dto.copy(data = enrichedPartial))
-                      case false => Left(SaveFailed)
-                    }
-
-                  case JsError(errors) =>
-                    Future.successful(Left(TransformationError(Json.prettyPrint(JsError.toJson(errors)))))
-                }
-            }
-          case None =>
-            UserAnswersTransformer.applyEnrichTransforms(transformedInput) match {
-              case Left(JsError(errors)) =>
-                Future.successful(Left(TransformationError(Json.prettyPrint(JsError.toJson(errors)))))
-
-              case Right(enrichedPartial) =>
-                transformedInput.validate[AnswersData] match {
-                  case JsSuccess(data, _) =>
-                    val saved = SavedUserAnswers(dto.referenceId, data, dto.lastUpdated)
-                    repository.set(saved).map {
-                      case true  => Right(dto.copy(data = enrichedPartial))
-                      case false => Left(SaveFailed)
-                    }
-                  case JsError(errors) =>
-                    Future.successful(Left(TransformationError(Json.prettyPrint(JsError.toJson(errors)))))
-                }
-            }
-
+                case Right(validated) =>
+                  val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
+                  repository.set(saved).map {
+                    case true  => Right(dto.copy(data = enrichedPartial))
+                    case false => Left(SaveForLaterError.SaveFailed)
+                  }
+              }
+          }
         }
+    }
+  }
+
+  private def cleanse(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    UserAnswersTransformer.applyCleanseTransforms(json).left.map(err =>
+      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
+    )
+  }
+
+  private def enrich(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    UserAnswersTransformer.applyEnrichTransforms(json).left.map(err =>
+      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
+    )
+  }
+
+  private def validate(json: JsObject): Either[SaveForLaterError, AnswersData] = {
+    json.validate[AnswersData] match {
+      case JsSuccess(data, _) => Right(data)
+      case JsError(err)       => Left(SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err))))
+    }
+  }
+
+  private def mergeWithExisting(existing: Option[SavedUserAnswers], update: JsObject): JsObject = {
+    existing match {
+      case Some(existingData) => Json.toJsObject(existingData.data).deepMerge(update)
+      case None               => update
     }
   }
 }

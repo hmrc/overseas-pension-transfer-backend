@@ -19,8 +19,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.json.{Json, OFormat}
 
 case class MemberDetails(
-    firstName: Option[String] = None,
-    lastName: Option[String] = None,
+    firstName: Option[String]  = None,
+    lastName: Option[String]   = None,
     memberNino: Option[String] = None
   )
 

@@ -20,9 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.TransformationError
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterService
-import uk.gov.hmrc.overseaspensiontransferbackend.transform.UserAnswersTransformer
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
@@ -39,12 +37,16 @@ class SaveForLaterController @Inject() (
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     saveForLaterService.getAnswers(referenceId).map {
-      case Right(saved)                       =>
+      case Right(saved)                                         =>
         Ok(Json.toJson(saved))
-      case Left(TransformationError(message)) =>
+      case Left(SaveForLaterError.TransformationError(message)) =>
         InternalServerError(Json.obj("error" -> "Failed to transform saved data", "details" -> message))
-      case Left(_)                            =>
-        NotFound
+
+      case Left(SaveForLaterError.NotFound) =>
+        NotFound(Json.obj("error" -> "No saved answers found"))
+
+      case Left(other) =>
+        InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
     }
   }
 
@@ -55,12 +57,17 @@ class SaveForLaterController @Inject() (
       val userAnswersDTO = request.body.copy(referenceId = referenceId)
 
       saveForLaterService.saveAnswer(userAnswersDTO).map {
-        case Right(saved)                       =>
+        case Right(saved)                                     =>
           Ok(Json.toJson(saved))
-        case Left(TransformationError(message)) =>
-          BadRequest(Json.obj("error" -> "Transformation failed", "details" -> message))
-        case Left(_)                            =>
-          InternalServerError(Json.obj("error" -> "Unexpected error"))
+        case Left(SaveForLaterError.TransformationError(msg)) =>
+          BadRequest(Json.obj(
+            "error"   -> "Transformation failed",
+            "details" -> msg
+          ))
+        case Left(SaveForLaterError.SaveFailed)               =>
+          InternalServerError(Json.obj("error" -> "Failed to save answers"))
+        case Left(other)                                      =>
+          InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
 }

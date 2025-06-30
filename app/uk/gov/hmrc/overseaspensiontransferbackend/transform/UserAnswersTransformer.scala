@@ -22,21 +22,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
 object UserAnswersTransformer {
 
-  def toSaved(dto: UserAnswersDTO): Either[JsError, SavedUserAnswers] = {
-    applyCleanseTransforms(dto.data).flatMap { cleansed =>
-      cleansed.validate[AnswersData].asEither.left.map(JsError.apply).map { parsed =>
-        SavedUserAnswers(dto.referenceId, parsed, dto.lastUpdated)
-      }
-    }
-  }
-
-  def fromSaved(saved: SavedUserAnswers): Either[JsError, UserAnswersDTO] = {
-    val baseJson = Json.toJsObject(saved.data)
-    applyEnrichTransforms(baseJson).map { enriched =>
-      UserAnswersDTO(saved.referenceId, enriched, saved.lastUpdated)
-    }
-  }
-
   def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] = {
     val transformers: Seq[JsObject => Either[JsError, JsObject]] = Seq(
       MemberDetailsTransformer.cleanse

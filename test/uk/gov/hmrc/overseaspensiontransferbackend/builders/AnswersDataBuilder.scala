@@ -3,11 +3,12 @@ package uk.gov.hmrc.overseaspensiontransferbackend.builders
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, QropsDetails, SchemeManagerDetails, TransferDetails}
 
 case class AnswersDataBuilder(
-                               memberDetails: Option[MemberDetails] = Some(MemberDetails(Some("Firstname"))),
-                               qropsDetails: Option[QropsDetails] = None,
-                               schemeManagerDetails: Option[SchemeManagerDetails] = None,
-                               transferDetails: Option[TransferDetails] = None
-                             ) {
+    memberDetails: Option[MemberDetails]               = Some(MemberDetails(Some("Firstname"))),
+    qropsDetails: Option[QropsDetails]                 = None,
+    schemeManagerDetails: Option[SchemeManagerDetails] = None,
+    transferDetails: Option[TransferDetails]           = None
+  ) {
+
   def withMembersDetails(m: MemberDetails): AnswersDataBuilder =
     copy(memberDetails = Some(m))
 
