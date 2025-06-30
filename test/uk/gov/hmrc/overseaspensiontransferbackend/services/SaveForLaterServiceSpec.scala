@@ -16,96 +16,83 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
-import play.api.Application
-import play.api.inject.bind
-import play.api.test.Helpers.running
-import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.{JsObject, Json}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
-import scala.concurrent.Future
+import java.time.Instant
+import scala.concurrent.{ExecutionContext, Future}
 
-class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
+class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with ScalaFutures {
 
-  "SaveForLaterService" - {
+  implicit val ec: ExecutionContext          = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val hc: HeaderCarrier             = HeaderCarrier()
+  val mockRepository: SaveForLaterRepository = mock[SaveForLaterRepository]
+  val service                                = new SaveForLaterServiceImpl(mockRepository)
 
-    "getAnswers" - {
+  private val now = Instant.parse("2025-06-29T12:00:00Z")
 
-      "must return Some(...) if repository returns a SavedUserAnswers" in {
-        val mockRepository = mock[SaveForLaterRepository]
+  private val validData: JsObject = Json.obj("memberDetails" -> Json.obj("memberName" -> Json.obj("firstName" -> "Foo", "lastName" -> "Bar")))
+  private val validSaved          = SavedUserAnswers("ref-1", AnswersData(Some(MemberDetails(Some("Foo"), Some("Bar"), None)), None, None, None), now)
+  private val validDTO            = UserAnswersDTO("ref-1", validData, now)
 
-        when(mockRepository.get(eqTo(testId))).thenReturn(Future.successful(Some(simpleSavedUserAnswers)))
+  "getAnswers" - {
 
-        val app: Application =
-          applicationBuilder()
-            .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-            .build()
+    "should return Right(UserAnswersDTO) when data exists and enrich succeeds" in {
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(validSaved)))
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.getAnswers(testId).futureValue
+      val result = service.getAnswers("ref-1")
 
-          result mustBe Some(simpleSavedUserAnswers)
-          verify(mockRepository).get(eqTo(testId))
-        }
-      }
-
-      "must return None if repository returns None" in {
-        val mockRepository = mock[SaveForLaterRepository]
-
-        when(mockRepository.get(eqTo(testId))).thenReturn(Future.successful(None))
-
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
-
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.getAnswers(testId).futureValue
-
-          result mustBe None
-          verify(mockRepository).get(eqTo(testId))
-        }
-      }
+      result.futureValue mustBe Right(UserAnswersDTO("ref-1", validData, now))
     }
 
-    "saveAnswers" - {
+    "should return Left(NotFound) when no data exists" in {
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
 
-      "must return Some(...) if set returns true" in {
-        val mockRepository = mock[SaveForLaterRepository]
+      val result = service.getAnswers("ref-1")
 
-        when(mockRepository.set(eqTo(simpleSavedUserAnswers))).thenReturn(Future.successful(true))
+      result.futureValue mustBe Left(SaveForLaterError.NotFound)
+    }
+  }
 
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
+  "saveAnswer" - {
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswer(simpleUserAnswersDTO).futureValue
+    "should save new answers and return Right(dto) if valid and repo.save returns true" in {
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
+      when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
-          result mustBe Some(simpleSavedUserAnswers.copy(lastUpdated = result.value.lastUpdated))
-          verify(mockRepository).set(eqTo(simpleSavedUserAnswers))
-        }
-      }
+      val result = service.saveAnswer(validDTO)
 
-      "must return None if set returns false" in {
-        val mockRepository = mock[SaveForLaterRepository]
+      result.futureValue mustBe Right(validDTO)
+    }
 
-        when(mockRepository.set(eqTo(simpleSavedUserAnswers))).thenReturn(Future.successful(false))
+    "should return Left(SaveFailed) if repo.set returns false" in {
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
+      when(mockRepository.set(any())).thenReturn(Future.successful(false))
 
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
+      val result = service.saveAnswer(validDTO)
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswer(simpleUserAnswersDTO).futureValue
+      result.futureValue mustBe Left(SaveForLaterError.SaveFailed)
+    }
 
-          result mustBe None
-          verify(mockRepository).set(eqTo(simpleSavedUserAnswers))
-        }
-      }
+    "should merge with existing data before save" in {
+      val existingData = Json.obj("memberDetails" -> Json.obj("memberNino" -> "QQ123456A"))
+      val existing     = SavedUserAnswers("ref-1", AnswersData(Some(MemberDetails(None, None, Some("QQ123456A"))), None, None, None), now)
+
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(existing)))
+      when(mockRepository.set(any())).thenReturn(Future.successful(true))
+
+      val result = service.saveAnswer(validDTO)
+
+      result.futureValue.map(_.data) mustBe Right(validData)
     }
   }
 }

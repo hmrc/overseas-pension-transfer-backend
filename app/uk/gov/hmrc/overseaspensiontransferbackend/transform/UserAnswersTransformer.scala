@@ -22,27 +22,22 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
 object UserAnswersTransformer {
 
-  def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] = {
-    val transformers: Seq[JsObject => Either[JsError, JsObject]] = Seq(
-      MemberDetailsTransformer.cleanse
-      // Add others here
-    )
+  private val transformers: Seq[JsonTransformerStep] = Seq(
+    MemberDetailsTransformer
+  )
 
-    transformers.foldLeft(Right(json): Either[JsError, JsObject]) {
-      case (Right(current), transform) => transform(current)
-      case (left @ Left(_), _)         => left
-    }
+  def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] = {
+    applyPipeline(json)(_.cleanse)
   }
 
   def applyEnrichTransforms(json: JsObject): Either[JsError, JsObject] = {
-    val transformers: Seq[JsObject => Either[JsError, JsObject]] = Seq(
-      MemberDetailsTransformer.enrich
-      // Add others here
-    )
+    applyPipeline(json)(_.enrich)
+  }
 
+  private def applyPipeline(json: JsObject)(step: JsonTransformerStep => JsObject => Either[JsError, JsObject]): Either[JsError, JsObject] = {
     transformers.foldLeft(Right(json): Either[JsError, JsObject]) {
-      case (Right(current), transform) => transform(current)
-      case (left @ Left(_), _)         => left
+      case (Right(current), transformer) => step(transformer)(current)
+      case (err @ Left(_), _)            => err
     }
   }
 }

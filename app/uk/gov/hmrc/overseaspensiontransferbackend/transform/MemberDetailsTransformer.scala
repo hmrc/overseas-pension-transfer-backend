@@ -19,45 +19,58 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transform
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 
-object MemberDetailsTransformer {
+object MemberDetailsTransformer extends JsonTransformerStep {
 
-  def cleanse(json: JsObject): Either[JsError, JsObject] = {
-    json.transform(
-      (__ \ "memberDetails").json.update(
-        (__ \ "memberName").read[JsObject].map { name =>
-          val firstName = Json.toJsFieldJsValueWrapper((name \ "firstName").getOrElse(JsNull))
-          val lastName  = Json.toJsFieldJsValueWrapper((name \ "lastName").getOrElse(JsNull))
+  override def cleanse(json: JsObject): Either[JsError, JsObject] = {
+    val maybeMemberName = (json \ "memberDetails" \ "memberName").toOption
 
-          val base = (json \ "memberDetails").asOpt[JsObject].getOrElse(Json.obj()) - "memberName"
+    maybeMemberName match {
+      case Some(obj: JsObject) =>
+        val maybeFirst = (obj \ "firstName").toOption
+        val maybeLast  = (obj \ "lastName").toOption
 
-          base ++ Json.obj(
-            "firstName" -> firstName,
-            "lastName"  -> lastName
-          )
-        }
-      )
-    ).asEither.left.map(JsError.apply)
+        val updatedFields = maybeFirst.map("firstName" -> _) ++ maybeLast.map("lastName" -> _)
+
+        val newMemberDetails = (json \ "memberDetails")
+          .asOpt[JsObject]
+          .getOrElse(Json.obj())
+          .fields
+          .filterNot(_._1 == "memberName") ++ updatedFields
+
+        val updated = json + ("memberDetails" -> JsObject(newMemberDetails))
+        Right(updated)
+
+      case Some(_) =>
+        Left(JsError(__ \ "memberDetails" \ "memberName", "Expected memberName to be an object"))
+
+      case None =>
+        Right(json)
+    }
   }
 
-  def enrich(json: JsObject): Either[JsError, JsObject] = {
-    val maybeFirst = (json \ "memberDetails" \ "firstName").asOpt[JsValue]
-    val maybeLast  = (json \ "memberDetails" \ "lastName").asOpt[JsValue]
+  override def enrich(json: JsObject): Either[JsError, JsObject] = {
+    (json \ "memberDetails").asOpt[JsObject] match {
+      case Some(memberDetails) =>
+        val maybeFirst = (memberDetails \ "firstName").asOpt[JsValue]
+        val maybeLast  = (memberDetails \ "lastName").asOpt[JsValue]
 
-    if (maybeFirst.isDefined || maybeLast.isDefined) {
-      val memberName = Json.obj(
-        "firstName" -> Json.toJsFieldJsValueWrapper(maybeFirst.getOrElse(JsNull)),
-        "lastName"  -> Json.toJsFieldJsValueWrapper(maybeLast.getOrElse(JsNull))
-      )
+        if (maybeFirst.isDefined || maybeLast.isDefined) {
+          val memberName = Json.obj(
+            "firstName" -> Json.toJsFieldJsValueWrapper(maybeFirst.getOrElse(JsNull)),
+            "lastName"  -> Json.toJsFieldJsValueWrapper(maybeLast.getOrElse(JsNull))
+          )
 
-      json.transform {
-        (__ \ "memberDetails").json.update(
-          __.read[JsObject].map { md =>
-            md - "firstName" - "lastName" ++ Json.obj("memberName" -> memberName)
-          }
-        )
-      }.asEither.left.map(JsError.apply)
-    } else {
-      Right(json)
+          val updated = memberDetails
+            .-("firstName")
+            .-("lastName")
+            .+("memberName" -> memberName)
+
+          Right(json + ("memberDetails" -> updated))
+        } else {
+          Right(json)
+        }
+
+      case None => Right(json)
     }
   }
 }

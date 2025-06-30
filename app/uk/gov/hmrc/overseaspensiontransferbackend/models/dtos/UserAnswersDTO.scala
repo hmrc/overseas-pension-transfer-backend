@@ -18,7 +18,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 
 import java.time.Instant
 

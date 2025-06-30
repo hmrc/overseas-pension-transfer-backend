@@ -27,9 +27,8 @@ import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromSavedUserAnswers
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -50,23 +49,27 @@ trait SpecBase
   val mockAppConfig: AppConfig           = mock[AppConfig]
 
   val testId: String = "test-id"
+  val now: Instant   = Instant.parse("2025-04-11T12:00:00Z")
 
-  val now: Instant = Instant.parse("2025-04-11T12:00:00Z")
-
-  val incomingJson: JsObject = Json.obj(
-    "referenceId" -> "ignored-in-request-body",
-    "data"        -> Json.obj("someField" -> "someIncomingValue"),
-    "lastUpdated" -> now
+  val sampleAnswersData: AnswersData = AnswersData(
+    memberDetails        = None,
+    qropsDetails         = None,
+    schemeManagerDetails = None,
+    transferDetails      = None
   )
 
   val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(
     referenceId = testId,
-    data        = Json.obj("field" -> "value"),
-    lastUpdated = Instant.parse("2025-04-11T12:00:00Z")
+    data        = sampleAnswersData,
+    lastUpdated = now
   )
 
-  val simpleUserAnswersDTO: UserAnswersDTO = fromSavedUserAnswers(simpleSavedUserAnswers)
+  val simpleUserAnswersDTO: UserAnswersDTO = UserAnswersDTO(
+    referenceId = testId,
+    data        = Json.obj("someField" -> "someIncomingValue"),
+    lastUpdated = now
+  )
 
-  protected def applicationBuilder(userAnswers: Option[SavedUserAnswers] = None): GuiceApplicationBuilder =
+  protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
 }
