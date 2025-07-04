@@ -16,16 +16,22 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
 import java.time.{Clock, ZoneOffset}
 
 class Module extends AbstractModule {
 
-  override def configure(): Unit = {
+  override def configure(): Unit                   = {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }
+
+  @Provides
+  @Singleton
+  def provideEmptyTransformers(): Seq[Transformer] = Seq.empty
+
 }

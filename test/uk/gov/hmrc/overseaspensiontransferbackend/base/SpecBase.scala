@@ -52,7 +52,7 @@ trait SpecBase
   val now: Instant   = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
-    memberDetails        = None,
+    transferringMember   = None,
     qropsDetails         = None,
     schemeManagerDetails = None,
     transferDetails      = None

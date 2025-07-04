@@ -21,7 +21,7 @@ import play.api.libs.json.{Json, OFormat}
 import java.time.LocalDate
 
 case class TransferringMember(
-    memberDetails: Option[MemberDetails]                   = None
+    memberDetails: Option[MemberDetails] = None
   )
 
 object TransferringMember {

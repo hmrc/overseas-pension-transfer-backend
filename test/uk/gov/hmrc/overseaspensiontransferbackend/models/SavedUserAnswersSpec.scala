@@ -30,7 +30,7 @@ class SavedUserAnswersSpec extends AnyWordSpec with Matchers {
       val original = SavedUserAnswers(
         referenceId = "ref-123",
         data        = AnswersData(
-          memberDetails        = Some(MemberDetails(Some("Jane"), Some("Doe"), Some("QQ123456A"))),
+          transferringMember   = Some(TransferringMember(None)),
           qropsDetails         = None,
           schemeManagerDetails = None,
           transferDetails      = None
@@ -46,7 +46,7 @@ class SavedUserAnswersSpec extends AnyWordSpec with Matchers {
 
     "flatten AnswersData to JsObject in writes" in {
       val data = AnswersData(
-        memberDetails        = Some(MemberDetails(Some("Jane"), Some("Doe"), Some("QQ123456A"))),
+        transferringMember   = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
         qropsDetails         = None,
         schemeManagerDetails = None,
         transferDetails      = None
@@ -56,7 +56,7 @@ class SavedUserAnswersSpec extends AnyWordSpec with Matchers {
 
       val json = Json.toJson(obj)
 
-      (json \ "data" \ "memberDetails" \ "firstName").as[String] mustBe "Jane"
+      (json \ "data" \ "transferringMember" \ "memberDetails" \ "foreName").as[String] mustBe "Jane"
       (json \ "referenceId").as[String] mustBe "ref-456"
     }
   }

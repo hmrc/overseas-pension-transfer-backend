@@ -24,7 +24,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
@@ -43,7 +43,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
   private val now = Instant.parse("2025-06-29T12:00:00Z")
 
   private val validData: JsObject = Json.obj("memberDetails" -> Json.obj("memberName" -> Json.obj("firstName" -> "Foo", "lastName" -> "Bar")))
-  private val validSaved          = SavedUserAnswers("ref-1", AnswersData(Some(MemberDetails(Some("Foo"), Some("Bar"), None)), None, None, None), now)
+  private val validSaved          = SavedUserAnswers("ref-1", AnswersData(Some(TransferringMember(None)), None, None, None), now)
   private val validDTO            = UserAnswersDTO("ref-1", validData, now)
 
   "getAnswers" - {
@@ -91,8 +91,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
     "should merge with existing data before save" in {
       val existingData = Json.obj("memberDetails" -> Json.obj("memberNino" -> "QQ123456A"))
-      val existing     = SavedUserAnswers("ref-1", AnswersData(Some(MemberDetails(None, None, Some("QQ123456A"))), None, None, None), now)
-
+      val existing     = SavedUserAnswers("ref-1", AnswersData(Some(TransferringMember(None)), None, None, None), now)
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(existing)))
       when(mockTransformer.applyCleanseTransforms(any())).thenReturn(Right(validData))
       when(mockRepository.set(any())).thenReturn(Future.successful(true))
