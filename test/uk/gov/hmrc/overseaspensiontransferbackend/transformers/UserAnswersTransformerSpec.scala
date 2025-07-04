@@ -18,68 +18,51 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.any
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transform.UserAnswersTransformer
 
-class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers {
+class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers with MockitoSugar {
 
   "UserAnswersTransformer" - {
 
-    "applyCleanseTransforms should move memberName fields to firstName and lastName" in {
-      val input = Json.obj(
-        "memberDetails" -> Json.obj(
-          "memberName" -> Json.obj(
-            "firstName" -> "John",
-            "lastName"  -> "Doe"
-          )
-        )
-      )
+    "should apply all registered cleanse transformers in order" in {
+      val input        = Json.obj("key" -> "value")
+      val intermediate = Json.obj("step1" -> "done")
+      val finalOutput  = Json.obj("step2" -> "done")
 
-      val result = UserAnswersTransformer.applyCleanseTransforms(input)
+      val transformer1 = mock[Transformer]
+      val transformer2 = mock[Transformer]
 
-      result mustBe a[Right[_, _]]
-      val cleansed = result.toOption.get
+      val sut = new UserAnswersTransformer(Seq(transformer1, transformer2))
 
-      (cleansed \ "memberDetails" \ "firstName").as[String] mustBe "John"
-      (cleansed \ "memberDetails" \ "lastName").as[String] mustBe "Doe"
-      (cleansed \ "memberDetails" \ "memberName").toOption mustBe None
+      when(transformer1.applyCleanseTransforms(any())).thenReturn(Right(intermediate))
+      when(transformer2.applyCleanseTransforms(intermediate)).thenReturn(Right(finalOutput))
+
+      val result = sut.applyCleanseTransforms(input)
+
+      result mustBe Right(finalOutput)
+      verify(transformer1).applyCleanseTransforms(input)
+      verify(transformer2).applyCleanseTransforms(intermediate)
     }
 
-    "applyEnrichTransforms should move firstName and lastName into memberName object" in {
-      val input = Json.obj(
-        "memberDetails" -> Json.obj(
-          "firstName" -> "Jane",
-          "lastName"  -> "Smith"
-        )
-      )
+    "should short-circuit cleanse transforms if a transformer fails" in {
+      val input = Json.obj("start" -> "bad")
+      val error = JsError("fail!")
 
-      val result = UserAnswersTransformer.applyEnrichTransforms(input)
+      val transformer1 = mock[Transformer]
+      val transformer2 = mock[Transformer]
 
-      result mustBe a[Right[_, _]]
-      val enriched = result.toOption.get
+      val sut = new UserAnswersTransformer(Seq(transformer1, transformer2))
 
-      (enriched \ "memberDetails" \ "memberName" \ "firstName").as[String] mustBe "Jane"
-      (enriched \ "memberDetails" \ "memberName" \ "lastName").as[String] mustBe "Smith"
-      (enriched \ "memberDetails" \ "firstName").toOption mustBe empty
-      (enriched \ "memberDetails" \ "lastName").toOption mustBe empty
-    }
+      when(transformer1.applyCleanseTransforms(input)).thenReturn(Left(error))
 
-    "applyCleanseTransforms should fail gracefully on invalid input" in {
-      val input = Json.obj("memberDetails" -> Json.obj("memberName" -> "notAnObject"))
+      val result = sut.applyCleanseTransforms(input)
 
-      val result = UserAnswersTransformer.applyCleanseTransforms(input)
-
-      result mustBe a[Left[_, _]]
-      val JsError(errors) = result.left.get
-      errors.head._1.toString must include("memberName")
-    }
-
-    "applyEnrichTransforms should succeed when no transform needed" in {
-      val input = Json.obj("memberDetails" -> Json.obj("memberNino" -> "QQ123456A"))
-
-      val result = UserAnswersTransformer.applyEnrichTransforms(input)
-
-      result mustBe Right(input)
+      result mustBe Left(error)
+      verify(transformer1).applyCleanseTransforms(input)
+      verifyNoInteractions(transformer2)
     }
   }
 }

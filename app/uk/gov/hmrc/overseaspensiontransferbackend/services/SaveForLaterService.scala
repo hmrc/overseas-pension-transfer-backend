@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
-import uk.gov.hmrc.overseaspensiontransferbackend.transform.UserAnswersTransformer
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,12 +37,13 @@ object SaveForLaterError {
 
 trait SaveForLaterService {
   def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
-  def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
+  def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]]
 }
 
 @Singleton
 class SaveForLaterServiceImpl @Inject() (
-    repository: SaveForLaterRepository
+    repository: SaveForLaterRepository,
+    userAnswersTransformer: UserAnswersTransformer
   )(implicit ec: ExecutionContext
   ) extends SaveForLaterService with Logging {
 
@@ -62,27 +63,23 @@ class SaveForLaterServiceImpl @Inject() (
     }
   }
 
-  override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
+  override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
     cleanse(dto.data) match {
       case Left(err) => Future.successful(Left(err))
 
       case Right(transformedInput) =>
         repository.get(dto.referenceId).flatMap { maybeExisting =>
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
-
-          enrich(transformedInput) match {
+          validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
-            case Right(enrichedPartial) =>
-              validate(mergedJson) match {
-                case Left(err) => Future.successful(Left(err))
-
-                case Right(validated) =>
-                  val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
-                  repository.set(saved).map {
-                    case true  => Right(dto.copy(data = enrichedPartial))
-                    case false => Left(SaveForLaterError.SaveFailed)
-                  }
+            case Right(validated) =>
+              println(transformedInput)
+              println(validated)
+              val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
+              repository.set(saved).map {
+                case true  => Right()
+                case false => Left(SaveForLaterError.SaveFailed)
               }
           }
         }
@@ -90,13 +87,13 @@ class SaveForLaterServiceImpl @Inject() (
   }
 
   private def cleanse(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    UserAnswersTransformer.applyCleanseTransforms(json).left.map(err =>
+    userAnswersTransformer.applyCleanseTransforms(json).left.map(err =>
       SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
     )
   }
 
   private def enrich(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    UserAnswersTransformer.applyEnrichTransforms(json).left.map(err =>
+    userAnswersTransformer.applyEnrichTransforms(json).left.map(err =>
       SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
     )
   }

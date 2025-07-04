@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.{Json, OFormat}
-import java.time.LocalDate
+import play.api.libs.json._
+import javax.inject.{Inject, Singleton}
 
-case class MemberDetails(
-    foreName: Option[String]                = None,
-    lastName: Option[String]                = None,
-    nino: Option[String]                    = None,
-    dateOfBirth: Option[LocalDate]          = None,
-    principalResAddDetails: Option[Address] = None,
-    memberResidencyDetails: Option[MemberResidencyDetails] = None
-  )
+@Singleton
+class UserAnswersTransformer @Inject() (
+    transformers: Seq[Transformer]
+  ) extends Transformer {
 
-object MemberDetails {
+  def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] =
+    TransformerUtils.applyPipeline(json, transformers)(_.applyCleanseTransforms)
 
-  implicit val format: OFormat[MemberDetails] = Json.format
+  def applyEnrichTransforms(json: JsObject): Either[JsError, JsObject] =
+    TransformerUtils.applyPipeline(json, transformers)(_.applyEnrichTransforms)
 }

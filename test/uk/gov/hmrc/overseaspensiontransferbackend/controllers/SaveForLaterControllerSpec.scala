@@ -73,7 +73,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "saveAnswers should return 200 OK if save is successful" in {
+    "saveAnswers should return 204 NoContent if save is successful" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
@@ -90,8 +90,8 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
 
         val result = route(app, request).value
 
-        status(result) mustBe OK
-        contentAsJson(result) mustBe Json.toJson(simpleUserAnswersDTO)
+        status(result) mustBe NO_CONTENT
+        contentAsString(result) mustBe empty
       }
     }
 

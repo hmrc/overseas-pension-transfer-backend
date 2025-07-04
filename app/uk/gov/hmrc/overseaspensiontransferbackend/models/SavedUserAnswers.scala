@@ -29,7 +29,7 @@ final case class SavedUserAnswers(
   )
 
 final case class AnswersData(
-    memberDetails: Option[MemberDetails],
+    transferringMember: Option[TransferringMember],
     qropsDetails: Option[QropsDetails],
     schemeManagerDetails: Option[SchemeManagerDetails],
     transferDetails: Option[TransferDetails]

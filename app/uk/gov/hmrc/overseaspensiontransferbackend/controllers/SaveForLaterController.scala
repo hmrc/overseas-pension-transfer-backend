@@ -57,8 +57,8 @@ class SaveForLaterController @Inject() (
       val userAnswersDTO = request.body.copy(referenceId = referenceId)
 
       saveForLaterService.saveAnswer(userAnswersDTO).map {
-        case Right(saved)                                     =>
-          Ok(Json.toJson(saved))
+        case Right(_)                                         =>
+          NoContent
         case Left(SaveForLaterError.TransformationError(msg)) =>
           BadRequest(Json.obj(
             "error"   -> "Transformation failed",

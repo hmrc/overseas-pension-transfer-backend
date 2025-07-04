@@ -27,16 +27,18 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
 class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with ScalaFutures {
 
-  implicit val ec: ExecutionContext          = scala.concurrent.ExecutionContext.Implicits.global
-  implicit val hc: HeaderCarrier             = HeaderCarrier()
-  val mockRepository: SaveForLaterRepository = mock[SaveForLaterRepository]
-  val service                                = new SaveForLaterServiceImpl(mockRepository)
+  implicit val ec: ExecutionContext           = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val hc: HeaderCarrier              = HeaderCarrier()
+  val mockRepository: SaveForLaterRepository  = mock[SaveForLaterRepository]
+  val mockTransformer: UserAnswersTransformer = mock[UserAnswersTransformer]
+  val service                                 = new SaveForLaterServiceImpl(mockRepository, mockTransformer)
 
   private val now = Instant.parse("2025-06-29T12:00:00Z")
 
@@ -48,6 +50,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
     "should return Right(UserAnswersDTO) when data exists and enrich succeeds" in {
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(validSaved)))
+      when(mockTransformer.applyEnrichTransforms(any())).thenReturn(Right(validData))
 
       val result = service.getAnswers("ref-1")
 
@@ -56,6 +59,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
     "should return Left(NotFound) when no data exists" in {
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
+      when(mockTransformer.applyEnrichTransforms(any())).thenReturn(Right(validData))
 
       val result = service.getAnswers("ref-1")
 
@@ -65,17 +69,19 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
   "saveAnswer" - {
 
-    "should save new answers and return Right(dto) if valid and repo.save returns true" in {
+    "should save new answers if valid" in {
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
+      when(mockTransformer.applyCleanseTransforms(any())).thenReturn(Right(validData))
       when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
-      result.futureValue mustBe Right(validDTO)
+      result.futureValue mustBe Right()
     }
 
     "should return Left(SaveFailed) if repo.set returns false" in {
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(None))
+      when(mockTransformer.applyCleanseTransforms(any())).thenReturn(Right(validData))
       when(mockRepository.set(any())).thenReturn(Future.successful(false))
 
       val result = service.saveAnswer(validDTO)
@@ -88,11 +94,12 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
       val existing     = SavedUserAnswers("ref-1", AnswersData(Some(MemberDetails(None, None, Some("QQ123456A"))), None, None, None), now)
 
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(existing)))
+      when(mockTransformer.applyCleanseTransforms(any())).thenReturn(Right(validData))
       when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
-      result.futureValue.map(_.data) mustBe Right(validData)
+      result.futureValue mustBe Right()
     }
   }
 }

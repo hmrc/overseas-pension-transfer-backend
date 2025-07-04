@@ -17,18 +17,17 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json.{Json, OFormat}
+
 import java.time.LocalDate
 
-case class MemberDetails(
-    foreName: Option[String]                = None,
-    lastName: Option[String]                = None,
-    nino: Option[String]                    = None,
-    dateOfBirth: Option[LocalDate]          = None,
-    principalResAddDetails: Option[Address] = None,
-    memberResidencyDetails: Option[MemberResidencyDetails] = None
+case class MemberResidencyDetails(
+    memUkResident: Option[String]            = None,
+    memEverUkResident: Option[String]        = None,
+    lastPrincipalAddDetails: Option[Address] = None,
+    dateMemberLeftUk: Option[LocalDate]      = None
   )
 
-object MemberDetails {
+object MemberResidencyDetails {
 
-  implicit val format: OFormat[MemberDetails] = Json.format
+  implicit val format: OFormat[MemberResidencyDetails] = Json.format
 }

@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transform
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json._
+import play.api.libs.json.{Json, OFormat}
 
-trait JsonTransformerStep {
-  def cleanse(input: JsObject): Either[JsError, JsObject]
-  def enrich(input: JsObject): Either[JsError, JsObject]
+import java.time.LocalDate
+
+case class TransferringMember(
+    memberDetails: Option[MemberDetails]                   = None
+  )
+
+object TransferringMember {
+
+  implicit val format: OFormat[TransferringMember] = Json.format
 }

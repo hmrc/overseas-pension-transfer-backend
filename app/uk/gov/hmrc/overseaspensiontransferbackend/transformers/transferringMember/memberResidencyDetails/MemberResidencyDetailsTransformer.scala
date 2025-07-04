@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember.memberResidencyDetails
 
-import play.api.libs.json.{Json, OFormat}
-import java.time.LocalDate
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{NestedTransformer, Transformer, TransformerStep, TransformerUtils}
 
-case class MemberDetails(
-    foreName: Option[String]                = None,
-    lastName: Option[String]                = None,
-    nino: Option[String]                    = None,
-    dateOfBirth: Option[LocalDate]          = None,
-    principalResAddDetails: Option[Address] = None,
-    memberResidencyDetails: Option[MemberResidencyDetails] = None
-  )
-
-object MemberDetails {
-
-  implicit val format: OFormat[MemberDetails] = Json.format
-}
+class MemberResidencyDetailsTransformer(transformerSteps: Seq[TransformerStep])
+    extends NestedTransformer(__ \ "transferringMember" \ "memberResidencyDetails", transformerSteps)
