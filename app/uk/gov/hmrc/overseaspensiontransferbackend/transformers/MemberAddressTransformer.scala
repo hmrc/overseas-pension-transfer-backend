@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNameTransformer extends Transformer {
+class MemberAddressTransformer extends Transformer {
 
-  private val jsonKey = "name"
+  private val jsonKey = "principalResAddDetails"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[JsObject => Either[JsError, JsObject]] = Seq(
@@ -31,8 +30,8 @@ class MemberNameTransformer extends Transformer {
         to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         _: JsObject
       ),
-      TransformerUtils.flattenName(
-        path = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+      TransformerUtils.constructAddressAt(
+        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
       )
     )
 
@@ -41,8 +40,8 @@ class MemberNameTransformer extends Transformer {
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[JsObject => Either[JsError, JsObject]] = Seq(
-      TransformerUtils.unflattenName(
-        path = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+      TransformerUtils.deconstructAddressAt(
+        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
       ),
       JsonHelpers.movePath(
         from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,

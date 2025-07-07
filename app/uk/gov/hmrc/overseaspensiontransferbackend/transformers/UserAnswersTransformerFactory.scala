@@ -22,6 +22,7 @@ case class UserAnswersTransformerFactory() {
     new UserAnswersTransformer(Seq(
       new MemberNameTransformer(),
       new MemberNinoTransformer(),
-      new MemberDOBTransformer()
+      new MemberDOBTransformer(),
+      new MemberAddressTransformer()
     ))
 }
