@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNinoTransformer extends Transformer {
+class MemberNinoTransformer extends Transformer with JsonHelpers {
 
   private val jsonKey = "nino"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[JsObject => Either[JsError, JsObject]] = Seq(
-      JsonHelpers.movePath(
+    val steps: Seq[TransformerStep] = Seq(
+      movePath(
         from = JsPath \ "memberDetails" \ jsonKey,
         to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         _: JsObject
@@ -36,14 +35,13 @@ class MemberNinoTransformer extends Transformer {
   }
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[JsObject => Either[JsError, JsObject]] = Seq(
-      JsonHelpers.movePath(
+    val steps: Seq[TransformerStep] = Seq(
+      movePath(
         from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         to   = JsPath \ "memberDetails" \ jsonKey,
         _: JsObject
       )
     )
-
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 }

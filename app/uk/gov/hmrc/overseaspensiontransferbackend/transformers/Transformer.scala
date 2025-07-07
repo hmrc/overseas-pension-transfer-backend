@@ -20,6 +20,8 @@ import play.api.libs.json.{JsError, JsObject}
 
 trait Transformer {
 
+  type TransformerStep = JsObject => Either[JsError, JsObject]
+
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   def construct(input: JsObject): Either[JsError, JsObject]

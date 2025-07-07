@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.utils
 
 import play.api.libs.json._
 
-object JsonHelpers {
+trait JsonHelpers {
 
   def movePath(from: JsPath, to: JsPath, json: JsObject): Either[JsError, JsObject] = {
     from.asSingleJson(json).toOption match {
