@@ -151,4 +151,69 @@ class TransformerUtilsSpec extends AnyFreeSpec with Matchers {
       TransformerUtils.unflattenName(foreNameKey = "given", lastNameKey = "surname", path = __ \ "memberDetails" \ "name")(input) mustBe Right(expected)
     }
   }
+
+  "constructAddressAt" - {
+    "should convert flat frontend-style address to backend-style nested structure" in {
+      val input = Json.obj(
+        "principalResAddRetails" -> Json.obj(
+          "addressLine1" -> "123 Test St",
+          "addressLine2" -> "Testville",
+          "addressLine3" -> "Testshire",
+          "postcode"     -> "TE5 7ST",
+          "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
+          "poBox"        -> "PO123"
+        )
+      )
+
+      val expected = Json.obj(
+        "principalResAddRetails" -> Json.obj(
+          "addressDetails" -> Json.obj(
+            "addressLine1" -> "123 Test St",
+            "addressLine2" -> "Testville",
+            "addressLine3" -> "Testshire",
+            "ukPostCode"   -> "TE5 7ST",
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+          ),
+          "poBox"          -> "PO123"
+        )
+      )
+
+      TransformerUtils.constructAddressAt(
+        __ \ "principalResAddRetails"
+      )(input) mustBe Right(expected)
+    }
+  }
+
+  "deconstructAddressAt" - {
+    "should convert nested backend-style address back to flat frontend-style structure" in {
+      val input = Json.obj(
+        "principalResAddDetails" -> Json.obj(
+          "addressDetails" -> Json.obj(
+            "addressLine1" -> "123 Test St",
+            "addressLine2" -> "Testville",
+            "addressLine3" -> "Testshire",
+            "ukPostCode"   -> "TE5 7ST",
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+          ),
+          "poBox"          -> "PO123"
+        )
+      )
+
+      val expected = Json.obj(
+        "principalResAddDetails" -> Json.obj(
+          "addressLine1" -> "123 Test St",
+          "addressLine2" -> "Testville",
+          "addressLine3" -> "Testshire",
+          "postcode"     -> "TE5 7ST",
+          "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
+          "poBox"        -> "PO123"
+        )
+      )
+
+      TransformerUtils.deconstructAddressAt(
+        __ \ "principalResAddDetails"
+      )(input) mustBe Right(expected)
+    }
+  }
+
 }

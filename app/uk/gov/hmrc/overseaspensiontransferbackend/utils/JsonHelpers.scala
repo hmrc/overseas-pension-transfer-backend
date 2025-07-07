@@ -49,7 +49,7 @@ object JsonHelpers {
     * It does simplify the final JSON and avoid leaving behind empty stubs but keep an eye on this behavior and consider refactoring to allow configurable
     * pruning if necessary.
     */
-  private def prunePath(path: JsPath)(json: JsObject): JsObject = {
+  def prunePath(path: JsPath)(json: JsObject): JsObject = {
     path.path match {
       case Seq(KeyPathNode(key)) =>
         json - key
