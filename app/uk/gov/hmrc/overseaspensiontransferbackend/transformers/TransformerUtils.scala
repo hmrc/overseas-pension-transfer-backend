@@ -57,10 +57,10 @@ object TransformerUtils {
   /** Unflattens a nested JSON representation of a person's name into a flat structure.
     */
   def unflattenName(
-                     foreNameKey: String = "foreName",
-                     lastNameKey: String = "lastName",
-                     path: JsPath
-                   ): JsObject => Either[JsError, JsObject] = { json =>
+      foreNameKey: String = "foreName",
+      lastNameKey: String = "lastName",
+      path: JsPath
+    ): JsObject => Either[JsError, JsObject] = { json =>
     val parentPath = JsPath(path.path.dropRight(1))
     val parentOpt  = parentPath.asSingleJson(json).asOpt[JsObject]
 
@@ -72,22 +72,21 @@ object TransformerUtils {
         if (foreNameOpt.isEmpty && lastNameOpt.isEmpty) {
           Right(json)
         } else {
-          val nameFields = Seq(
+          val nameFields    = Seq(
             foreNameOpt.map("firstName" -> JsString(_)),
             lastNameOpt.map("lastName" -> JsString(_))
           ).flatten
-          val nameObject = JsObject(nameFields)
+          val nameObject    = JsObject(nameFields)
           val updatedParent = parent - foreNameKey - lastNameKey
-          val withName = updatedParent + (path.path.last.asInstanceOf[KeyPathNode].key -> nameObject)
+          val withName      = updatedParent + (path.path.last.asInstanceOf[KeyPathNode].key -> nameObject)
 
-         JsonHelpers.setPath(parentPath, withName, json)
+          JsonHelpers.setPath(parentPath, withName, json)
         }
 
       case None =>
         Right(json)
     }
   }
-
 
   def applyPipeline[T](
       json: JsObject,

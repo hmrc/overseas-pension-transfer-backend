@@ -23,12 +23,10 @@ object JsonHelpers {
   def movePath(from: JsPath, to: JsPath, json: JsObject): Either[JsError, JsObject] = {
     from.asSingleJson(json).toOption match {
       case Some(value) =>
-        // Remove old path
-        val withoutOld = prunePath(from, json)
-        // Set value at new path
+        val withoutOld = prunePath(from)(json)
         setPath(to, value, withoutOld)
       case None        =>
-        Right(json) // Nothing to move; return as-is
+        Right(json)
     }
   }
 
@@ -40,19 +38,42 @@ object JsonHelpers {
     setNested(json, path, value)
   }
 
-  private def prunePath(path: JsPath, json: JsObject): JsObject = {
+  /** Recursively removes a value at the given JsPath from the JSON object.
+    *
+    * ⚠️ This function performs *aggressive pruning*: if removing the value causes its parent object to become empty, the parent is also removed. This is done
+    * to remove empty objects that get attached to json paths when moving objects.
+    *
+    *   - If other transformations depend on the parent key still existing, this may cause failures.
+    *   - It introduces asymmetry: reversing a transformation may require reintroducing structure.
+    *
+    * It does simplify the final JSON and avoid leaving behind empty stubs but keep an eye on this behavior and consider refactoring to allow configurable
+    * pruning if necessary.
+    */
+  private def prunePath(path: JsPath)(json: JsObject): JsObject = {
     path.path match {
-      case Seq(KeyPathNode(key))             =>
+      case Seq(KeyPathNode(key)) =>
         json - key
-      case Seq(KeyPathNode(head), tail @ _*) =>
-        val nested = json.value.get(head).collect { case o: JsObject => o }
-        nested match {
-          case Some(inner) =>
-            val cleaned = prunePath(JsPath(tail.toList), inner)
-            json + (head -> cleaned)
-          case None        => json
+
+      case Seq(KeyPathNode(parent), rest @ _*) =>
+        val restPath: JsPath = rest.foldLeft(JsPath()) {
+          case (acc: JsPath, key: KeyPathNode) => acc \ key.key
+          case (acc, _)                        => acc
         }
-      case _                                 => json
+
+        val updatedChild = (json \ parent).asOpt[JsObject].map { child =>
+          prunePath(restPath)(child)
+        }
+
+        updatedChild match {
+          case Some(childUpdated) if childUpdated.fields.isEmpty =>
+            json - parent
+          case Some(childUpdated)                                =>
+            json + (parent -> childUpdated)
+          case None                                              =>
+            json
+        }
+
+      case _ => json
     }
   }
 
