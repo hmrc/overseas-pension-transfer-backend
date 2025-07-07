@@ -37,14 +37,14 @@ class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers with MockitoS
 
       val sut = new UserAnswersTransformer(Seq(transformer1, transformer2))
 
-      when(transformer1.applyCleanseTransforms(any())).thenReturn(Right(intermediate))
-      when(transformer2.applyCleanseTransforms(intermediate)).thenReturn(Right(finalOutput))
+      when(transformer1.construct(any())).thenReturn(Right(intermediate))
+      when(transformer2.construct(intermediate)).thenReturn(Right(finalOutput))
 
-      val result = sut.applyCleanseTransforms(input)
+      val result = sut.construct(input)
 
       result mustBe Right(finalOutput)
-      verify(transformer1).applyCleanseTransforms(input)
-      verify(transformer2).applyCleanseTransforms(intermediate)
+      verify(transformer1).construct(input)
+      verify(transformer2).construct(intermediate)
     }
 
     "should short-circuit cleanse transforms if a transformer fails" in {
@@ -56,12 +56,12 @@ class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers with MockitoS
 
       val sut = new UserAnswersTransformer(Seq(transformer1, transformer2))
 
-      when(transformer1.applyCleanseTransforms(input)).thenReturn(Left(error))
+      when(transformer1.construct(input)).thenReturn(Left(error))
 
-      val result = sut.applyCleanseTransforms(input)
+      val result = sut.construct(input)
 
       result mustBe Left(error)
-      verify(transformer1).applyCleanseTransforms(input)
+      verify(transformer1).construct(input)
       verifyNoInteractions(transformer2)
     }
   }

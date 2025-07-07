@@ -16,15 +16,20 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.{JsError, JsObject}
+import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.json.{JsError, JsObject, Json}
 
-trait Transformer {
+case class TransferringMemberTransformer() extends Transformer {
 
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  def construct(input: JsObject): Either[JsError, JsObject]
+  override def construct(input: JsObject): Either[JsError, JsObject] = {
+    Right(Json.obj("transferringMember" -> input))
+  }
 
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  def deconstruct(input: JsObject): Either[JsError, JsObject]
+  def deconstruct(constructed: JsObject): Either[JsError, JsObject] = {
+    val lookup = (constructed \ "transferringMember" \ "memberDetails").validateOpt[JsObject].get
+    lookup match {
+      case Some(res) => Right(Json.obj("memberDetails" -> res))
+      case _         => Left(JsError("memberDetails does not exist"))
+    }
+  }
 }

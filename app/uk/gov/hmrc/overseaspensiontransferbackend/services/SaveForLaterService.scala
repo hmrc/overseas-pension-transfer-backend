@@ -50,9 +50,9 @@ class SaveForLaterServiceImpl @Inject() (
   override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
     repository.get(id).map {
       case Some(saved) =>
-        enrich(Json.toJsObject(saved.data)) match {
-          case Right(enriched) =>
-            Right(UserAnswersDTO(saved.referenceId, enriched, saved.lastUpdated))
+        deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
+          case Right(deconstructed) =>
+            Right(UserAnswersDTO(saved.referenceId, deconstructed, saved.lastUpdated))
 
           case Left(error) =>
             Left(error)
@@ -64,18 +64,22 @@ class SaveForLaterServiceImpl @Inject() (
   }
 
   override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
-    cleanse(dto.data) match {
-      case Left(err) => Future.successful(Left(err))
-
+    constructSavedAnswers(dto.data) match {
+      case Left(err)               =>
+        Future.successful(Left(err))
       case Right(transformedInput) =>
+        println("Recieved")
+        logger.info(Json.prettyPrint(dto.data))
         repository.get(dto.referenceId).flatMap { maybeExisting =>
+          println("Transformed")
+          logger.info(Json.prettyPrint(transformedInput))
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
           validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              println(transformedInput)
-              println(validated)
+              println("Validated")
+              logger.info(Json.prettyPrint(Json.toJson(validated)))
               val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
               repository.set(saved).map {
                 case true  => Right()
@@ -86,14 +90,14 @@ class SaveForLaterServiceImpl @Inject() (
     }
   }
 
-  private def cleanse(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    userAnswersTransformer.applyCleanseTransforms(json).left.map(err =>
+  private def constructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    userAnswersTransformer.construct(json).left.map(err =>
       SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
     )
   }
 
-  private def enrich(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    userAnswersTransformer.applyEnrichTransforms(json).left.map(err =>
+  private def deconstructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    userAnswersTransformer.deconstruct(json).left.map(err =>
       SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
     )
   }

@@ -18,13 +18,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{TransferringMemberTransformer, Transformer}
 
 import java.time.{Clock, ZoneOffset}
 
 class Module extends AbstractModule {
 
-  override def configure(): Unit                   = {
+  override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
@@ -32,6 +32,8 @@ class Module extends AbstractModule {
 
   @Provides
   @Singleton
-  def provideEmptyTransformers(): Seq[Transformer] = Seq.empty
+  def provideTransformers(): Seq[Transformer] = Seq(
+    new TransferringMemberTransformer
+  )
 
 }

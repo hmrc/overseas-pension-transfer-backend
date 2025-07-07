@@ -24,9 +24,9 @@ class UserAnswersTransformer @Inject() (
     transformers: Seq[Transformer]
   ) extends Transformer {
 
-  def applyCleanseTransforms(json: JsObject): Either[JsError, JsObject] =
-    TransformerUtils.applyPipeline(json, transformers)(_.applyCleanseTransforms)
+  def construct(json: JsObject): Either[JsError, JsObject] =
+    TransformerUtils.applyPipeline(json, transformers)(_.construct)
 
-  def applyEnrichTransforms(json: JsObject): Either[JsError, JsObject] =
-    TransformerUtils.applyPipeline(json, transformers)(_.applyEnrichTransforms)
+  def deconstruct(json: JsObject): Either[JsError, JsObject] =
+    TransformerUtils.applyPipeline(json, transformers)(_.deconstruct)
 }
