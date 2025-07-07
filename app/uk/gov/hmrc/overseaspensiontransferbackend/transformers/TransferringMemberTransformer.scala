@@ -16,20 +16,42 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.Json.JsValueWrapper
-import play.api.libs.json.{JsError, JsObject, Json}
+import play.api.libs.json._
 
-case class TransferringMemberTransformer() extends Transformer {
+class TransferringMemberTransformer(
+    nestedTransformers: Seq[Transformer] = Seq.empty
+  ) extends Transformer {
 
   override def construct(input: JsObject): Either[JsError, JsObject] = {
-    Right(Json.obj("transferringMember" -> input))
+    val memberDetailsOpt = (input \ "memberDetails").asOpt[JsObject]
+
+    memberDetailsOpt match {
+      case Some(memberDetailsJson) =>
+        // Apply nested transformers to memberDetails
+        val transformedMemberDetails = TransformerUtils.applyPipeline(memberDetailsJson, nestedTransformers)(_.construct)
+
+        transformedMemberDetails.map { transformed =>
+          Json.obj("transferringMember" -> Json.obj("memberDetails" -> transformed))
+        }
+
+      case None =>
+        Left(JsError("memberDetails not found in input JSON"))
+    }
   }
 
-  def deconstruct(constructed: JsObject): Either[JsError, JsObject] = {
-    val lookup = (constructed \ "transferringMember" \ "memberDetails").validateOpt[JsObject].get
-    lookup match {
-      case Some(res) => Right(Json.obj("memberDetails" -> res))
-      case _         => Left(JsError("memberDetails does not exist"))
+  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+    val maybeMemberDetails = (input \ "transferringMember" \ "memberDetails").asOpt[JsObject]
+
+    maybeMemberDetails match {
+      case Some(memberDetails) =>
+        val transformedBack = TransformerUtils.applyPipeline(memberDetails, nestedTransformers)(_.deconstruct)
+
+        transformedBack.map { unwrapped =>
+          Json.obj("memberDetails" -> unwrapped)
+        }
+
+      case None =>
+        Left(JsError("transferringMember.memberDetails not found in input JSON"))
     }
   }
 }

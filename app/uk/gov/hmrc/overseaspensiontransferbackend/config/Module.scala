@@ -32,8 +32,11 @@ class Module extends AbstractModule {
 
   @Provides
   @Singleton
-  def provideTransformers(): Seq[Transformer] = Seq(
-    new TransferringMemberTransformer
-  )
+  def provideTransformers(): Seq[Transformer] = {
+    val nestedTransformers: Seq[Transformer] = Seq() // Add MemberNameTransformer etc. later
+    Seq(
+      new TransferringMemberTransformer(nestedTransformers)
+    )
+  }
 
 }
