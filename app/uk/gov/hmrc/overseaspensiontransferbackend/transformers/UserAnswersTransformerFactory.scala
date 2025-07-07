@@ -20,6 +20,8 @@ case class UserAnswersTransformerFactory() {
 
   def build(): UserAnswersTransformer =
     new UserAnswersTransformer(Seq(
-      new MemberNameTransformer()
+      new MemberNameTransformer(),
+      new MemberNinoTransformer(),
+      new MemberDOBTransformer()
     ))
 }
