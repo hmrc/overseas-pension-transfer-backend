@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{TransferringMemberTransformer, Transformer}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, UserAnswersTransformer, UserAnswersTransformerFactory}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -32,11 +32,6 @@ class Module extends AbstractModule {
 
   @Provides
   @Singleton
-  def provideTransformers(): Seq[Transformer] = {
-    val nestedTransformers: Seq[Transformer] = Seq() // Add MemberNameTransformer etc. later
-    Seq(
-      new TransferringMemberTransformer(nestedTransformers)
-    )
-  }
-
+  def provideUserAnswersTransformer(): UserAnswersTransformer =
+    UserAnswersTransformerFactory().build()
 }

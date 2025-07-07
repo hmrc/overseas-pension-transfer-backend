@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json._
+case class UserAnswersTransformerFactory() {
 
-trait TransformerStep {
-  def cleanse(input: JsObject): Either[JsError, JsObject]
-  def enrich(input: JsObject): Either[JsError, JsObject]
+  def build(): UserAnswersTransformer =
+    new UserAnswersTransformer(Seq(
+      new MemberNameTransformer()
+    ))
 }
