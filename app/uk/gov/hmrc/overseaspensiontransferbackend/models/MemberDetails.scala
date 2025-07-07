@@ -23,6 +23,7 @@ case class MemberDetails(
     foreName: Option[String]                               = None,
     lastName: Option[String]                               = None,
     nino: Option[String]                                   = None,
+    memberNoNino: Option[String]                           = None,
     dateOfBirth: Option[LocalDate]                         = None,
     principalResAddDetails: Option[Address]                = None,
     memberResidencyDetails: Option[MemberResidencyDetails] = None

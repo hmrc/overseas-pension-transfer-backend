@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
-class MemberNinoTransformerSpec extends AnyWordSpec with Matchers {
+class MemberDOBTransformerSpec extends AnyWordSpec with Matchers {
 
-  val transformer = new MemberNinoTransformer
+  val transformer = new MemberDOBTransformer
 
-  "MemberNinoTransformer" should {
+  "MemberDOBTransformer" should {
 
-    "construct: move memberDetails.nino to transferringMember.memberDetails.nino" in {
+    "construct: move memberDetails.dateOfBirth to transferringMember.memberDetails.dateOfBirth" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
-          "nino" -> "AB123456C"
+          "dateOfBirth" -> "1985-07-01"
         )
       )
 
       val expected = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
-            "nino" -> "AB123456C"
+            "dateOfBirth" -> "1985-07-01"
           )
         )
       )
@@ -45,18 +45,18 @@ class MemberNinoTransformerSpec extends AnyWordSpec with Matchers {
       result shouldBe Right(expected)
     }
 
-    "deconstruct: move transferringMember.memberDetails.nino to memberDetails.nino" in {
+    "deconstruct: move transferringMember.memberDetails.dateOfBirth to memberDetails.dateOfBirth" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
-            "nino" -> "AB123456C"
+            "dateOfBirth" -> "1985-07-01"
           )
         )
       )
 
       val expected = Json.obj(
         "memberDetails" -> Json.obj(
-          "nino" -> "AB123456C"
+          "dateOfBirth" -> "1985-07-01"
         )
       )
 
@@ -64,14 +64,14 @@ class MemberNinoTransformerSpec extends AnyWordSpec with Matchers {
       result shouldBe Right(expected)
     }
 
-    "construct: leave JSON unchanged if memberDetails.nino is missing" in {
+    "construct: leave JSON unchanged if memberDetails.dateOfBirth is missing" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj())
 
       val result = transformer.construct(inputJson)
       result shouldBe Right(Json.obj("memberDetails" -> Json.obj()))
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.nino is missing" in {
+    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.dateOfBirth is missing" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj("memberDetails" -> Json.obj())
       )

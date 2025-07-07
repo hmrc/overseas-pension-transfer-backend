@@ -21,6 +21,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait AddressTransformers extends JsonHelpers {
 
+  // Converts a flat frontend-style address at the given path into a nested backend-style address (addressDetails + optional poBox).
   def constructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
@@ -50,6 +51,7 @@ trait AddressTransformers extends JsonHelpers {
     }
   }
 
+  // Converts a nested backend-style address at the given path back into a flat frontend-style address.
   def deconstructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>

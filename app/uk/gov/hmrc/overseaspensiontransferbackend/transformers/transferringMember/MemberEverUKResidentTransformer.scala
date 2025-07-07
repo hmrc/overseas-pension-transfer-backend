@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{BooleanTransformers, Transformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNameTransformer extends Transformer with NameTransformers with JsonHelpers {
+class MemberEverUKResidentTransformer extends Transformer with JsonHelpers with BooleanTransformers {
 
-  private val jsonKey = "name"
+  private val jsonKey = "memEverUkResident"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        to   = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
         _: JsObject
       ),
-      flattenName(
-        path = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+      constructBool(
+        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
       )
     )
-
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      unflattenName(
-        path = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+      deconstructBool(
+        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
       ),
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        from = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
         to   = JsPath \ "memberDetails" \ jsonKey,
         _: JsObject
       )

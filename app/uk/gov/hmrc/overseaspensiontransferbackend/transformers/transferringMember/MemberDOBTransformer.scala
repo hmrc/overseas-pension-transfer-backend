@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberAddressTransformer extends Transformer with AddressTransformers with JsonHelpers {
+class MemberDOBTransformer extends Transformer with JsonHelpers {
 
-  private val jsonKey = "principalResAddDetails"
+  private val jsonKey = "dateOfBirth"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
@@ -29,20 +30,13 @@ class MemberAddressTransformer extends Transformer with AddressTransformers with
         from = JsPath \ "memberDetails" \ jsonKey,
         to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         _: JsObject
-      ),
-      constructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
       )
     )
-
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
-      ),
       movePath(
         from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         to   = JsPath \ "memberDetails" \ jsonKey,

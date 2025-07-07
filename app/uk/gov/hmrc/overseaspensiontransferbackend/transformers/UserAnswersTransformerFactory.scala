@@ -16,13 +16,27 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
+
 case class UserAnswersTransformerFactory() {
 
-  def build(): UserAnswersTransformer =
-    new UserAnswersTransformer(Seq(
-      new MemberNameTransformer(),
-      new MemberNinoTransformer(),
-      new MemberDOBTransformer(),
-      new MemberAddressTransformer()
-    ))
+  private def memberDetailsTransformers: Seq[Transformer] = Seq(
+    new MemberNameTransformer(),
+    new MemberNinoTransformer(),
+    new MemberNoNinoTransformer(),
+    new MemberDOBTransformer(),
+    new MemberAddressTransformer(),
+    new MemberIsUKResidentTransformer(),
+    new MemberEverUKResidentTransformer(),
+    new MemberLastUKAddressTransformer()
+  )
+
+  def build(): UserAnswersTransformer = {
+    val allTransformers =
+      Seq(
+        memberDetailsTransformers
+      ).flatten
+
+    new UserAnswersTransformer(allTransformers)
+  }
 }

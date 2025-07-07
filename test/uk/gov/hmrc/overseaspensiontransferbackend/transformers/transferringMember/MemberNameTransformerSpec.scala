@@ -14,70 +14,77 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
+import org.scalatest.EitherValues
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
-class MemberDOBTransformerSpec extends AnyWordSpec with Matchers {
+class MemberNameTransformerSpec extends AnyWordSpec with Matchers with EitherValues {
 
-  val transformer = new MemberDOBTransformer
+  val transformer = new MemberNameTransformer
 
-  "MemberDOBTransformer" should {
+  "MemberNameTransformer" should {
 
-    "construct: move memberDetails.dateOfBirth to transferringMember.memberDetails.dateOfBirth" in {
+    "construct the correct structure with flattened name fields" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
-          "dateOfBirth" -> "1985-07-01"
+          "name" -> Json.obj(
+            "firstName" -> "Mathew",
+            "lastName"  -> "May"
+          )
         )
       )
 
       val expected = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
-            "dateOfBirth" -> "1985-07-01"
+            "foreName" -> "Mathew",
+            "lastName" -> "May"
           )
         )
       )
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(expected)
+      result.value shouldBe expected
     }
 
-    "deconstruct: move transferringMember.memberDetails.dateOfBirth to memberDetails.dateOfBirth" in {
+    "deconstruct the flattened structure back to nested name fields" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
-            "dateOfBirth" -> "1985-07-01"
+            "foreName" -> "Mathew",
+            "lastName" -> "May"
           )
         )
       )
 
       val expected = Json.obj(
         "memberDetails" -> Json.obj(
-          "dateOfBirth" -> "1985-07-01"
+          "name" -> Json.obj(
+            "firstName" -> "Mathew",
+            "lastName"  -> "May"
+          )
         )
       )
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(expected)
+      result.value shouldBe expected
     }
 
-    "construct: leave JSON unchanged if memberDetails.dateOfBirth is missing" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj())
+    "return original JSON if name key not present on construct" in {
+      val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A"))
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(Json.obj("memberDetails" -> Json.obj()))
+      result.value shouldBe inputJson
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.dateOfBirth is missing" in {
-      val inputJson = Json.obj(
-        "transferringMember" -> Json.obj("memberDetails" -> Json.obj())
-      )
+    "return original JSON if foreName/lastName not present on deconstruct" in {
+      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A")))
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj())))
+      result.value shouldBe inputJson
     }
   }
 }
