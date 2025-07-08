@@ -52,6 +52,7 @@ class SaveForLaterServiceImpl @Inject() (
       case Some(saved) =>
         deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
           case Right(deconstructed) =>
+            println(Json.prettyPrint(deconstructed))
             Right(UserAnswersDTO(saved.referenceId, deconstructed, saved.lastUpdated))
 
           case Left(error) =>
@@ -69,17 +70,17 @@ class SaveForLaterServiceImpl @Inject() (
         Future.successful(Left(err))
       case Right(transformedInput) =>
         println("Recieved")
-        logger.info(Json.prettyPrint(dto.data))
+        println(Json.prettyPrint(dto.data))
         repository.get(dto.referenceId).flatMap { maybeExisting =>
           println("Transformed")
-          logger.info(Json.prettyPrint(transformedInput))
+          println(Json.prettyPrint(transformedInput))
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
           validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
               println("Validated")
-              logger.info(Json.prettyPrint(Json.toJson(validated)))
+              println(Json.prettyPrint(Json.toJson(validated)))
               val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
               repository.set(saved).map {
                 case true  => Right()
@@ -103,6 +104,8 @@ class SaveForLaterServiceImpl @Inject() (
   }
 
   private def validate(json: JsObject): Either[SaveForLaterError, AnswersData] = {
+    println("JSON about to validate:")
+    println(Json.prettyPrint(json))
     json.validate[AnswersData] match {
       case JsSuccess(data, _) => Right(data)
       case JsError(err)       => Left(SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err))))

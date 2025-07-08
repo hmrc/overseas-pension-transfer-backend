@@ -16,62 +16,20 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.{JsError, JsObject, JsPath, JsString, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait AddressTransformerStep extends JsonHelpers {
 
-  // Converts a flat frontend-style address at the given path into a nested backend-style address (addressDetails + optional poBox).
-  def constructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
+  def constructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
-        val addressFields = Seq(
-          "addressLine1" -> (addressObj \ "addressLine1").asOpt[String],
-          "addressLine2" -> (addressObj \ "addressLine2").asOpt[String],
-          "addressLine3" -> (addressObj \ "addressLine3").asOpt[String],
-          "addressLine4" -> (addressObj \ "addressLine4").asOpt[String],
-          "addressLine5" -> (addressObj \ "addressLine5").asOpt[String],
-          "ukPostCode"   -> (addressObj \ "ukPostCode").asOpt[String],
-          "country"      -> (addressObj \ "country").asOpt[JsObject]
-        ).collect {
-          case (k, Some(v: String))   => k -> JsString(v)
-          case (k, Some(v: JsObject)) => k -> v
+        val addressFields = extractAddressFields(addressObj)
+        val preservedFields = addressObj.fields.filterNot {
+          case (key, _) => addressFields.map(_._1).contains(key)
         }
 
-        val addressDetails = JsObject(addressFields)
-
-        val poBox = (addressObj \ "poBox").asOpt[String]
-
-        val finalObj = Json.obj("addressDetails" -> addressDetails) ++
-          poBox.map(pb => Json.obj("poBox" -> JsString(pb))).getOrElse(Json.obj())
-
-        setPath(path, finalObj, json)
-
-      case None => Right(json)
-    }
-  }
-
-  // Converts a nested backend-style address at the given path back into a flat frontend-style address.
-  def deconstructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
-    path.asSingleJson(json).asOpt[JsObject] match {
-      case Some(addressObj) =>
-        val details = (addressObj \ "addressDetails").asOpt[JsObject].getOrElse(Json.obj())
-
-        val flattenedFields = Seq(
-          "addressLine1" -> (details \ "addressLine1").asOpt[String],
-          "addressLine2" -> (details \ "addressLine2").asOpt[String],
-          "addressLine3" -> (details \ "addressLine3").asOpt[String],
-          "addressLine4" -> (details \ "addressLine4").asOpt[String],
-          "addressLine5" -> (details \ "addressLine5").asOpt[String],
-          "ukPostCode"   -> (details \ "ukPostCode").asOpt[String],
-          "country"      -> (details \ "country").asOpt[JsObject],
-          "poBox"        -> (addressObj \ "poBox").asOpt[String]
-        ).collect {
-          case (key, Some(value: String))   => key -> JsString(value)
-          case (key, Some(value: JsObject)) => key -> value
-        }
-
-        val rebuilt = JsObject(flattenedFields)
+        val rebuilt = Json.obj(nestedKey -> JsObject(addressFields)) ++ JsObject(preservedFields)
 
         setPath(path, rebuilt, json)
 
@@ -79,4 +37,30 @@ trait AddressTransformerStep extends JsonHelpers {
     }
   }
 
+
+  def deconstructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
+    path.asSingleJson(json).asOpt[JsObject] match {
+      case Some(container) =>
+        val nestedObj = (container \ nestedKey).asOpt[JsObject].getOrElse(Json.obj())
+        val flattened = JsObject(extractAddressFields(nestedObj))
+        val preserved = container - nestedKey
+        val merged    = flattened ++ preserved
+        setPath(path, merged, json)
+
+      case None            => Right(json)
+    }
+  }
+
+  private def extractAddressFields(jsObj: JsObject): Seq[(String, JsValue)] =
+    Seq(
+      "addressLine1" -> (jsObj \ "addressLine1").asOpt[String].map(JsString),
+      "addressLine2" -> (jsObj \ "addressLine2").asOpt[String].map(JsString),
+      "addressLine3" -> (jsObj \ "addressLine3").asOpt[String].map(JsString),
+      "addressLine4" -> (jsObj \ "addressLine4").asOpt[String].map(JsString),
+      "addressLine5" -> (jsObj \ "addressLine5").asOpt[String].map(JsString),
+      "ukPostCode"   -> (jsObj \ "ukPostCode").asOpt[String].map(JsString),
+      "country"      -> (jsObj \ "country").asOpt[JsObject]
+    ).collect {
+      case (key, Some(value)) => key -> value
+    }
 }

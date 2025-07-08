@@ -27,12 +27,13 @@ class MemberLastUKAddressTransformer extends Transformer with AddressTransformer
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
+        from      = JsPath \ "memberDetails" \ jsonKey,
+        to        = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
         _: JsObject
       ),
       constructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
+        nestedKey = "addressDetails"
       )
     )
 
@@ -42,11 +43,12 @@ class MemberLastUKAddressTransformer extends Transformer with AddressTransformer
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
+        nestedKey = "addressDetails"
       ),
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        to   = JsPath \ "memberDetails" \ jsonKey,
+        from      = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
+        to        = JsPath \ "memberDetails" \ jsonKey,
         _: JsObject
       )
     )

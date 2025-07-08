@@ -69,23 +69,19 @@ class SaveForLaterRepository @Inject() (
   }
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
-    keepAlive(referenceId).flatMap {
-      _ =>
-        collection
-          .find(byReferenceId(referenceId))
-          .headOption()
-    }
+    collection
+      .find(byReferenceId(referenceId))
+      .headOption()
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
-      .updateOne(
-        filter  = byReferenceId(updatedAnswers.referenceId),
-        update  = Filters.equal("savedUserAnswers", updatedAnswers),
-        options = UpdateOptions().upsert(true)
+      .replaceOne(
+        filter      = byReferenceId(answers.referenceId),
+        replacement = answers,
+        options     = ReplaceOptions().upsert(true)
       )
-      .toFuture
+      .toFuture()
       .map(_.wasAcknowledged())
   }
 

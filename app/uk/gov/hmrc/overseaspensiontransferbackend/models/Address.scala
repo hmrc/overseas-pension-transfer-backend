@@ -18,25 +18,34 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class Address(
-    addressDetails: AddressDetails,
-    poBox: Option[String]
-  )
-
-object Address {
-  implicit val format: OFormat[Address] = Json.format
+trait AddressBase {
+  def addressLine1: String
+  def addressLine2: String
+  def addressLine3: Option[String]
+  def addressLine4: Option[String]
+  def addressLine5: Option[String]
+  def ukPostCode: Option[String]
+  def country: Option[Country]
 }
 
-case class AddressDetails(
+case class Address(
     addressLine1: String,
     addressLine2: String,
     addressLine3: Option[String],
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: String
+    country: Option[Country]
   )
 
-object AddressDetails {
-  implicit val format: OFormat[AddressDetails] = Json.format
+object Address {
+  implicit val format: OFormat[Address] = Json.format
+}
+
+case class Country(code: String, name: String) {
+  override def toString: String = name
+}
+
+object Country {
+  implicit val format: OFormat[Country] = Json.format
 }

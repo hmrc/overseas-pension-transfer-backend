@@ -21,10 +21,9 @@ import play.api.libs.json.{Json, OFormat}
 import java.time.LocalDate
 
 case class MemberResidencyDetails(
-    memUkResident: Option[String]            = None,
-    memEverUkResident: Option[String]        = None,
-    lastPrincipalAddDetails: Option[Address] = None,
-    dateMemberLeftUk: Option[LocalDate]      = None
+    memUkResident: Option[String]                            = None,
+    memEverUkResident: Option[String]                        = None,
+    lastPrincipalAddDetails: Option[LastPrincipalAddDetails] = None
   )
 
 object MemberResidencyDetails {

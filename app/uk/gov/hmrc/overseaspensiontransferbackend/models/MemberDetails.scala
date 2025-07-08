@@ -22,10 +22,10 @@ import java.time.LocalDate
 case class MemberDetails(
     foreName: Option[String]                               = None,
     lastName: Option[String]                               = None,
+    dateOfBirth: Option[LocalDate]                         = None,
     nino: Option[String]                                   = None,
     memberNoNino: Option[String]                           = None,
-    dateOfBirth: Option[LocalDate]                         = None,
-    principalResAddDetails: Option[Address]                = None,
+    principalResAddDetails: Option[PrincipalResAddDetails] = None,
     memberResidencyDetails: Option[MemberResidencyDetails] = None
   )
 

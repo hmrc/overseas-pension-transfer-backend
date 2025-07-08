@@ -27,12 +27,14 @@ class MemberAddressTransformer extends Transformer with AddressTransformerStep w
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        from      = JsPath \ "memberDetails" \ jsonKey,
+        to        = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
         _: JsObject
       ),
+      transformPoBoxAt(__ \ "transferringMember" \ "memberDetails" \ jsonKey),
       constructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+        path      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        nestedKey = "addressDetails"
       )
     )
 
@@ -41,16 +43,25 @@ class MemberAddressTransformer extends Transformer with AddressTransformerStep w
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
+      transformPoBoxAt(JsPath \ "transferringMember" \ "memberDetails" \ jsonKey),
       deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        nestedKey = "addressDetails"
       ),
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "memberDetails" \ jsonKey,
+        from      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        to        = JsPath \ "memberDetails" \ jsonKey,
         _: JsObject
       )
     )
 
     TransformerUtils.applyPipeline(json, steps)(identity)
+  }
+
+  private def transformPoBoxAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
+    (path.asSingleJson(json) \ "poBoxNumber").asOpt[String] match {
+      case Some(pb) => setPath(path \ "poBoxNumber", JsString(pb), json)
+      case None     => Right(json)
+    }
   }
 }

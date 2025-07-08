@@ -25,7 +25,7 @@ class MemberDetailsSpec extends AnyWordSpec with Matchers {
   "MemberDetails format" should {
 
     "serialize and deserialize correctly" in {
-      val model  = MemberDetails(Some("John"), Some("Smith"), Some("AB123456C"))
+      val model  = MemberDetails(Some("John"), Some("Smith"))
       val json   = Json.toJson(model)
       val result = json.validate[MemberDetails]
 
