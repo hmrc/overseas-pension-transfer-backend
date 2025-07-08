@@ -26,16 +26,16 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
 
   "MemberAddressTransformer" should {
 
-    "construct: move and wrap memberDetails.principalResAddDetails into addressDetails and poBox under transferringMember.memberDetails" in {
+    "construct: move and wrap memberDetails.principalResAddDetails into addressDetails and poBoxNumber under transferringMember.memberDetails" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
           "principalResAddDetails" -> Json.obj(
             "addressLine1" -> "123 Test St",
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
-            "postcode"     -> "TE5 7ST",
+            "ukPostCode"   -> "TE5 7ST",
             "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-            "poBox"        -> "PO123"
+            "poBoxNumber"  -> "PO123"
           )
         )
       )
@@ -51,7 +51,7 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
                 "ukPostCode"   -> "TE5 7ST",
                 "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
               ),
-              "poBox"          -> "PO123"
+              "poBoxNumber"    -> "PO123"
             )
           )
         )
@@ -61,7 +61,7 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
       result shouldBe Right(expected)
     }
 
-    "deconstruct: unwrap transferringMember.memberDetails.principalResAddDetails from addressDetails and poBox back to memberDetails" in {
+    "deconstruct: unwrap transferringMember.memberDetails.principalResAddDetails from addressDetails and poBoxNumber back to memberDetails" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -73,7 +73,7 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
                 "ukPostCode"   -> "TE5 7ST",
                 "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
               ),
-              "poBox"          -> "PO123"
+              "poBoxNumber"    -> "PO123"
             )
           )
         )
@@ -85,9 +85,9 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
             "addressLine1" -> "123 Test St",
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
-            "postcode"     -> "TE5 7ST",
+            "ukPostCode"   -> "TE5 7ST",
             "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-            "poBox"        -> "PO123"
+            "poBoxNumber"  -> "PO123"
           )
         )
       )

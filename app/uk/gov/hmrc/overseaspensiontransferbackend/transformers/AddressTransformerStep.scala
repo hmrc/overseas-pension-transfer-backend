@@ -24,7 +24,7 @@ trait AddressTransformerStep extends JsonHelpers {
   def constructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
-        val addressFields = extractAddressFields(addressObj)
+        val addressFields   = extractAddressFields(addressObj)
         val preservedFields = addressObj.fields.filterNot {
           case (key, _) => addressFields.map(_._1).contains(key)
         }
@@ -37,7 +37,6 @@ trait AddressTransformerStep extends JsonHelpers {
     }
   }
 
-
   def deconstructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(container) =>
@@ -47,7 +46,7 @@ trait AddressTransformerStep extends JsonHelpers {
         val merged    = flattened ++ preserved
         setPath(path, merged, json)
 
-      case None            => Right(json)
+      case None => Right(json)
     }
   }
 

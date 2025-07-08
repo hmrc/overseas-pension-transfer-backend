@@ -29,9 +29,9 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
           "addressLine1" -> "123 Test St",
           "addressLine2" -> "Testville",
           "addressLine3" -> "Testshire",
-          "postcode"     -> "TE5 7ST",
+          "ukPostCode"   -> "TE5 7ST",
           "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-          "poBox"        -> "PO123"
+          "poBoxNumber"  -> "PO123"
         )
       )
 
@@ -44,7 +44,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "ukPostCode"   -> "TE5 7ST",
             "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           ),
-          "poBox"          -> "PO123"
+          "poBoxNumber"    -> "PO123"
         )
       )
 
@@ -63,7 +63,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "ukPostCode"   -> "TE5 7ST",
             "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           ),
-          "poBox"          -> "PO123"
+          "poBoxNumber"    -> "PO123"
         )
       )
 
@@ -72,9 +72,9 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
           "addressLine1" -> "123 Test St",
           "addressLine2" -> "Testville",
           "addressLine3" -> "Testshire",
-          "postcode"     -> "TE5 7ST",
+          "ukPostCode"   -> "TE5 7ST",
           "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-          "poBox"        -> "PO123"
+          "poBoxNumber"  -> "PO123"
         )
       )
 
