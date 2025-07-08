@@ -80,12 +80,12 @@ class SaveForLaterRepository @Inject() (
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
     val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
-      .replaceOne(
+      .updateOne(
         filter      = byReferenceId(updatedAnswers.referenceId),
-        replacement = updatedAnswers,
-        options     = ReplaceOptions().upsert(true)
+        update      = Filters.equal("savedUserAnswers", updatedAnswers),
+        options     = UpdateOptions().upsert(true)
       )
-      .toFuture()
+      .toFuture
       .map(_.wasAcknowledged())
   }
 
