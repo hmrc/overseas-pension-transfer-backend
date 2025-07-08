@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait NameTransformers extends JsonHelpers {
+trait NameTransformerStep extends JsonHelpers {
 
   /** Flattens a nested JSON representation of a person's name into a flat structure.
     *

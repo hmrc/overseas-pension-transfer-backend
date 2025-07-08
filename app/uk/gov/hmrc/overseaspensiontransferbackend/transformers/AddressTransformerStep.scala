@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 import play.api.libs.json.{JsError, JsObject, JsPath, JsString, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait AddressTransformers extends JsonHelpers {
+trait AddressTransformerStep extends JsonHelpers {
 
   // Converts a flat frontend-style address at the given path into a nested backend-style address (addressDetails + optional poBox).
   def constructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>

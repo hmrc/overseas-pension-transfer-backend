@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait BooleanTransformers extends JsonHelpers {
+trait BooleanTransformerStep extends JsonHelpers {
 
   /** Converts a boolean at the given path into a Yes/No string */
   def constructBool(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>

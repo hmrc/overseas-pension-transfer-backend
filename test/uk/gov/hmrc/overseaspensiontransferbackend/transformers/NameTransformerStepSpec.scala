@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 
-class NameTransformerSpec extends AnyFreeSpec with Matchers with NameTransformers {
+class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransformerStep {
 
   "flattenName" - {
     "should flatten name with firstName and lastName to foreName and lastName" in {

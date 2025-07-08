@@ -17,10 +17,10 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{NameTransformers, Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{NameTransformerStep, Transformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNameTransformer extends Transformer with NameTransformers with JsonHelpers {
+class MemberNameTransformer extends Transformer with NameTransformerStep with JsonHelpers {
 
   private val jsonKey = "name"
 

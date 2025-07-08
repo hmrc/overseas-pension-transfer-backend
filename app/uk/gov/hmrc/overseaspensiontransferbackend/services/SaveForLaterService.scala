@@ -65,7 +65,7 @@ class SaveForLaterServiceImpl @Inject() (
 
   override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
     constructSavedAnswers(dto.data) match {
-      case Left(err)               =>
+      case Left(err) =>
         Future.successful(Left(err))
 
       case Right(transformedInput) =>

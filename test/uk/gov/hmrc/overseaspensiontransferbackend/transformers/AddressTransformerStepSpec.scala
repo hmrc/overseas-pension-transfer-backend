@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 
-class AddressTransformerSpec extends AnyFreeSpec with Matchers with AddressTransformers {
+class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep {
 
   "constructAddressAt" - {
     "should convert flat frontend-style address to backend-style nested structure" in {
