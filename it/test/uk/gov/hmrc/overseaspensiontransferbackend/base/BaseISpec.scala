@@ -18,18 +18,19 @@ package uk.gov.hmrc.overseaspensiontransferbackend.base
 
 import org.scalatest._
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 
 trait BaseISpec
-    extends AnyWordSpecLike
+    extends AnyWordSpec
     with Matchers
     with OptionValues
     with BeforeAndAfterAll
@@ -42,7 +43,7 @@ trait BaseISpec
     "microservice.services.overseas-pension-transfer-stubs.host" -> WireMockHelper.wireMockHost,
     "microservice.services.overseas-pension-transfer-stubs.port" -> WireMockHelper.wireMockPort.toString,
     "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
-    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
+    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString,
   )
 
   implicit override lazy val app: Application =
@@ -70,7 +71,7 @@ trait BaseISpec
     super.beforeEach()
   }
 
-  override def afterEach(): Unit  = {
+  override def afterEach(): Unit = {
     super.afterEach()
   }
 }

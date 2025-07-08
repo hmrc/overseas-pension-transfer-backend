@@ -25,7 +25,7 @@ import java.time.Instant
 final case class SavedUserAnswers(
     referenceId: String,
     data: AnswersData,
-    lastUpdated: Instant = Instant.now
+    lastUpdated: Instant
   )
 
 final case class AnswersData(
