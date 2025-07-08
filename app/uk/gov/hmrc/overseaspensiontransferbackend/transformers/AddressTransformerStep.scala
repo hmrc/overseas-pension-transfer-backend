@@ -31,7 +31,7 @@ trait AddressTransformerStep extends JsonHelpers {
           "addressLine3" -> (addressObj \ "addressLine3").asOpt[String],
           "addressLine4" -> (addressObj \ "addressLine4").asOpt[String],
           "addressLine5" -> (addressObj \ "addressLine5").asOpt[String],
-          "ukPostCode"   -> (addressObj \ "postcode").asOpt[String],
+          "ukPostCode"   -> (addressObj \ "ukPostCode").asOpt[String],
           "country"      -> (addressObj \ "country").asOpt[JsObject]
         ).collect {
           case (k, Some(v: String))   => k -> JsString(v)
@@ -63,7 +63,7 @@ trait AddressTransformerStep extends JsonHelpers {
           "addressLine3" -> (details \ "addressLine3").asOpt[String],
           "addressLine4" -> (details \ "addressLine4").asOpt[String],
           "addressLine5" -> (details \ "addressLine5").asOpt[String],
-          "postcode"     -> (details \ "ukPostCode").asOpt[String],
+          "ukPostCode"   -> (details \ "ukPostCode").asOpt[String],
           "country"      -> (details \ "country").asOpt[JsObject],
           "poBox"        -> (addressObj \ "poBox").asOpt[String]
         ).collect {

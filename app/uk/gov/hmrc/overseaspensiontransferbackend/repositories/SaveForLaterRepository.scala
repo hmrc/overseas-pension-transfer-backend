@@ -81,9 +81,9 @@ class SaveForLaterRepository @Inject() (
     val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
       .updateOne(
-        filter      = byReferenceId(updatedAnswers.referenceId),
-        update      = Filters.equal("savedUserAnswers", updatedAnswers),
-        options     = UpdateOptions().upsert(true)
+        filter  = byReferenceId(updatedAnswers.referenceId),
+        update  = Filters.equal("savedUserAnswers", updatedAnswers),
+        options = UpdateOptions().upsert(true)
       )
       .toFuture
       .map(_.wasAcknowledged())

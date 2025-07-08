@@ -28,7 +28,8 @@ case class UserAnswersTransformerFactory() {
     new MemberAddressTransformer(),
     new MemberIsUKResidentTransformer(),
     new MemberEverUKResidentTransformer(),
-    new MemberLastUKAddressTransformer()
+    new MemberLastUKAddressTransformer(),
+    new MemberDateLeftUKTransformer()
   )
 
   def build(): UserAnswersTransformer = {
