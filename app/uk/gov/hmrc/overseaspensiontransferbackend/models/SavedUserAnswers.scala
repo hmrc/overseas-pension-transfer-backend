@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import play.api.libs.functional.syntax._
 
 import java.time.Instant
 
@@ -36,6 +36,7 @@ final case class AnswersData(
   )
 
 object AnswersData {
+
   // This may seam unnecessary but allows for type validation in the save for later service.
   // A custom reads with readNullable will need to be written for every key we save to mongo.
   // This is due to the way that play handles nullable values.
@@ -44,7 +45,7 @@ object AnswersData {
       (__ \ "qropsDetails").readNullable[QropsDetails] and
       (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
       (__ \ "transferDetails").readNullable[TransferDetails]
-    )(AnswersData.apply _)
+  )(AnswersData.apply _)
 
   implicit val writes: OWrites[AnswersData] = Json.writes[AnswersData]
 

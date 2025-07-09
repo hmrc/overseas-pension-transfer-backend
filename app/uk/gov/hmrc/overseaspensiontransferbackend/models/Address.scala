@@ -30,16 +30,17 @@ trait AddressBase {
 }
 
 case class Address(
-                    addressLine1: String,
-                    addressLine2: String,
-                    addressLine3: Option[String],
-                    addressLine4: Option[String],
-                    addressLine5: Option[String],
-                    ukPostCode: Option[String],
-                    country: Option[Country]
-                  )
+    addressLine1: String,
+    addressLine2: String,
+    addressLine3: Option[String],
+    addressLine4: Option[String],
+    addressLine5: Option[String],
+    ukPostCode: Option[String],
+    country: Option[Country]
+  )
 
 object Address {
+
   implicit val reads: Reads[Address] = (
     (__ \ "addressLine1").read[String] and
       (__ \ "addressLine2").read[String] and
@@ -48,7 +49,7 @@ object Address {
       (__ \ "addressLine5").readNullable[String] and
       (__ \ "ukPostCode").readNullable[String] and
       (__ \ "country").readNullable[Country]
-    )(Address.apply _)
+  )(Address.apply _)
 
   implicit val writes: OWrites[Address] = Json.writes[Address]
 
@@ -60,10 +61,11 @@ case class Country(code: String, name: String) {
 }
 
 object Country {
+
   implicit val reads: Reads[Country] = (
     (__ \ "code").read[String] and
       (__ \ "name").read[String]
-    )(Country.apply _)
+  )(Country.apply _)
 
   implicit val writes: OWrites[Country] = Json.writes[Country]
 

@@ -24,8 +24,8 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
@@ -76,7 +76,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
       result.futureValue match {
         case Left(SaveForLaterError.TransformationError(msg)) =>
           msg must include("deconstruct failed")
-        case other =>
+        case other                                            =>
           fail(s"Unexpected result: $other")
       }
     }
@@ -92,7 +92,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
       val result = service.saveAnswer(validDTO)
 
-      result.futureValue mustBe Right()
+      result.futureValue mustBe Right(())
     }
 
     "should return Left(SaveFailed) if repo.set returns false" in {
@@ -106,14 +106,14 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
     }
 
     "should merge with existing data before save" in {
-      val existing     = SavedUserAnswers("ref-1", AnswersData(Some(TransferringMember(None)), None, None, None), now)
+      val existing = SavedUserAnswers("ref-1", AnswersData(Some(TransferringMember(None)), None, None, None), now)
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(existing)))
       when(mockTransformer.construct(any())).thenReturn(Right(validData))
       when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
-      result.futureValue mustBe Right()
+      result.futureValue mustBe Right(())
     }
 
     "should return Left(TransformationError) when construct fails" in {
@@ -125,7 +125,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
       result.futureValue match {
         case Left(SaveForLaterError.TransformationError(msg)) =>
           msg must include("construct failed")
-        case other =>
+        case other                                            =>
           fail(s"Unexpected result: $other")
       }
     }
@@ -153,7 +153,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
       result.futureValue match {
         case Left(SaveForLaterError.TransformationError(msg)) =>
           msg.toLowerCase must include("nino")
-        case other =>
+        case other                                            =>
           fail(s"Expected TransformationError due to malformed field, got: $other")
       }
     }

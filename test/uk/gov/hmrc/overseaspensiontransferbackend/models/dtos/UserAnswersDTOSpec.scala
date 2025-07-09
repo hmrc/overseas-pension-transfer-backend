@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.{JsObject, JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, Json}
 
 import java.time.Instant
 

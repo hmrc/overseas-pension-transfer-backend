@@ -29,7 +29,7 @@ class MemberDetailsSpec extends AnyWordSpec with Matchers {
       val json   = Json.toJson(model)
       val result = json.validate[MemberDetails]
 
-      result mustBe JsSuccess(model)
+      result.get mustBe model
     }
 
     "handle missing optional fields" in {

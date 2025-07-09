@@ -22,9 +22,9 @@ import play.api.libs.json._
 import java.time.LocalDate
 
 case class PrincipalResAddDetails(
-                                   addressDetails: Option[Address],
-                                   poBoxNumber: Option[String]
-                                 ) extends AddressBase {
+    addressDetails: Option[Address],
+    poBoxNumber: Option[String]
+  ) extends AddressBase {
   override def addressLine1: String         = addressDetails.map(_.addressLine1).orNull
   override def addressLine2: String         = addressDetails.map(_.addressLine2).orNull
   override def addressLine3: Option[String] = addressDetails.flatMap(_.addressLine3)
@@ -35,20 +35,20 @@ case class PrincipalResAddDetails(
 }
 
 object PrincipalResAddDetails {
+
   implicit val reads: Reads[PrincipalResAddDetails] = (
     (__ \ "addressDetails").readNullable[Address] and
       (__ \ "poBoxNumber").readNullable[String]
-    )(PrincipalResAddDetails.apply _)
+  )(PrincipalResAddDetails.apply _)
 
   implicit val writes: OWrites[PrincipalResAddDetails] = Json.writes[PrincipalResAddDetails]
   implicit val format: OFormat[PrincipalResAddDetails] = OFormat(reads, writes)
 }
 
-
 case class LastPrincipalAddDetails(
-                                    addressDetails: Option[Address],
-                                    dateMemberLeftUk: Option[LocalDate]
-                                  ) extends AddressBase {
+    addressDetails: Option[Address],
+    dateMemberLeftUk: Option[LocalDate]
+  ) extends AddressBase {
   override def addressLine1: String         = addressDetails.map(_.addressLine1).orNull
   override def addressLine2: String         = addressDetails.map(_.addressLine2).orNull
   override def addressLine3: Option[String] = addressDetails.flatMap(_.addressLine3)
@@ -59,24 +59,25 @@ case class LastPrincipalAddDetails(
 }
 
 object LastPrincipalAddDetails {
+
   implicit val reads: Reads[LastPrincipalAddDetails] = (
     (__ \ "addressDetails").readNullable[Address] and
       (__ \ "dateMemberLeftUk").readNullable[LocalDate]
-    )(LastPrincipalAddDetails.apply _)
+  )(LastPrincipalAddDetails.apply _)
 
   implicit val writes: OWrites[LastPrincipalAddDetails] = Json.writes[LastPrincipalAddDetails]
   implicit val format: OFormat[LastPrincipalAddDetails] = OFormat(reads, writes)
 }
 
 case class PropertyAddress(
-                            addressLine1: String,
-                            addressLine2: String,
-                            addressLine3: Option[String],
-                            addressLine4: Option[String],
-                            addressLine5: Option[String],
-                            ukPostCode: Option[String],
-                            country: Option[Country]
-                          ) extends AddressBase
+    addressLine1: String,
+    addressLine2: String,
+    addressLine3: Option[String],
+    addressLine4: Option[String],
+    addressLine5: Option[String],
+    ukPostCode: Option[String],
+    country: Option[Country]
+  ) extends AddressBase
 
 object PropertyAddress {
   // NB: This may not be validated properly, I'm not sure if the compiler is smart enough to get recognise that

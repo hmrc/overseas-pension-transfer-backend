@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, UserAnswersTransformer, UserAnswersTransformerFactory}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 
 import java.time.{Clock, ZoneOffset}
 

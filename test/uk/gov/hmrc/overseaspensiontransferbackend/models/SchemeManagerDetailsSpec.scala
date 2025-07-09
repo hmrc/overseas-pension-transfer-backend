@@ -29,7 +29,7 @@ class SchemeManagerDetailsSpec extends AnyWordSpec with Matchers {
       val json   = Json.toJson(model)
       val result = json.validate[SchemeManagerDetails]
 
-      result mustBe JsSuccess(model)
+      result.get mustBe model
     }
 
     "deserialize with missing field as None" in {

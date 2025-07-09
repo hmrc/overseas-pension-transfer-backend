@@ -68,18 +68,15 @@ class SaveForLaterServiceImpl @Inject() (
       case Left(err)               =>
         Future.successful(Left(err))
       case Right(transformedInput) =>
-
         repository.get(dto.referenceId).flatMap { maybeExisting =>
-
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
           validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-
               val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
               repository.set(saved).map {
-                case true  => Right()
+                case true  => Right(())
                 case false => Left(SaveForLaterError.SaveFailed)
               }
           }
@@ -98,6 +95,7 @@ class SaveForLaterServiceImpl @Inject() (
       SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
     )
   }
+
   // Note that this only validates if any of the json keys are malformed, it does not validate for
   // missing or unexpected json, I looked into doing that and the solution is overly complex and
   // cumbersome
