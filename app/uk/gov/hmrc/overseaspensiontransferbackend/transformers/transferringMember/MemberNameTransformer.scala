@@ -17,7 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{NameTransformerStep, Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberNameTransformer extends Transformer with NameTransformerStep with JsonHelpers {

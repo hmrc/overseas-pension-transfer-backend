@@ -104,7 +104,7 @@ class MemberAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockit
       result mustBe Right(Json.obj("memberDetails" -> Json.obj()))
     }
 
-    "leave JSON unchanged if transferringMember.memberDetails.principalResAddDetails is missing" in {
+    "must leave JSON unchanged if transferringMember.memberDetails.principalResAddDetails is missing" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj("memberDetails" -> Json.obj())
       )
