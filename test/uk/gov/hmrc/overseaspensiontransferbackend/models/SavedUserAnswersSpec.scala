@@ -57,7 +57,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
       val json = Json.toJson(obj)
 
       (json \ "data" \ "transferringMember" \ "memberDetails" \ "foreName").as[String] mustBe "Jane"
-      (json \ "referenceId").as[String] mustBe "ref-456"
+      (json \ "referenceId").as[String]                                                mustBe "ref-456"
     }
   }
 }
