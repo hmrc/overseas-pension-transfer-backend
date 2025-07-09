@@ -21,11 +21,15 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
+import java.time.Instant
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 
@@ -73,5 +77,36 @@ trait BaseISpec
 
   override def afterEach(): Unit = {
     super.afterEach()
+  }
+
+  def freshId(): String = UUID.randomUUID().toString
+  def frozenNow(): Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+
+  def dtoFrom(id: String, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, js, now)
+
+  def savedFrom(id: String, js: JsObject, now: Instant): SavedUserAnswers =
+    SavedUserAnswers(id, js.as[AnswersData], now)
+
+  def parseJson(str: String): JsObject = Json.parse(str).as[JsObject]
+
+  def withSavedDto(id: String, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, js, now)
+
+  def assertMemberDetails(js: JsLookupResult, expected: Map[String, String]): Unit = {
+    expected.foreach { case (key, value) =>
+      (js \ key).as[String] shouldBe value
+    }
+  }
+
+  def assertAddress(js: JsLookupResult, expected: Map[String, String]): Unit = {
+    expected.foreach { case (key, value) =>
+      (js \ key).as[String] shouldBe value
+    }
+  }
+
+  def assertCountry(js: JsLookupResult, expectedCode: String, expectedName: String): Unit = {
+    (js \ "code").as[String] shouldBe expectedCode
+    (js \ "name").as[String] shouldBe expectedName
   }
 }
