@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsSuccess, Json}
 
 import java.time.Instant
 
-class SavedUserAnswersSpec extends AnyWordSpec with Matchers {
+class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
-  "SavedUserAnswers JSON format" should {
+  "SavedUserAnswers JSON format" - {
 
-    "round trip to and from JSON" in {
+    "must round trip to and from JSON" in {
       val original = SavedUserAnswers(
         referenceId = "ref-123",
         data        = AnswersData(
@@ -44,7 +44,7 @@ class SavedUserAnswersSpec extends AnyWordSpec with Matchers {
       parsed mustBe JsSuccess(original)
     }
 
-    "flatten AnswersData to JsObject in writes" in {
+    "must flatten AnswersData to JsObject in writes" in {
       val data = AnswersData(
         transferringMember   = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
         qropsDetails         = None,

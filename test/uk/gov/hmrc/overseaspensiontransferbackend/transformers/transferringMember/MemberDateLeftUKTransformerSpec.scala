@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
+
 import play.api.libs.json._
 
-class MemberDateLeftUKTransformerSpec extends AnyWordSpec with Matchers {
+class MemberDateLeftUKTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer = new MemberDateLeftUKTransformer
 
-  "MemberDateLeftUKTransformer" should {
+  "MemberDateLeftUKTransformer" - {
 
-    "construct: move memberDetails.dateMemberLeftUk to transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk" in {
+    "must move memberDetails.dateMemberLeftUk to transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
           "dateMemberLeftUk" -> "2020-06-30"
@@ -46,10 +47,10 @@ class MemberDateLeftUKTransformerSpec extends AnyWordSpec with Matchers {
       )
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(expected)
+      result mustBe Right(expected)
     }
 
-    "deconstruct: move transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk to memberDetails.dateMemberLeftUk" in {
+    "must move transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk to memberDetails.dateMemberLeftUk" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -69,19 +70,19 @@ class MemberDateLeftUKTransformerSpec extends AnyWordSpec with Matchers {
       )
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(expected)
+      result mustBe Right(expected)
     }
 
-    "construct: leave JSON unchanged if memberDetails.dateMemberLeftUk is missing" in {
+    "must leave JSON unchanged if memberDetails.dateMemberLeftUk is missing" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj()
       )
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(inputJson)
+      result mustBe Right(inputJson)
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk is missing" in {
+    "must leave JSON unchanged if transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails.dateMemberLeftUk is missing" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -93,7 +94,7 @@ class MemberDateLeftUKTransformerSpec extends AnyWordSpec with Matchers {
       )
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(inputJson)
+      result mustBe Right(inputJson)
     }
   }
 }

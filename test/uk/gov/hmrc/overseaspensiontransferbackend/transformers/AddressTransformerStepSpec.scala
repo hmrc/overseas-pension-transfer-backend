@@ -22,8 +22,8 @@ import play.api.libs.json._
 
 class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep {
 
-  "constructAddressAt" - {
-    "should convert flat frontend-style address to backend-style nested structure" in {
+  "AddressTransformerStep" - {
+    "must convert flat frontend-style address to backend-style nested structure" in {
       val input = Json.obj(
         "principalResAddRetails" -> Json.obj(
           "addressLine1" -> "123 Test St",
@@ -50,10 +50,8 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
 
       constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(expected)
     }
-  }
 
-  "deconstructAddressAt" - {
-    "should convert nested backend-style address back to flat frontend-style structure" in {
+    "must convert nested backend-style address back to flat frontend-style structure" in {
       val input = Json.obj(
         "principalResAddDetails" -> Json.obj(
           "addressDetails" -> Json.obj(

@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.EitherValues
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 
-class MemberNameTransformerSpec extends AnyWordSpec with Matchers with EitherValues {
+class MemberNameTransformerSpec extends AnyFreeSpec with Matchers with EitherValues {
 
-  val transformer = new MemberNameTransformer
+  private val transformer = new MemberNameTransformer
 
-  "MemberNameTransformer" should {
+  "MemberNameTransformer" - {
 
-    "construct the correct structure with flattened name fields" in {
+    "must construct the correct structure with flattened name fields" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
           "name" -> Json.obj(
@@ -46,11 +46,10 @@ class MemberNameTransformerSpec extends AnyWordSpec with Matchers with EitherVal
         )
       )
 
-      val result = transformer.construct(inputJson)
-      result.value shouldBe expected
+      transformer.construct(inputJson).value mustBe expected
     }
 
-    "deconstruct the flattened structure back to nested name fields" in {
+    "must deconstruct the flattened structure back to nested name fields" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -69,22 +68,19 @@ class MemberNameTransformerSpec extends AnyWordSpec with Matchers with EitherVal
         )
       )
 
-      val result = transformer.deconstruct(inputJson)
-      result.value shouldBe expected
+      transformer.deconstruct(inputJson).value mustBe expected
     }
 
-    "return original JSON if name key not present on construct" in {
+    "must return original JSON if name key not present on construct" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A"))
 
-      val result = transformer.construct(inputJson)
-      result.value shouldBe inputJson
+      transformer.construct(inputJson).value mustBe inputJson
     }
 
-    "return original JSON if foreName/lastName not present on deconstruct" in {
+    "must return original JSON if foreName/lastName not present on deconstruct" in {
       val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A")))
 
-      val result = transformer.deconstruct(inputJson)
-      result.value shouldBe inputJson
+      transformer.deconstruct(inputJson).value mustBe inputJson
     }
   }
 }

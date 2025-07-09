@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 
-class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
+class MemberAddressTransformerSpec extends AnyFreeSpec with Matchers with MockitoSugar {
 
   private val transformer = new MemberAddressTransformer
 
-  "MemberAddressTransformer" should {
+  "MemberAddressTransformer" - {
 
-    "construct: move and wrap memberDetails.principalResAddDetails into addressDetails and poBoxNumber under transferringMember.memberDetails" in {
+    "must move and wrap memberDetails.principalResAddDetails into addressDetails and poBoxNumber under transferringMember.memberDetails" in {
       val inputJson = Json.obj(
         "memberDetails" -> Json.obj(
           "principalResAddDetails" -> Json.obj(
@@ -58,10 +59,10 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
       )
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(expected)
+      result mustBe Right(expected)
     }
 
-    "deconstruct: unwrap transferringMember.memberDetails.principalResAddDetails from addressDetails and poBoxNumber back to memberDetails" in {
+    "must unwrap transferringMember.memberDetails.principalResAddDetails from addressDetails and poBoxNumber back to memberDetails" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -93,23 +94,23 @@ class MemberAddressTransformerSpec extends AnyWordSpec with Matchers {
       )
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(expected)
+      result mustBe Right(expected)
     }
 
-    "construct: leave JSON unchanged if memberDetails.principalResAddDetails is missing" in {
+    "must leave JSON unchanged if memberDetails.principalResAddDetails is missing" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj())
 
       val result = transformer.construct(inputJson)
-      result shouldBe Right(Json.obj("memberDetails" -> Json.obj()))
+      result mustBe Right(Json.obj("memberDetails" -> Json.obj()))
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.principalResAddDetails is missing" in {
+    "leave JSON unchanged if transferringMember.memberDetails.principalResAddDetails is missing" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj("memberDetails" -> Json.obj())
       )
 
       val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj())))
+      result mustBe Right(Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj())))
     }
   }
 }

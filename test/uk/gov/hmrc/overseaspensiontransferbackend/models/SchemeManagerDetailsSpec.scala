@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsSuccess, Json}
 
-class SchemeManagerDetailsSpec extends AnyWordSpec with Matchers {
+class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
 
-  "SchemeManagerDetails" should {
+  "SchemeManagerDetails" - {
 
-    "serialize and deserialize correctly with value" in {
+    "must serialize and deserialize correctly with value" in {
       val model  = SchemeManagerDetails(Some("Some Type"))
       val json   = Json.toJson(model)
       val result = json.validate[SchemeManagerDetails]
@@ -32,7 +32,7 @@ class SchemeManagerDetailsSpec extends AnyWordSpec with Matchers {
       result.get mustBe model
     }
 
-    "deserialize with missing field as None" in {
+    "must deserialize with missing field as None" in {
       val json   = Json.obj()
       val result = json.validate[SchemeManagerDetails]
 

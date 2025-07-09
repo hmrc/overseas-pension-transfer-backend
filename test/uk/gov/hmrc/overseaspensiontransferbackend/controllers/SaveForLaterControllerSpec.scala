@@ -17,7 +17,6 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.Json
@@ -28,13 +27,13 @@ import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, S
 
 import scala.concurrent.Future
 
-class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOneAppPerSuite {
+class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
   private val routePrefix = "/overseas-pension-transfer-backend"
 
   "SaveForLaterController" - {
 
-    "getAnswers should return 200 with user answers if they exist" in {
+    "must return 200 with user answers if they exist" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.getAnswers(eqTo(testId))(any))
@@ -54,7 +53,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "getAnswers should return 404 if not found" in {
+    "must return 404 if not found" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.getAnswers(eqTo(testId))(any))
@@ -73,7 +72,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "saveAnswers should return 204 NoContent if save is successful" in {
+    "must return 204 NoContent if save is successful" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
@@ -95,7 +94,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "saveAnswers should return 400 BadRequest on transformation error" in {
+    "must return 400 BadRequest on transformation error" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
@@ -117,7 +116,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "saveAnswers should return 500 InternalServerError on save failure" in {
+    "must return 500 InternalServerError on save failure" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))

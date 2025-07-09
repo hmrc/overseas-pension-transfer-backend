@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsSuccess, Json}
 
-class QropsDetailsSpec extends AnyWordSpec with Matchers {
+class QropsDetailsSpec extends AnyFreeSpec with Matchers {
 
-  "QropsDetails" should {
+  "QropsDetails" - {
 
     "serialize and deserialize correctly with value" in {
       val model  = QropsDetails(Some("Example QROPS"))

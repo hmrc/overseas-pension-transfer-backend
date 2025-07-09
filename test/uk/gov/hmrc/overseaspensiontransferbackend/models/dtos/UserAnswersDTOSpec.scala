@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+
 import play.api.libs.json.{JsSuccess, Json}
 
 import java.time.Instant
 
-class UserAnswersDTOSpec extends AnyWordSpec with Matchers {
+class UserAnswersDTOSpec extends AnyFreeSpec with Matchers {
 
-  "UserAnswersDTO" should {
+  "UserAnswersDTO" - {
 
-    "serialize and deserialize correctly" in {
+    "must serialize and deserialize correctly" in {
       val dto = UserAnswersDTO(
         referenceId = "user-123",
         data        = Json.obj("foo" -> "bar"),
@@ -39,7 +40,7 @@ class UserAnswersDTOSpec extends AnyWordSpec with Matchers {
       result mustBe JsSuccess(dto)
     }
 
-    "fail to deserialize if required fields are missing" in {
+    "must fail to deserialize if required fields are missing" in {
       val json = Json.obj("referenceId" -> "user-123")
 
       val result = json.validate[UserAnswersDTO]
@@ -47,7 +48,7 @@ class UserAnswersDTOSpec extends AnyWordSpec with Matchers {
       result.isError mustBe true
     }
 
-    "round-trip with an empty object for data" in {
+    "must round-trip with an empty object for data" in {
       val dto    = UserAnswersDTO("abc", Json.obj(), Instant.now)
       val result = Json.toJson(dto).validate[UserAnswersDTO]
 

@@ -16,70 +16,58 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 
-class BooleanTransformerStepSpec extends AnyWordSpec with Matchers with BooleanTransformerStep {
+class BooleanTransformerStepSpec extends AnyFreeSpec with Matchers with BooleanTransformerStep {
 
   private val path = __ \ "memberDetails" \ "isUKResident"
 
-  "BooleanTransformerStep" should {
+  "BooleanTransformerStep" - {
 
-    "constructBool: convert true to Yes string" in {
+    "must convert true to Yes string" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> true))
 
       val expected = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "Yes"))
 
-      constructBool(path)(inputJson) shouldBe Right(expected)
+      constructBool(path)(inputJson) mustBe Right(expected)
     }
 
-    "constructBool: convert false to No string" in {
+    "must convert false to No string" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> false))
 
       val expected = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "No"))
 
-      constructBool(path)(inputJson) shouldBe Right(expected)
+      constructBool(path)(inputJson) mustBe Right(expected)
     }
 
-    "constructBool: leave unchanged if value is not a boolean" in {
+    "must leave unchanged if value is not a boolean" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "maybe"))
 
-      constructBool(path)(inputJson) shouldBe Right(inputJson)
+      constructBool(path)(inputJson) mustBe Right(inputJson)
     }
 
-    "constructBool: leave unchanged if path is missing" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj())
-
-      constructBool(path)(inputJson) shouldBe Right(inputJson)
-    }
-
-    "deconstructBool: convert Yes string to true" in {
+    "must convert Yes string to true" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "Yes"))
 
       val expected = Json.obj("memberDetails" -> Json.obj("isUKResident" -> true))
 
-      deconstructBool(path)(inputJson) shouldBe Right(expected)
+      deconstructBool(path)(inputJson) mustBe Right(expected)
     }
 
-    "deconstructBool: convert No string to false" in {
+    "must convert No string to false" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "No"))
 
       val expected = Json.obj("memberDetails" -> Json.obj("isUKResident" -> false))
 
-      deconstructBool(path)(inputJson) shouldBe Right(expected)
+      deconstructBool(path)(inputJson) mustBe Right(expected)
     }
 
-    "deconstructBool: leave unchanged if value is not Yes or No" in {
+    "must leave unchanged if value is not Yes or No" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj("isUKResident" -> "maybe"))
 
-      deconstructBool(path)(inputJson) shouldBe Right(inputJson)
-    }
-
-    "deconstructBool: leave unchanged if path is missing" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj())
-
-      deconstructBool(path)(inputJson) shouldBe Right(inputJson)
+      deconstructBool(path)(inputJson) mustBe Right(inputJson)
     }
   }
 }

@@ -27,7 +27,7 @@ class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers with MockitoS
 
   "UserAnswersTransformer" - {
 
-    "should apply all registered cleanse transformers in order" in {
+    "must apply all registered cleanse transformers in order" in {
       val input        = Json.obj("key" -> "value")
       val intermediate = Json.obj("step1" -> "done")
       val finalOutput  = Json.obj("step2" -> "done")
@@ -47,7 +47,7 @@ class UserAnswersTransformerSpec extends AnyFreeSpec with Matchers with MockitoS
       verify(transformer2).construct(intermediate)
     }
 
-    "should short-circuit cleanse transforms if a transformer fails" in {
+    "must short-circuit cleanse transforms if a transformer fails" in {
       val input = Json.obj("start" -> "bad")
       val error = JsError("fail!")
 

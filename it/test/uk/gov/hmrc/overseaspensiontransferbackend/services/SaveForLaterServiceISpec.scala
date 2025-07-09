@@ -31,7 +31,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
   lazy private val now = frozenNow()
 
 
-  "SaveForLaterService" should {
+  "SaveForLaterService" - {
 
     "transform and persist data correctly" in {
 
@@ -67,11 +67,11 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       val dto = withSavedDto(id, rawJson, now)
 
-      await(service.saveAnswer(dto)) shouldBe Right(())
+      await(service.saveAnswer(dto)) mustBe Right(())
 
       val result = await(repository.get(id)).value
-      result.referenceId shouldBe id
-      result.lastUpdated shouldBe now
+      result.referenceId mustBe id
+      result.lastUpdated mustBe now
 
       val memberDetails = Json.toJsObject(result.data) \ "transferringMember" \ "memberDetails"
 
@@ -91,7 +91,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
         "ukPostCode"   -> "ab123c"
       ))
       assertCountry(principal \ "addressDetails" \ "country", "AE-AZ", "Abu Dhabi")
-      (principal \ "poBoxNumber").as[String] shouldBe "baa"
+      (principal \ "poBoxNumber").as[String] mustBe "baa"
 
       val residency = memberDetails \ "memberResidencyDetails"
       assertMemberDetails(residency, Map(
@@ -106,7 +106,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
         "addressLine3" -> "Some District",
         "ukPostCode"   -> "ZZ1 1ZZ"
       ))
-      (lastUK \ "dateMemberLeftUk").as[String] shouldBe "2011-06-06"
+      (lastUK \ "dateMemberLeftUk").as[String] mustBe "2011-06-06"
     }
 
     "retrieve and transform data" in {
@@ -152,7 +152,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
         }
         """).as[AnswersData], now)
 
-      await(repository.set(savedAnswers)) shouldBe true
+      await(repository.set(savedAnswers)) mustBe true
 
       val result = await(service.getAnswers(id))
 
@@ -180,10 +180,10 @@ class SaveForLaterServiceISpec extends BaseISpec {
             "ukPostCode"   -> "LO4 4AD"
           ))
           assertCountry(principal \ "country", "IE", "Ireland")
-          (principal \ "poBoxNumber").as[String] shouldBe "PO456"
+          (principal \ "poBoxNumber").as[String] mustBe "PO456"
 
-          (details \ "memUkResident").as[Boolean]     shouldBe false
-          (details \ "memEverUkResident").as[Boolean] shouldBe true
+          (details \ "memUkResident").as[Boolean]     mustBe false
+          (details \ "memEverUkResident").as[Boolean] mustBe true
 
           val lastUK = details \ "lastPrincipalAddDetails"
           assertAddress(lastUK, Map(
@@ -194,7 +194,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
             "ukPostCode"   -> "ZZ2 2ZZ"
           ))
           assertCountry(lastUK \ "country", "UK", "United Kingdom")
-          (lastUK \ "dateMemberLeftUk").as[String] shouldBe "2013-05-01"
+          (lastUK \ "dateMemberLeftUk").as[String] mustBe "2013-05-01"
 
         case Left(err) =>
           fail(s"Expected successful result but got error: $err")
@@ -240,8 +240,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
         """
       )
 
-      await(service.saveAnswer(withSavedDto(id, original, now))) shouldBe Right(())
-      await(service.saveAnswer(withSavedDto(id, update, now.plusSeconds(1)))) shouldBe Right(())
+      await(service.saveAnswer(withSavedDto(id, original, now))) mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, update, now.plusSeconds(1)))) mustBe Right(())
 
       val result = await(service.getAnswers(id))
 
@@ -266,10 +266,10 @@ class SaveForLaterServiceISpec extends BaseISpec {
             "ukPostCode"   -> "AB1 2CD"
           ))
           assertCountry(address \ "country", "UK", "United Kingdom")
-          (address \ "poBoxNumber").as[String] shouldBe "PO123"
+          (address \ "poBoxNumber").as[String] mustBe "PO123"
 
-          (details \ "memUkResident").as[Boolean]     shouldBe true
-          (details \ "memEverUkResident").as[Boolean] shouldBe false
+          (details \ "memUkResident").as[Boolean]     mustBe true
+          (details \ "memEverUkResident").as[Boolean] mustBe false
 
           val lastUK = details \ "lastPrincipalAddDetails"
           assertAddress(lastUK, Map(
@@ -277,7 +277,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
             "addressLine2" -> "Old Town",
             "ukPostCode"   -> "ZZ9 9ZZ"
           ))
-          (lastUK \ "dateMemberLeftUk").as[String] shouldBe "2010-10-10"
+          (lastUK \ "dateMemberLeftUk").as[String] mustBe "2010-10-10"
 
         case Left(err) =>
           fail(s"Expected successful result but got error: $err")

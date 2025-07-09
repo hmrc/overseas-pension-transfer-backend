@@ -17,15 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend
 
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
 
 class HealthEndpointIntegrationSpec
-    extends AnyWordSpec
+    extends AnyFreeSpec
     with Matchers
     with ScalaFutures
     with IntegrationPatience
@@ -38,7 +38,7 @@ class HealthEndpointIntegrationSpec
     GuiceApplicationBuilder()
       .build()
 
-  "service health endpoint" should {
+  "service health endpoint" - {
     "respond with 200 status" in {
       val response =
         wsClient
@@ -46,7 +46,7 @@ class HealthEndpointIntegrationSpec
           .get()
           .futureValue
 
-      response.status shouldBe 200
+      response.status mustBe 200
     }
   }
 }

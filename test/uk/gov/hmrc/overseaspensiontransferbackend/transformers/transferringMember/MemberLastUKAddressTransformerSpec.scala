@@ -16,93 +16,91 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 
-class MemberLastUKAddressTransformerSpec extends AnyWordSpec with Matchers {
+class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer = new MemberLastUKAddressTransformer
 
-  "MemberLastUKAddressTransformer" should {
+  "MemberLastUKAddressTransformer" - {
 
-    "construct: move and wrap memberDetails.lastPrincipalAddDetails into addressDetails and poBoxNumber under " +
-      "transferringMember.memberDetails.memberResidencyDetails" in {
-        val inputJson = Json.obj(
-          "memberDetails" -> Json.obj(
-            "lastPrincipalAddDetails" -> Json.obj(
-              "addressLine1" -> "321 Old St",
-              "addressLine2" -> "Oldtown",
-              "ukPostCode"   -> "OL9 4LD",
-              "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-              "poBoxNumber"  -> "OLD123"
-            )
+    "must move and wrap memberDetails.lastPrincipalAddDetails into addressDetails and poBoxNumber under transferringMember.memberDetails.memberResidencyDetails" in {
+      val inputJson = Json.obj(
+        "memberDetails" -> Json.obj(
+          "lastPrincipalAddDetails" -> Json.obj(
+            "addressLine1" -> "321 Old St",
+            "addressLine2" -> "Oldtown",
+            "ukPostCode"   -> "OL9 4LD",
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
+            "poBoxNumber"  -> "OLD123"
           )
         )
-        val expected  = Json.obj(
-          "transferringMember" -> Json.obj(
-            "memberDetails" -> Json.obj(
-              "memberResidencyDetails" -> Json.obj(
-                "lastPrincipalAddDetails" -> Json.obj(
-                  "addressDetails" -> Json.obj(
-                    "addressLine1" -> "321 Old St",
-                    "addressLine2" -> "Oldtown",
-                    "ukPostCode"   -> "OL9 4LD",
-                    "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
-                  ),
-                  "poBoxNumber"    -> "OLD123"
-                )
+      )
+
+      val expected = Json.obj(
+        "transferringMember" -> Json.obj(
+          "memberDetails" -> Json.obj(
+            "memberResidencyDetails" -> Json.obj(
+              "lastPrincipalAddDetails" -> Json.obj(
+                "addressDetails" -> Json.obj(
+                  "addressLine1" -> "321 Old St",
+                  "addressLine2" -> "Oldtown",
+                  "ukPostCode"   -> "OL9 4LD",
+                  "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+                ),
+                "poBoxNumber"    -> "OLD123"
               )
             )
           )
         )
-        val result    = transformer.construct(inputJson)
-        result shouldBe Right(expected)
-      }
+      )
 
-    "deconstruct: unwrap transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails" +
-      " from addressDetails and poBoxNumber back to memberDetails" in {
-        val inputJson = Json.obj(
-          "transferringMember" -> Json.obj(
-            "memberDetails" -> Json.obj(
-              "memberResidencyDetails" -> Json.obj(
-                "lastPrincipalAddDetails" -> Json.obj(
-                  "addressDetails" -> Json.obj(
-                    "addressLine1" -> "321 Old St",
-                    "addressLine2" -> "Oldtown",
-                    "ukPostCode"   -> "OL9 4LD",
-                    "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
-                  ),
-                  "poBoxNumber"    -> "OLD123"
-                )
-              )
-            )
-          )
-        )
-
-        val expected = Json.obj(
-          "memberDetails" -> Json.obj(
-            "lastPrincipalAddDetails" -> Json.obj(
-              "addressLine1" -> "321 Old St",
-              "addressLine2" -> "Oldtown",
-              "ukPostCode"   -> "OL9 4LD",
-              "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-              "poBoxNumber"  -> "OLD123"
-            )
-          )
-        )
-        val result   = transformer.deconstruct(inputJson)
-        result shouldBe Right(expected)
-      }
-
-    "construct: leave JSON unchanged if memberDetails.lastPrincipalAddDetails is missing" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj())
-
-      val result = transformer.construct(inputJson)
-      result shouldBe Right(Json.obj("memberDetails" -> Json.obj()))
+      transformer.construct(inputJson) mustBe Right(expected)
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails is missing" in {
+    "must unwrap transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails back to memberDetails.lastPrincipalAddDetails" in {
+      val inputJson = Json.obj(
+        "transferringMember" -> Json.obj(
+          "memberDetails" -> Json.obj(
+            "memberResidencyDetails" -> Json.obj(
+              "lastPrincipalAddDetails" -> Json.obj(
+                "addressDetails" -> Json.obj(
+                  "addressLine1" -> "321 Old St",
+                  "addressLine2" -> "Oldtown",
+                  "ukPostCode"   -> "OL9 4LD",
+                  "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+                ),
+                "poBoxNumber"    -> "OLD123"
+              )
+            )
+          )
+        )
+      )
+
+      val expected = Json.obj(
+        "memberDetails" -> Json.obj(
+          "lastPrincipalAddDetails" -> Json.obj(
+            "addressLine1" -> "321 Old St",
+            "addressLine2" -> "Oldtown",
+            "ukPostCode"   -> "OL9 4LD",
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
+            "poBoxNumber"  -> "OLD123"
+          )
+        )
+      )
+
+      transformer.deconstruct(inputJson) mustBe Right(expected)
+    }
+
+    "must leave JSON unchanged if memberDetails.lastPrincipalAddDetails is missing" in {
+      val inputJson = Json.obj("memberDetails" -> Json.obj())
+
+      transformer.construct(inputJson) mustBe Right(inputJson)
+    }
+
+    "must leave JSON unchanged if transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails is missing" in {
       val inputJson = Json.obj(
         "transferringMember" -> Json.obj(
           "memberDetails" -> Json.obj(
@@ -111,8 +109,7 @@ class MemberLastUKAddressTransformerSpec extends AnyWordSpec with Matchers {
         )
       )
 
-      val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(inputJson)
+      transformer.deconstruct(inputJson) mustBe Right(inputJson)
     }
   }
 }

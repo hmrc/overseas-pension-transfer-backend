@@ -17,8 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
 import org.scalatest._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
@@ -34,7 +34,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 
 trait BaseISpec
-    extends AnyWordSpec
+    extends AnyFreeSpec
     with Matchers
     with OptionValues
     with BeforeAndAfterAll
@@ -95,18 +95,18 @@ trait BaseISpec
 
   def assertMemberDetails(js: JsLookupResult, expected: Map[String, String]): Unit = {
     expected.foreach { case (key, value) =>
-      (js \ key).as[String] shouldBe value
+      (js \ key).as[String] mustBe value
     }
   }
 
   def assertAddress(js: JsLookupResult, expected: Map[String, String]): Unit = {
     expected.foreach { case (key, value) =>
-      (js \ key).as[String] shouldBe value
+      (js \ key).as[String] mustBe value
     }
   }
 
   def assertCountry(js: JsLookupResult, expectedCode: String, expectedName: String): Unit = {
-    (js \ "code").as[String] shouldBe expectedCode
-    (js \ "name").as[String] shouldBe expectedName
+    (js \ "code").as[String] mustBe expectedCode
+    (js \ "name").as[String] mustBe expectedName
   }
 }

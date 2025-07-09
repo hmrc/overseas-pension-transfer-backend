@@ -16,68 +16,40 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 
-class MemberNoNinoTransformerSpec extends AnyWordSpec with Matchers {
+class MemberNoNinoTransformerSpec extends AnyFreeSpec with Matchers {
 
-  val transformer = new MemberNoNinoTransformer
+  private val transformer = new MemberNoNinoTransformer
 
-  "MemberNoNinoTransformer" should {
+  "MemberNoNinoTransformer" - {
 
-    "construct: move memberDetails.reasonNoNINO to transferringMember.memberDetails.reasonNoNINO" in {
-      val inputJson = Json.obj(
-        "memberDetails" -> Json.obj(
-          "reasonNoNINO" -> "reason for no nino"
-        )
-      )
+    "must move memberDetails.reasonNoNINO to transferringMember.memberDetails.reasonNoNINO" in {
+      val inputJson = Json.obj("memberDetails" -> Json.obj("reasonNoNINO" -> "reason for no nino"))
+      val expected  = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("reasonNoNINO" -> "reason for no nino")))
 
-      val expected = Json.obj(
-        "transferringMember" -> Json.obj(
-          "memberDetails" -> Json.obj(
-            "reasonNoNINO" -> "reason for no nino"
-          )
-        )
-      )
-
-      val result = transformer.construct(inputJson)
-      result shouldBe Right(expected)
+      transformer.construct(inputJson) mustBe Right(expected)
     }
 
-    "deconstruct: move transferringMember.memberDetails.reasonNoNINO to memberDetails.reasonNoNINO" in {
-      val inputJson = Json.obj(
-        "transferringMember" -> Json.obj(
-          "memberDetails" -> Json.obj(
-            "reasonNoNINO" -> "reason for no nino"
-          )
-        )
-      )
+    "must move transferringMember.memberDetails.reasonNoNINO to memberDetails.reasonNoNINO" in {
+      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("reasonNoNINO" -> "reason for no nino")))
+      val expected  = Json.obj("memberDetails" -> Json.obj("reasonNoNINO" -> "reason for no nino"))
 
-      val expected = Json.obj(
-        "memberDetails" -> Json.obj(
-          "reasonNoNINO" -> "reason for no nino"
-        )
-      )
-
-      val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(expected)
+      transformer.deconstruct(inputJson) mustBe Right(expected)
     }
 
-    "construct: leave JSON unchanged if memberDetails.reasonNoNINO is missing" in {
+    "must leave JSON unchanged if memberDetails.reasonNoNINO is missing" in {
       val inputJson = Json.obj("memberDetails" -> Json.obj())
 
-      val result = transformer.construct(inputJson)
-      result shouldBe Right(Json.obj("memberDetails" -> Json.obj()))
+      transformer.construct(inputJson) mustBe Right(inputJson)
     }
 
-    "deconstruct: leave JSON unchanged if transferringMember.memberDetails.reasonNoNINO is missing" in {
-      val inputJson = Json.obj(
-        "transferringMember" -> Json.obj("memberDetails" -> Json.obj())
-      )
+    "must leave JSON unchanged if transferringMember.memberDetails.reasonNoNINO is missing" in {
+      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj()))
 
-      val result = transformer.deconstruct(inputJson)
-      result shouldBe Right(Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj())))
+      transformer.deconstruct(inputJson) mustBe Right(inputJson)
     }
   }
 }
