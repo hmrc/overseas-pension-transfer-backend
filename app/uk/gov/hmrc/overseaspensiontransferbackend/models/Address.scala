@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 trait AddressBase {
   def addressLine1: String
@@ -29,17 +30,29 @@ trait AddressBase {
 }
 
 case class Address(
-    addressLine1: String,
-    addressLine2: String,
-    addressLine3: Option[String],
-    addressLine4: Option[String],
-    addressLine5: Option[String],
-    ukPostCode: Option[String],
-    country: Option[Country]
-  )
+                    addressLine1: String,
+                    addressLine2: String,
+                    addressLine3: Option[String],
+                    addressLine4: Option[String],
+                    addressLine5: Option[String],
+                    ukPostCode: Option[String],
+                    country: Option[Country]
+                  )
 
 object Address {
-  implicit val format: OFormat[Address] = Json.format
+  implicit val reads: Reads[Address] = (
+    (__ \ "addressLine1").read[String] and
+      (__ \ "addressLine2").read[String] and
+      (__ \ "addressLine3").readNullable[String] and
+      (__ \ "addressLine4").readNullable[String] and
+      (__ \ "addressLine5").readNullable[String] and
+      (__ \ "ukPostCode").readNullable[String] and
+      (__ \ "country").readNullable[Country]
+    )(Address.apply _)
+
+  implicit val writes: OWrites[Address] = Json.writes[Address]
+
+  implicit val format: OFormat[Address] = OFormat(reads, writes)
 }
 
 case class Country(code: String, name: String) {
@@ -47,5 +60,12 @@ case class Country(code: String, name: String) {
 }
 
 object Country {
-  implicit val format: OFormat[Country] = Json.format
+  implicit val reads: Reads[Country] = (
+    (__ \ "code").read[String] and
+      (__ \ "name").read[String]
+    )(Country.apply _)
+
+  implicit val writes: OWrites[Country] = Json.writes[Country]
+
+  implicit val format: OFormat[Country] = OFormat(reads, writes)
 }

@@ -36,7 +36,19 @@ final case class AnswersData(
   )
 
 object AnswersData {
-  implicit val format: OFormat[AnswersData] = Json.format
+  // This may seam unnecessary but allows for type validation in the save for later service.
+  // A custom reads with readNullable will need to be written for every key we save to mongo.
+  // This is due to the way that play handles nullable values.
+  implicit val reads: Reads[AnswersData] = (
+    (__ \ "transferringMember").readNullable[TransferringMember] and
+      (__ \ "qropsDetails").readNullable[QropsDetails] and
+      (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
+      (__ \ "transferDetails").readNullable[TransferDetails]
+    )(AnswersData.apply _)
+
+  implicit val writes: OWrites[AnswersData] = Json.writes[AnswersData]
+
+  implicit val format: OFormat[AnswersData] = OFormat(reads, writes)
 }
 
 object SavedUserAnswers {

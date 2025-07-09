@@ -22,7 +22,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
@@ -65,6 +65,22 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
       result.futureValue mustBe Left(SaveForLaterError.NotFound)
     }
+
+    "should return Left(TransformationError) when deconstruct fails" in {
+      when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(validSaved)))
+      when(mockTransformer.deconstruct(any()))
+        .thenReturn(Left(JsError("deconstruct failed")))
+
+      val result = service.getAnswers("ref-1")
+
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) =>
+          msg must include("deconstruct failed")
+        case other =>
+          fail(s"Unexpected result: $other")
+      }
+    }
+
   }
 
   "saveAnswer" - {
@@ -90,7 +106,6 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
     }
 
     "should merge with existing data before save" in {
-      val existingData = Json.obj("memberDetails" -> Json.obj("memberNino" -> "QQ123456A"))
       val existing     = SavedUserAnswers("ref-1", AnswersData(Some(TransferringMember(None)), None, None, None), now)
       when(mockRepository.get("ref-1")).thenReturn(Future.successful(Some(existing)))
       when(mockTransformer.construct(any())).thenReturn(Right(validData))
@@ -100,5 +115,48 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with Matchers with MockitoSuga
 
       result.futureValue mustBe Right()
     }
+
+    "should return Left(TransformationError) when construct fails" in {
+      when(mockTransformer.construct(any()))
+        .thenReturn(Left(JsError("construct failed")))
+
+      val result = service.saveAnswer(validDTO)
+
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) =>
+          msg must include("construct failed")
+        case other =>
+          fail(s"Unexpected result: $other")
+      }
+    }
+    "should return Left(TransformationError) when a known field is malformed" in {
+
+      val malformedJson = Json.obj(
+        "transferringMember" -> Json.obj(
+          "memberDetails" -> Json.obj(
+            "nino" -> 12345
+          )
+        )
+      )
+
+      when(mockTransformer.construct(any()))
+        .thenReturn(Right(malformedJson))
+
+      when(mockRepository.get("ref-1"))
+        .thenReturn(Future.successful(Some(validSaved)))
+
+      when(mockRepository.set(any()))
+        .thenReturn(Future.successful(true))
+
+      val result = service.saveAnswer(validDTO)
+
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) =>
+          msg.toLowerCase must include("nino")
+        case other =>
+          fail(s"Expected TransformationError due to malformed field, got: $other")
+      }
+    }
+
   }
 }
