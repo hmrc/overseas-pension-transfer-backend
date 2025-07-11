@@ -17,41 +17,99 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.Logging
+import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.toSavedUserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-//I am making this return an option for ease of use, but we should consider making this return either SavedUserAnswers or an Error
+sealed trait SaveForLaterError
+
+object SaveForLaterError {
+  final case class TransformationError(msg: String) extends SaveForLaterError
+  final case object NotFound                        extends SaveForLaterError
+  final case object SaveFailed                      extends SaveForLaterError
+}
 
 trait SaveForLaterService {
-  def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Option[SavedUserAnswers]]
-  def saveAnswers(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Option[SavedUserAnswers]]
+  def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
+  def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]]
 }
 
 @Singleton
 class SaveForLaterServiceImpl @Inject() (
-    repository: SaveForLaterRepository
+    repository: SaveForLaterRepository,
+    userAnswersTransformer: UserAnswersTransformer
   )(implicit ec: ExecutionContext
-  ) extends SaveForLaterService
-    with Logging {
+  ) extends SaveForLaterService with Logging {
 
-  override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Option[SavedUserAnswers]] = {
-    repository.get(id)
+  override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
+    repository.get(id).map {
+      case Some(saved) =>
+        deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
+          case Right(deconstructed) =>
+            Right(UserAnswersDTO(saved.referenceId, deconstructed, saved.lastUpdated))
+
+          case Left(error) =>
+            Left(error)
+        }
+
+      case None =>
+        Left(SaveForLaterError.NotFound)
+    }
   }
 
-  override def saveAnswers(answersDTO: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Option[SavedUserAnswers]] = {
-    val savedUserAnswers = toSavedUserAnswers(answersDTO)
-    repository
-      .set(savedUserAnswers)
-      .map {
-        case true => Some(savedUserAnswers)
-        case _    => None
-      }
+  override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
+    constructSavedAnswers(dto.data) match {
+      case Left(err)               =>
+        Future.successful(Left(err))
+      case Right(transformedInput) =>
+        repository.get(dto.referenceId).flatMap { maybeExisting =>
+          val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
+          validate(mergedJson) match {
+            case Left(err) => Future.successful(Left(err))
+
+            case Right(validated) =>
+              val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
+              repository.set(saved).map {
+                case true  => Right(())
+                case false => Left(SaveForLaterError.SaveFailed)
+              }
+          }
+        }
+    }
+  }
+
+  private def constructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    userAnswersTransformer.construct(json).left.map(err =>
+      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
+    )
+  }
+
+  private def deconstructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
+    userAnswersTransformer.deconstruct(json).left.map(err =>
+      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
+    )
+  }
+
+  // Note that this only validates if any of the json keys are malformed, it does not validate for
+  // missing or unexpected json, I looked into doing that and the solution is overly complex and
+  // cumbersome
+  private def validate(json: JsObject): Either[SaveForLaterError, AnswersData] = {
+    json.validate[AnswersData] match {
+      case JsSuccess(data, _) => Right(data)
+      case JsError(err)       => Left(SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err))))
+    }
+  }
+
+  private def mergeWithExisting(existing: Option[SavedUserAnswers], update: JsObject): JsObject = {
+    existing match {
+      case Some(existingData) => Json.toJsObject(existingData.data).deepMerge(update)
+      case None               => update
+    }
   }
 }

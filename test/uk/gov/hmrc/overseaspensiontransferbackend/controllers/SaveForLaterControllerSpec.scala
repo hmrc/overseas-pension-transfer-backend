@@ -17,28 +17,27 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
-import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers._
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 
 import scala.concurrent.Future
 
-class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOneAppPerSuite {
+class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
   private val routePrefix = "/overseas-pension-transfer-backend"
 
   "SaveForLaterController" - {
 
-    "getAnswers should return 200 with user answers if they exist" in {
+    "must return 200 with user answers if they exist" in {
       val mockService = mock[SaveForLaterService]
 
       when(mockService.getAnswers(eqTo(testId))(any))
-        .thenReturn(Future.successful(Some(simpleSavedUserAnswers)))
+        .thenReturn(Future.successful(Right(simpleUserAnswersDTO)))
 
       val app: Application =
         applicationBuilder()
@@ -49,16 +48,16 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
         val request = FakeRequest(GET, s"$routePrefix/save-for-later/$testId")
         val result  = route(app, request).value
 
-        status(result) mustEqual OK
-        val json = contentAsJson(result)
-        (json \ "data").as[JsObject] mustBe Json.obj("field" -> "value")
+        status(result)        mustBe OK
+        contentAsJson(result) mustBe Json.toJson(simpleUserAnswersDTO)
       }
     }
 
-    "getAnswers should return 404 if no answers exist" in {
+    "must return 404 if not found" in {
       val mockService = mock[SaveForLaterService]
+
       when(mockService.getAnswers(eqTo(testId))(any))
-        .thenReturn(Future.successful(None))
+        .thenReturn(Future.successful(Left(SaveForLaterError.NotFound)))
 
       val app: Application =
         applicationBuilder()
@@ -73,12 +72,11 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
       }
     }
 
-    "saveAnswers should return 201 Created if save successful" in {
+    "must return 204 NoContent if save is successful" in {
       val mockService = mock[SaveForLaterService]
-      val expected    = simpleSavedUserAnswers
 
-      when(mockService.saveAnswers(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
-        .thenReturn(Future.successful(Some(expected)))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+        .thenReturn(Future.successful(Right(simpleUserAnswersDTO)))
 
       val app: Application =
         applicationBuilder()
@@ -91,17 +89,38 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase with GuiceOne
 
         val result = route(app, request).value
 
-        status(result) mustBe CREATED
-        val json = contentAsJson(result)
-        (json \ "data").as[JsObject] mustBe Json.obj("field" -> "value")
+        status(result)          mustBe NO_CONTENT
+        contentAsString(result) mustBe empty
       }
     }
 
-    "saveAnswers should return 500 InternalServerError if save fails" in {
+    "must return 400 BadRequest on transformation error" in {
       val mockService = mock[SaveForLaterService]
 
-      when(mockService.saveAnswers(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
-        .thenReturn(Future.successful(None))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+        .thenReturn(Future.successful(Left(SaveForLaterError.TransformationError("something went wrong"))))
+
+      val app: Application =
+        applicationBuilder()
+          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .build()
+
+      running(app) {
+        val request = FakeRequest(POST, s"$routePrefix/save-for-later/$testId")
+          .withJsonBody(Json.toJson(simpleUserAnswersDTO))
+
+        val result = route(app, request).value
+
+        status(result)                             mustBe BAD_REQUEST
+        (contentAsJson(result) \ "error").as[String] must include("Transformation failed")
+      }
+    }
+
+    "must return 500 InternalServerError on save failure" in {
+      val mockService = mock[SaveForLaterService]
+
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+        .thenReturn(Future.successful(Left(SaveForLaterError.SaveFailed)))
 
       val app: Application =
         applicationBuilder()

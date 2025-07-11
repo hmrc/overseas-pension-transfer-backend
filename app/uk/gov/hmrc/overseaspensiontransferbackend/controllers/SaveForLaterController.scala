@@ -20,8 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO.fromSavedUserAnswers
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
@@ -34,24 +33,41 @@ class SaveForLaterController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def getAnswers(referenceID: String): Action[AnyContent] = Action.async { implicit request =>
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromRequest(request)
+  def getAnswers(referenceId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-    saveForLaterService.getAnswers(referenceID).map {
-      case Some(a) => Ok(Json.toJson(a))
-      case None    => NotFound
+    saveForLaterService.getAnswers(referenceId).map {
+      case Right(saved)                                         =>
+        Ok(Json.toJson(saved))
+      case Left(SaveForLaterError.TransformationError(message)) =>
+        InternalServerError(Json.obj("error" -> "Failed to transform saved data", "details" -> message))
+
+      case Left(SaveForLaterError.NotFound) =>
+        NotFound(Json.obj("error" -> "No saved answers found"))
+
+      case Left(other) =>
+        InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
     }
   }
 
   def saveAnswers(referenceId: String): Action[UserAnswersDTO] =
     Action.async(parse.json[UserAnswersDTO]) { request =>
-      implicit val hc: HeaderCarrier =
-        HeaderCarrierConverter.fromRequest(request)
-      val userAnswersDTO             = request.body.copy(referenceId = referenceId)
-      saveForLaterService.saveAnswers(userAnswersDTO).map {
-        case Some(savedAnswers) => Created(Json.toJson(fromSavedUserAnswers(savedAnswers)))
-        case None               => InternalServerError
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+
+      val userAnswersDTO = request.body.copy(referenceId = referenceId)
+
+      saveForLaterService.saveAnswer(userAnswersDTO).map {
+        case Right(_)                                         =>
+          NoContent
+        case Left(SaveForLaterError.TransformationError(msg)) =>
+          BadRequest(Json.obj(
+            "error"   -> "Transformation failed",
+            "details" -> msg
+          ))
+        case Left(SaveForLaterError.SaveFailed)               =>
+          InternalServerError(Json.obj("error" -> "Failed to save answers"))
+        case Left(other)                                      =>
+          InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
 }

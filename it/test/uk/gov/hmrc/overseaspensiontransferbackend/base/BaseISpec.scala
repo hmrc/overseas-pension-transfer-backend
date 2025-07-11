@@ -17,19 +17,24 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
 import org.scalatest._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 
+import java.time.Instant
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 
 trait BaseISpec
-    extends AnyWordSpecLike
+    extends AnyFreeSpec
     with Matchers
     with OptionValues
     with BeforeAndAfterAll
@@ -42,7 +47,7 @@ trait BaseISpec
     "microservice.services.overseas-pension-transfer-stubs.host" -> WireMockHelper.wireMockHost,
     "microservice.services.overseas-pension-transfer-stubs.port" -> WireMockHelper.wireMockPort.toString,
     "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
-    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
+    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString,
   )
 
   implicit override lazy val app: Application =
@@ -70,7 +75,38 @@ trait BaseISpec
     super.beforeEach()
   }
 
-  override def afterEach(): Unit  = {
+  override def afterEach(): Unit = {
     super.afterEach()
+  }
+
+  def freshId(): String = UUID.randomUUID().toString
+  def frozenNow(): Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
+
+  def dtoFrom(id: String, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, js, now)
+
+  def savedFrom(id: String, js: JsObject, now: Instant): SavedUserAnswers =
+    SavedUserAnswers(id, js.as[AnswersData], now)
+
+  def parseJson(str: String): JsObject = Json.parse(str).as[JsObject]
+
+  def withSavedDto(id: String, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, js, now)
+
+  def assertMemberDetails(js: JsLookupResult, expected: Map[String, String]): Unit = {
+    expected.foreach { case (key, value) =>
+      (js \ key).as[String] mustBe value
+    }
+  }
+
+  def assertAddress(js: JsLookupResult, expected: Map[String, String]): Unit = {
+    expected.foreach { case (key, value) =>
+      (js \ key).as[String] mustBe value
+    }
+  }
+
+  def assertCountry(js: JsLookupResult, expectedCode: String, expectedName: String): Unit = {
+    (js \ "code").as[String] mustBe expectedCode
+    (js \ "name").as[String] mustBe expectedName
   }
 }

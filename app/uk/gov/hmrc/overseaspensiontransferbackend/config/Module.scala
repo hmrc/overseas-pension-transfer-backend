@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -28,4 +29,9 @@ class Module extends AbstractModule {
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }
+
+  @Provides
+  @Singleton
+  def provideUserAnswersTransformer(): UserAnswersTransformer =
+    UserAnswersTransformerFactory().build()
 }

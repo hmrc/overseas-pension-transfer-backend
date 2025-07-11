@@ -17,94 +17,128 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import org.scalatest.freespec.AnyFreeSpec
-import play.api.Application
-import play.api.inject.bind
-import play.api.test.Helpers.running
+import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
 import scala.concurrent.Future
 
 class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
-  "SaveForLaterService" - {
+  private val mockRepository  = mock[SaveForLaterRepository]
+  private val mockTransformer = mock[UserAnswersTransformer]
+  private val service         = new SaveForLaterServiceImpl(mockRepository, mockTransformer)
 
-    "getAnswers" - {
+  private val validData: JsObject = Json.obj(
+    "memberDetails" -> Json.obj(
+      "memberName" -> Json.obj(
+        "firstName" -> "Foo",
+        "lastName"  -> "Bar"
+      )
+    )
+  )
 
-      "must return Some(...) if repository returns a SavedUserAnswers" in {
-        val mockRepository = mock[SaveForLaterRepository]
+  private val validSaved = SavedUserAnswers(
+    referenceId = testId,
+    data        = AnswersData(Some(TransferringMember(None)), None, None, None),
+    lastUpdated = now
+  )
 
-        when(mockRepository.get(eqTo(testId))).thenReturn(Future.successful(Some(simpleSavedUserAnswers)))
+  private val validDTO = UserAnswersDTO(testId, validData, now)
 
-        val app: Application =
-          applicationBuilder()
-            .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-            .build()
+  "SaveForLaterServiceSpec" - {
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.getAnswers(testId).futureValue
+    "must return Right(UserAnswersDTO) when data exists and deconstruct succeeds" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockTransformer.deconstruct(*)).thenReturn(Right(validData))
 
-          result mustBe Some(simpleSavedUserAnswers)
-          verify(mockRepository).get(eqTo(testId))
-        }
-      }
+      val result = service.getAnswers(testId)
 
-      "must return None if repository returns None" in {
-        val mockRepository = mock[SaveForLaterRepository]
+      result.futureValue mustBe Right(validDTO)
+    }
 
-        when(mockRepository.get(eqTo(testId))).thenReturn(Future.successful(None))
+    "must return Left(NotFound) when no data exists" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
 
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
+      val result = service.getAnswers(testId)
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.getAnswers(testId).futureValue
+      result.futureValue mustBe Left(SaveForLaterError.NotFound)
+    }
 
-          result mustBe None
-          verify(mockRepository).get(eqTo(testId))
-        }
+    "must return Left(TransformationError) when deconstruct fails" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockTransformer.deconstruct(*)).thenReturn(Left(JsError("deconstruct failed")))
+
+      val result = service.getAnswers(testId)
+
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) => msg must include("deconstruct failed")
+        case other                                            => fail(s"Unexpected result: $other")
       }
     }
 
-    "saveAnswers" - {
+    "must save new answers if valid" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
+      when(mockTransformer.construct(*)).thenReturn(Right(validData))
+      when(mockRepository.set(*)).thenReturn(Future.successful(true))
 
-      "must return Some(...) if set returns true" in {
-        val mockRepository = mock[SaveForLaterRepository]
+      val result = service.saveAnswer(validDTO)
 
-        when(mockRepository.set(eqTo(simpleSavedUserAnswers))).thenReturn(Future.successful(true))
+      result.futureValue mustBe Right(())
+    }
 
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
+    "must return Left(SaveFailed) if repo.set returns false" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
+      when(mockTransformer.construct(*)).thenReturn(Right(validData))
+      when(mockRepository.set(*)).thenReturn(Future.successful(false))
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswers(simpleUserAnswersDTO).futureValue
+      val result = service.saveAnswer(validDTO)
 
-          result mustBe Some(simpleSavedUserAnswers.copy(lastUpdated = result.value.lastUpdated))
-          verify(mockRepository).set(eqTo(simpleSavedUserAnswers))
-        }
+      result.futureValue mustBe Left(SaveForLaterError.SaveFailed)
+    }
+
+    "must merge with existing data before save" in {
+      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockTransformer.construct(*)).thenReturn(Right(validData))
+      when(mockRepository.set(*)).thenReturn(Future.successful(true))
+
+      val result = service.saveAnswer(validDTO)
+
+      result.futureValue mustBe Right(())
+    }
+
+    "must return Left(TransformationError) when construct fails" in {
+      when(mockTransformer.construct(*)).thenReturn(Left(JsError("construct failed")))
+
+      val result = service.saveAnswer(validDTO)
+
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) => msg must include("construct failed")
+        case other                                            => fail(s"Unexpected result: $other")
       }
+    }
 
-      "must return None if set returns false" in {
-        val mockRepository = mock[SaveForLaterRepository]
+    "must return Left(TransformationError) when a known field is malformed" in {
+      val malformedJson = Json.obj(
+        "transferringMember" -> Json.obj(
+          "memberDetails" -> Json.obj(
+            "nino" -> 12345
+          )
+        )
+      )
 
-        when(mockRepository.set(eqTo(simpleSavedUserAnswers))).thenReturn(Future.successful(false))
+      when(mockTransformer.construct(*)).thenReturn(Right(malformedJson))
+      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockRepository.set(*)).thenReturn(Future.successful(true))
 
-        val app = applicationBuilder()
-          .overrides(bind[SaveForLaterRepository].toInstance(mockRepository))
-          .build()
+      val result = service.saveAnswer(validDTO)
 
-        running(app) {
-          val service = app.injector.instanceOf[SaveForLaterService]
-          val result  = service.saveAnswers(simpleUserAnswersDTO).futureValue
-
-          result mustBe None
-          verify(mockRepository).set(eqTo(simpleSavedUserAnswers))
-        }
+      result.futureValue match {
+        case Left(SaveForLaterError.TransformationError(msg)) => msg.toLowerCase must include("nino")
+        case other                                            => fail(s"Expected TransformationError due to malformed field, got: $other")
       }
     }
   }

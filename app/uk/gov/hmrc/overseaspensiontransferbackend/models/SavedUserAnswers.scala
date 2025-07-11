@@ -16,25 +16,48 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import play.api.libs.functional.syntax._
 
 import java.time.Instant
 
 final case class SavedUserAnswers(
     referenceId: String,
-    // This should be replaced by a mapping of the user answers data
-    data: JsObject       = Json.obj(),
-    lastUpdated: Instant = Instant.now
+    data: AnswersData,
+    lastUpdated: Instant
   )
+
+final case class AnswersData(
+    transferringMember: Option[TransferringMember],
+    qropsDetails: Option[QropsDetails],
+    schemeManagerDetails: Option[SchemeManagerDetails],
+    transferDetails: Option[TransferDetails]
+  )
+
+object AnswersData {
+
+  // This may seam unnecessary but allows for type validation in the save for later service.
+  // A custom reads with readNullable will need to be written for every key we save to mongo.
+  // This is due to the way that play handles nullable values.
+  implicit val reads: Reads[AnswersData] = (
+    (__ \ "transferringMember").readNullable[TransferringMember] and
+      (__ \ "qropsDetails").readNullable[QropsDetails] and
+      (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
+      (__ \ "transferDetails").readNullable[TransferDetails]
+  )(AnswersData.apply _)
+
+  implicit val writes: OWrites[AnswersData] = Json.writes[AnswersData]
+
+  implicit val format: OFormat[AnswersData] = OFormat(reads, writes)
+}
 
 object SavedUserAnswers {
 
   val reads: Reads[SavedUserAnswers] = {
     (
       (__ \ "referenceId").read[String] and
-        (__ \ "data").read[JsObject] and
+        (__ \ "data").read[AnswersData] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(SavedUserAnswers.apply _)
   }
@@ -44,7 +67,7 @@ object SavedUserAnswers {
       (__ \ "referenceId").write[String] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    )(ua => (ua.referenceId, ua.data, ua.lastUpdated))
+    )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 
   implicit val format: OFormat[SavedUserAnswers] = OFormat(reads, writes)
