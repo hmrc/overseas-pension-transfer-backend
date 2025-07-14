@@ -17,18 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNinoTransformer extends Transformer with JsonHelpers {
+class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
 
-  private val jsonKey = "nino"
+  val jsonKey              = "nino"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        from = externalPath,
+        to   = internalPath,
         _: JsObject
       )
     )
@@ -38,8 +40,8 @@ class MemberNinoTransformer extends Transformer with JsonHelpers {
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "memberDetails" \ jsonKey,
+        from = internalPath,
+        to   = externalPath,
         _: JsObject
       )
     )

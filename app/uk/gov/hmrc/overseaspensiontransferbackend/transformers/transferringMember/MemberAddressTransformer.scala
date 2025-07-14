@@ -18,23 +18,25 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberAddressTransformer extends Transformer with AddressTransformerStep with JsonHelpers {
+class MemberAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
 
-  private val jsonKey = "principalResAddDetails"
+  val jsonKey              = "principalResAddDetails"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from      = JsPath \ "memberDetails" \ jsonKey,
-        to        = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        from      = externalPath,
+        to        = internalPath,
         _: JsObject
       ),
-      transformPoBoxAt(__ \ "transferringMember" \ "memberDetails" \ jsonKey),
+      transformPoBoxAt(internalPath),
       constructAddressAt(
-        path      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        path      = internalPath,
         nestedKey = "addressDetails"
       )
     )
@@ -44,14 +46,14 @@ class MemberAddressTransformer extends Transformer with AddressTransformerStep w
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      transformPoBoxAt(JsPath \ "transferringMember" \ "memberDetails" \ jsonKey),
+      transformPoBoxAt(internalPath),
       deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
+        internalPath,
         nestedKey = "addressDetails"
       ),
       movePath(
-        from      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        to        = JsPath \ "memberDetails" \ jsonKey,
+        from      = internalPath,
+        to        = externalPath,
         _: JsObject
       )
     )

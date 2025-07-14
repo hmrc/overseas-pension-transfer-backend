@@ -17,18 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class QropsNameTransformer extends Transformer with JsonHelpers {
+class QropsNameTransformer extends PathAwareTransformer with JsonHelpers {
 
-  private val jsonKey = "qropsFullName"
+  val jsonKey              = "qropsFullName"
+  override val externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "qropsDetails" \ jsonKey,
-        to   = JsPath \ "aboutReceivingQROPS" \ jsonKey,
+        from = externalPath,
+        to   = internalPath,
         _: JsObject
       )
     )
@@ -38,8 +40,8 @@ class QropsNameTransformer extends Transformer with JsonHelpers {
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "aboutReceivingQROPS" \ jsonKey,
-        to   = JsPath \ "qropsDetails" \ jsonKey,
+        from = internalPath,
+        to   = externalPath,
         _: JsObject
       )
     )

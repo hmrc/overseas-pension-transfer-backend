@@ -17,18 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberDateLeftUKTransformer extends Transformer with JsonHelpers {
+class MemberDateLeftUKTransformer extends PathAwareTransformer with JsonHelpers {
 
-  private val jsonKey = "dateMemberLeftUk"
+  val jsonKey              = "dateMemberLeftUk"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails" \ jsonKey,
+        from = externalPath,
+        to   = internalPath,
         _: JsObject
       )
     )
@@ -38,12 +40,11 @@ class MemberDateLeftUKTransformer extends Transformer with JsonHelpers {
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails" \ jsonKey,
-        to   = JsPath \ "memberDetails" \ jsonKey,
+        from = internalPath,
+        to   = externalPath,
         _: JsObject
       )
     )
-
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 }
