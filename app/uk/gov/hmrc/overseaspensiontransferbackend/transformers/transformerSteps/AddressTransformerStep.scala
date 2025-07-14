@@ -42,9 +42,11 @@ trait AddressTransformerStep extends JsonHelpers {
       case Some(container) =>
         val nestedObj = (container \ nestedKey).asOpt[JsObject].getOrElse(Json.obj())
         val flattened = JsObject(extractAddressFields(nestedObj))
-        val preserved = container - nestedKey
-        val merged    = flattened ++ preserved
-        setPath(path, merged, json)
+
+        val preserved = container.fields.filterNot(_._1 == nestedKey)
+        val rebuilt   = JsObject(preserved :+ (nestedKey -> flattened))
+
+        setPath(path, rebuilt, json)
 
       case None => Right(json)
     }

@@ -23,9 +23,9 @@ case class UserAnswersTransformerFactory() {
 
   private def memberDetailsTransformers: Seq[Transformer] = Seq(
     new MemberNameTransformer(),
+    new MemberDOBTransformer(),
     new MemberNinoTransformer(),
     new MemberNoNinoTransformer(),
-    new MemberDOBTransformer(),
     new MemberAddressTransformer(),
     new MemberIsUKResidentTransformer(),
     new MemberEverUKResidentTransformer(),

@@ -26,16 +26,17 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
   val jsonKey                       = "lastPrincipalAddDetails"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+  private val nestedKey             = "addressDetails"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from      = externalPath,
-        to        = internalPath
+        from = externalPath,
+        to   = internalPath
       ),
       constructAddressAt(
         internalPath,
-        nestedKey = "addressDetails"
+        nestedKey
       )
     )
 
@@ -46,11 +47,11 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
         internalPath,
-        nestedKey = "addressDetails"
+        nestedKey
       ),
       movePath(
-        from      = internalPath,
-        to        = externalPath
+        from = internalPath \ nestedKey,
+        to   = externalPath
       )
     )
 

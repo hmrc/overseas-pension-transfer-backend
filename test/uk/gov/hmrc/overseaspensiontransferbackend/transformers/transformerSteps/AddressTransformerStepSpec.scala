@@ -60,19 +60,19 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
             "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
-          ),
-          "poBoxNumber"    -> "PO123"
+          )
         )
       )
 
       val expected = Json.obj(
         "principalResAddDetails" -> Json.obj(
-          "addressLine1" -> "123 Test St",
-          "addressLine2" -> "Testville",
-          "addressLine3" -> "Testshire",
-          "ukPostCode"   -> "TE5 7ST",
-          "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-          "poBoxNumber"  -> "PO123"
+          "addressDetails" -> Json.obj(
+            "addressLine1" -> "123 Test St",
+            "addressLine2" -> "Testville",
+            "addressLine3" -> "Testshire",
+            "ukPostCode"   -> "TE5 7ST",
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+          )
         )
       )
 
