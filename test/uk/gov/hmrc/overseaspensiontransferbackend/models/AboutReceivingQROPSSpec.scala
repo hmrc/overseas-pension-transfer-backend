@@ -20,23 +20,23 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 
-class QropsDetailsSpec extends AnyFreeSpec with Matchers {
+class AboutReceivingQROPSSpec extends AnyFreeSpec with Matchers {
 
-  "QropsDetails" - {
+  "AboutReceivingQROPS" - {
 
     "must serialize and deserialize correctly with value" in {
-      val model  = QropsDetails(Some("Example QROPS"))
+      val model  = AboutReceivingQROPS(Some("Example QROPS"))
       val json   = Json.toJson(model)
-      val result = json.validate[QropsDetails]
+      val result = json.validate[AboutReceivingQROPS]
 
       result.get mustBe model
     }
 
     "must deserialize with missing field as None" in {
       val json   = Json.obj()
-      val result = json.validate[QropsDetails]
+      val result = json.validate[AboutReceivingQROPS]
 
-      result mustBe JsSuccess(QropsDetails(None))
+      result mustBe JsSuccess(AboutReceivingQROPS(None))
     }
   }
 }

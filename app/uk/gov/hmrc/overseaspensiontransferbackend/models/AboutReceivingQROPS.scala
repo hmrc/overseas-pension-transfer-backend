@@ -18,18 +18,18 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json._
 
-case class QropsDetails(
-    qropsName: Option[String]
+case class AboutReceivingQROPS(
+    qropsFullName: Option[String]
   )
 
-object QropsDetails {
+object AboutReceivingQROPS {
 
-  implicit val reads: Reads[QropsDetails] =
-    (__ \ "qropsName").readNullable[String].map(QropsDetails.apply)
+  implicit val reads: Reads[AboutReceivingQROPS] =
+    (__ \ "qropsFullName").readNullable[String].map(AboutReceivingQROPS.apply)
 
-  implicit val writes: OWrites[QropsDetails] =
-    Json.writes[QropsDetails]
+  implicit val writes: OWrites[AboutReceivingQROPS] =
+    Json.writes[AboutReceivingQROPS]
 
-  implicit val format: OFormat[QropsDetails] =
+  implicit val format: OFormat[AboutReceivingQROPS] =
     OFormat(reads, writes)
 }

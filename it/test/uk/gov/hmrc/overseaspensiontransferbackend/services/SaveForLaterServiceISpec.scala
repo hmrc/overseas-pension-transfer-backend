@@ -60,6 +60,9 @@ class SaveForLaterServiceISpec extends BaseISpec {
               "ukPostCode": "ZZ1 1ZZ"
             },
             "dateMemberLeftUk": "2011-06-06"
+          },
+          "qropsDetails": {
+            "qropsFullName": "Blah"
           }
         }
         """
@@ -75,7 +78,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       val memberDetails = Json.toJsObject(result.data) \ "transferringMember" \ "memberDetails"
 
-      assertMemberDetails(memberDetails, Map(
+      assertJson(memberDetails, Map(
         "foreName"    -> "Test",
         "lastName"    -> "McTest",
         "nino"        -> "AB123456B",
@@ -94,7 +97,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
       (principal \ "poBoxNumber").as[String] mustBe "baa"
 
       val residency = memberDetails \ "memberResidencyDetails"
-      assertMemberDetails(residency, Map(
+      assertJson(residency, Map(
         "memUkResident"     -> "No",
         "memEverUkResident" -> "Yes"
       ))
@@ -107,6 +110,13 @@ class SaveForLaterServiceISpec extends BaseISpec {
         "ukPostCode"   -> "ZZ1 1ZZ"
       ))
       (lastUK \ "dateMemberLeftUk").as[String] mustBe "2011-06-06"
+
+      val qropsDetails = Json.toJsObject(result.data) \ "aboutReceivingQROPS"
+      assertJson(
+        qropsDetails, Map(
+          "qropsFullName" -> "Blah"
+        )
+      )
     }
 
     "retrieve and transform data" in {
@@ -148,6 +158,9 @@ class SaveForLaterServiceISpec extends BaseISpec {
                 }
               }
             }
+          },
+          "aboutReceivingQROPS": {
+            "qropsFullName": "Blah"
           }
         }
         """).as[AnswersData], now)
@@ -158,19 +171,19 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       result match {
         case Right(dto) =>
-          val details = dto.data \ "memberDetails"
+          val memberDetails = dto.data \ "memberDetails"
 
-          assertMemberDetails(details \ "name", Map(
+          assertJson(memberDetails \ "name", Map(
             "firstName" -> "GetOnly",
             "lastName"  -> "McLoad"
           ))
 
-          assertMemberDetails(details, Map(
+          assertJson(memberDetails, Map(
             "nino"        -> "GG123456G",
             "dateOfBirth" -> "2012-12-12"
           ))
 
-          val principal = details \ "principalResAddDetails"
+          val principal = memberDetails \ "principalResAddDetails"
           assertAddress(principal, Map(
             "addressLine1" -> "1 Get St",
             "addressLine2" -> "Loadtown",
@@ -182,10 +195,10 @@ class SaveForLaterServiceISpec extends BaseISpec {
           assertCountry(principal \ "country", "IE", "Ireland")
           (principal \ "poBoxNumber").as[String] mustBe "PO456"
 
-          (details \ "memUkResident").as[Boolean]     mustBe false
-          (details \ "memEverUkResident").as[Boolean] mustBe true
+          (memberDetails \ "memUkResident").as[Boolean]     mustBe false
+          (memberDetails \ "memEverUkResident").as[Boolean] mustBe true
 
-          val lastUK = details \ "lastPrincipalAddDetails"
+          val lastUK = memberDetails \ "lastPrincipalAddDetails"
           assertAddress(lastUK, Map(
             "addressLine1" -> "Flat 8",
             "addressLine2" -> "Memory Lane",
@@ -195,6 +208,12 @@ class SaveForLaterServiceISpec extends BaseISpec {
           ))
           assertCountry(lastUK \ "country", "UK", "United Kingdom")
           (lastUK \ "dateMemberLeftUk").as[String] mustBe "2013-05-01"
+
+          val qropsDetails = dto.data \ "qropsDetails"
+
+          assertJson(qropsDetails, Map(
+            "qropsFullName" -> "Blah"
+          ))
 
         case Left(err) =>
           fail(s"Expected successful result but got error: $err")
@@ -247,19 +266,19 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       result match {
         case Right(dto) =>
-          val details = dto.data \ "memberDetails"
+          val memberDetails = dto.data \ "memberDetails"
 
-          assertMemberDetails(details \ "name", Map(
+          assertJson(memberDetails \ "name", Map(
             "firstName" -> "Updated",
             "lastName"  -> "User"
           ))
 
-          assertMemberDetails(details, Map(
+          assertJson(memberDetails, Map(
             "nino"        -> "AA111111A",
             "dateOfBirth" -> "1990-01-01"
           ))
 
-          val address = details \ "principalResAddDetails"
+          val address = memberDetails \ "principalResAddDetails"
           assertAddress(address, Map(
             "addressLine1" -> "10 Main Street",
             "addressLine2" -> "Townsville",
@@ -268,10 +287,10 @@ class SaveForLaterServiceISpec extends BaseISpec {
           assertCountry(address \ "country", "UK", "United Kingdom")
           (address \ "poBoxNumber").as[String] mustBe "PO123"
 
-          (details \ "memUkResident").as[Boolean]     mustBe true
-          (details \ "memEverUkResident").as[Boolean] mustBe false
+          (memberDetails \ "memUkResident").as[Boolean]     mustBe true
+          (memberDetails \ "memEverUkResident").as[Boolean] mustBe false
 
-          val lastUK = details \ "lastPrincipalAddDetails"
+          val lastUK = memberDetails \ "lastPrincipalAddDetails"
           assertAddress(lastUK, Map(
             "addressLine1" -> "Old Address",
             "addressLine2" -> "Old Town",

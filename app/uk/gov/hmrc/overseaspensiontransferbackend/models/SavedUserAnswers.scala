@@ -30,7 +30,7 @@ final case class SavedUserAnswers(
 
 final case class AnswersData(
     transferringMember: Option[TransferringMember],
-    qropsDetails: Option[QropsDetails],
+    aboutReceivingQROPS: Option[AboutReceivingQROPS],
     schemeManagerDetails: Option[SchemeManagerDetails],
     transferDetails: Option[TransferDetails]
   )
@@ -42,7 +42,7 @@ object AnswersData {
   // This is due to the way that play handles nullable values.
   implicit val reads: Reads[AnswersData] = (
     (__ \ "transferringMember").readNullable[TransferringMember] and
-      (__ \ "qropsDetails").readNullable[QropsDetails] and
+      (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
       (__ \ "transferDetails").readNullable[TransferDetails]
   )(AnswersData.apply _)

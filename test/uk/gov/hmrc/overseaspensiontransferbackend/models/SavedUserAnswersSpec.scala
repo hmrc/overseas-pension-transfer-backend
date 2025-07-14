@@ -31,7 +31,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         referenceId = "ref-123",
         data        = AnswersData(
           transferringMember   = Some(TransferringMember(None)),
-          qropsDetails         = None,
+          aboutReceivingQROPS  = None,
           schemeManagerDetails = None,
           transferDetails      = None
         ),
@@ -47,7 +47,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
     "must flatten AnswersData to JsObject in writes" in {
       val data = AnswersData(
         transferringMember   = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
-        qropsDetails         = None,
+        aboutReceivingQROPS  = None,
         schemeManagerDetails = None,
         transferDetails      = None
       )

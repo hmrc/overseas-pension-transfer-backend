@@ -49,7 +49,7 @@ trait SpecBase
 
   val sampleAnswersData: AnswersData = AnswersData(
     transferringMember   = None,
-    qropsDetails         = None,
+    aboutReceivingQROPS  = None,
     schemeManagerDetails = None,
     transferDetails      = None
   )
