@@ -23,7 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberIsUKResidentTransformer extends PathAwareTransformer with JsonHelpers with BooleanTransformerStep {
 
-  val jsonKey              = "memUkResident"
+  val jsonKey                       = "memUkResident"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
 
@@ -31,8 +31,7 @@ class MemberIsUKResidentTransformer extends PathAwareTransformer with JsonHelper
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = externalPath,
-        to   = internalPath,
-        _: JsObject
+        to   = internalPath
       ),
       constructBool(
         internalPath
@@ -48,8 +47,7 @@ class MemberIsUKResidentTransformer extends PathAwareTransformer with JsonHelper
       ),
       movePath(
         from = internalPath,
-        to   = externalPath,
-        _: JsObject
+        to   = externalPath
       )
     )
 

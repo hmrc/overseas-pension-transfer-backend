@@ -22,7 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey              = "nino"
+  val jsonKey                       = "nino"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
 
@@ -30,8 +30,7 @@ class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = externalPath,
-        to   = internalPath,
-        _: JsObject
+        to   = internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
@@ -41,8 +40,7 @@ class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = internalPath,
-        to   = externalPath,
-        _: JsObject
+        to   = externalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)

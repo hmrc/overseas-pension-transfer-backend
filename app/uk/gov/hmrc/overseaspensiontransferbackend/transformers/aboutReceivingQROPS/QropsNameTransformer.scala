@@ -22,7 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class QropsNameTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey              = "qropsFullName"
+  val jsonKey                       = "qropsFullName"
   override val externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ jsonKey
 
@@ -30,8 +30,7 @@ class QropsNameTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = externalPath,
-        to   = internalPath,
-        _: JsObject
+        to   = internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
@@ -41,8 +40,7 @@ class QropsNameTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = internalPath,
-        to   = externalPath,
-        _: JsObject
+        to   = externalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)

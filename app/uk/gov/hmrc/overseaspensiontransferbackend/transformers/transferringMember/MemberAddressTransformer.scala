@@ -23,7 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
 
-  val jsonKey              = "principalResAddDetails"
+  val jsonKey                       = "principalResAddDetails"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
 
@@ -31,8 +31,7 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from      = externalPath,
-        to        = internalPath,
-        _: JsObject
+        to        = internalPath
       ),
       transformPoBoxAt(internalPath),
       constructAddressAt(
@@ -53,8 +52,7 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
       ),
       movePath(
         from      = internalPath,
-        to        = externalPath,
-        _: JsObject
+        to        = externalPath
       )
     )
 

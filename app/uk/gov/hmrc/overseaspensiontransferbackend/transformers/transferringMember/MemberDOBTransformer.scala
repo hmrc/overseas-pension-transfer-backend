@@ -22,7 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey              = "dateOfBirth"
+  val jsonKey                       = "dateOfBirth"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
   override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
 
@@ -30,8 +30,7 @@ class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = externalPath,
-        to   = internalPath,
-        _: JsObject
+        to   = internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
@@ -41,11 +40,9 @@ class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = internalPath,
-        to   = externalPath,
-        _: JsObject
+        to   = externalPath
       )
     )
-
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 }
