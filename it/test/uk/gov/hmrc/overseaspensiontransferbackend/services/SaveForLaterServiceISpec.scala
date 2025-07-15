@@ -43,7 +43,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result.referenceId mustBe id
       result.lastUpdated mustBe now
 
-      Json.toJson(dto.data) mustBe Json.toJson(UserAnswersTestData.fullUserAnswersExternalJson)
+      result mustBe SavedUserAnswers(id, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
 
     }
 
@@ -56,13 +56,33 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       result match {
         case Right(dto) =>
-          Json.toJson(dto.data) mustEqual Json.toJson(UserAnswersTestData.fullUserAnswersExternalJson)
+          dto.data mustBe UserAnswersTestData.fullUserAnswersExternalJson
         case Left(err) =>
           fail(s"Expected successful result but got error: $err")
       }
     }
 
-    "incrementally add data and maintain previously added data" in {
+    "save user answers into internal format and return as external format" in {
+      val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(service.getAnswers(id))
+
+      result match {
+        case Right(dto) =>
+
+          dto.referenceId mustBe id
+          dto.lastUpdated mustBe now
+          dto.data mustEqual UserAnswersTestData.fullUserAnswersExternalJson
+        case Left(err) =>
+          fail(s"Expected successful result but got error: $err")
+      }
+    }
+
+    "incrementally add new data while maintaining previously added data" in {
       await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))               mustBe Right(())
       await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.qropsDetailsExternalJson, now.plusSeconds(1)))) mustBe Right(())
 
@@ -70,8 +90,10 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       result match {
         case Right(dto) =>
-          val memberDetails = (dto.data \ "memberDetails").as[JsObject]
-          memberDetails.keys must contain allOf ("name", "nino", "dateOfBirth")
+          val memberDetailsExpected = (UserAnswersTestData.memberDetailsExternalJson \ "memberDetails").as[JsObject]
+          val memberDetailsActual = (dto.data \ "memberDetails").as[JsObject]
+
+          memberDetailsExpected mustBe memberDetailsActual
 
           val qropsDetails = dto.data \ "qropsDetails"
 
