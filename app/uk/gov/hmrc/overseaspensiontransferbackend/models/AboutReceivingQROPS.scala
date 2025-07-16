@@ -16,16 +16,20 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 
 case class AboutReceivingQROPS(
-    qropsFullName: Option[String]
+    qropsFullName: Option[String],
+    qropsRef: Option[String]
   )
 
 object AboutReceivingQROPS {
 
-  implicit val reads: Reads[AboutReceivingQROPS] =
-    (__ \ "qropsFullName").readNullable[String].map(AboutReceivingQROPS.apply)
+  implicit val reads: Reads[AboutReceivingQROPS] = (
+    (__ \ "qropsFullName").readNullable[String] and
+      (__ \ "qropsRef").readNullable[String]
+  )(AboutReceivingQROPS.apply _)
 
   implicit val writes: OWrites[AboutReceivingQROPS] =
     Json.writes[AboutReceivingQROPS]
