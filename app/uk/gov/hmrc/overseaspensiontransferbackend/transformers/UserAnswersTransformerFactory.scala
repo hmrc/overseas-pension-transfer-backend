@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.QropsNameTransformer
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.{QropsNameTransformer, QropsRefTransformer}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
 case class UserAnswersTransformerFactory() {
@@ -34,7 +34,8 @@ case class UserAnswersTransformerFactory() {
   )
 
   private def qropsDetailsTransformers: Seq[Transformer] = Seq(
-    new QropsNameTransformer()
+    new QropsNameTransformer(),
+    new QropsRefTransformer()
   )
 
   def build(): UserAnswersTransformer = {
