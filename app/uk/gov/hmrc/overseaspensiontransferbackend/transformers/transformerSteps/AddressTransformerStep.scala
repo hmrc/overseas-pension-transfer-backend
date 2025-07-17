@@ -21,6 +21,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait AddressTransformerStep extends JsonHelpers {
 
+  /* This constructs an address at a path inside a nestedKey so for example if you pass addressDetails as a nested key
+   * and memberDetails \ principalResAdd as a path, it will create the address at memberDetails \ principleResAdd \ addressDetails */
   def constructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
@@ -37,14 +39,18 @@ trait AddressTransformerStep extends JsonHelpers {
     }
   }
 
+  /* This deconstructs an address in place, so if it is constructed at memberDetails \ memberAddress (where memberAddress is the nested key)
+   * it will need to be deconstructed there and then moved from memberDetails \ memberAddress (including the nested key) */
   def deconstructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(container) =>
         val nestedObj = (container \ nestedKey).asOpt[JsObject].getOrElse(Json.obj())
         val flattened = JsObject(extractAddressFields(nestedObj))
-        val preserved = container - nestedKey
-        val merged    = flattened ++ preserved
-        setPath(path, merged, json)
+
+        val preserved = container.fields.filterNot(_._1 == nestedKey)
+        val rebuilt   = JsObject(preserved :+ (nestedKey -> flattened))
+
+        setPath(path, rebuilt, json)
 
       case None => Right(json)
     }

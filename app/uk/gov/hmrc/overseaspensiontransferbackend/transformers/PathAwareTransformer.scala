@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json._
+import play.api.libs.json.JsPath
 
-case class QropsDetails(
-    qropsName: Option[String]
-  )
-
-object QropsDetails {
-
-  implicit val reads: Reads[QropsDetails] =
-    (__ \ "qropsName").readNullable[String].map(QropsDetails.apply)
-
-  implicit val writes: OWrites[QropsDetails] =
-    Json.writes[QropsDetails]
-
-  implicit val format: OFormat[QropsDetails] =
-    OFormat(reads, writes)
+trait PathAwareTransformer extends Transformer {
+  def externalPath: JsPath
+  def internalPath: JsPath
 }

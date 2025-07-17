@@ -93,7 +93,7 @@ trait BaseISpec
   def withSavedDto(id: String, js: JsObject, now: Instant): UserAnswersDTO =
     UserAnswersDTO(id, js, now)
 
-  def assertMemberDetails(js: JsLookupResult, expected: Map[String, String]): Unit = {
+  def assertJson(js: JsLookupResult, expected: Map[String, String]): Unit = {
     expected.foreach { case (key, value) =>
       (js \ key).as[String] mustBe value
     }

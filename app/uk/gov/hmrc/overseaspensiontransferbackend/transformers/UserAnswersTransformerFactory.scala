@@ -16,15 +16,16 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.QropsNameTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
 case class UserAnswersTransformerFactory() {
 
   private def memberDetailsTransformers: Seq[Transformer] = Seq(
     new MemberNameTransformer(),
+    new MemberDOBTransformer(),
     new MemberNinoTransformer(),
     new MemberNoNinoTransformer(),
-    new MemberDOBTransformer(),
     new MemberAddressTransformer(),
     new MemberIsUKResidentTransformer(),
     new MemberEverUKResidentTransformer(),
@@ -32,10 +33,15 @@ case class UserAnswersTransformerFactory() {
     new MemberDateLeftUKTransformer()
   )
 
+  private def qropsDetailsTransformers: Seq[Transformer] = Seq(
+    new QropsNameTransformer()
+  )
+
   def build(): UserAnswersTransformer = {
     val allTransformers =
       Seq(
-        memberDetailsTransformers
+        memberDetailsTransformers,
+        qropsDetailsTransformers
       ).flatten
 
     new UserAnswersTransformer(allTransformers)

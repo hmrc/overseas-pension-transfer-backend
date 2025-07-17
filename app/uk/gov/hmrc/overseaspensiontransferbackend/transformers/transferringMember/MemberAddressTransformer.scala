@@ -18,24 +18,25 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberAddressTransformer extends Transformer with AddressTransformerStep with JsonHelpers {
+class MemberAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
 
-  private val jsonKey = "principalResAddDetails"
+  val jsonKey                       = "principalResAddDetails"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  private val nestedKey             = "addressDetails"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from      = JsPath \ "memberDetails" \ jsonKey,
-        to        = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        _: JsObject
+        from = externalPath,
+        to   = internalPath
       ),
-      transformPoBoxAt(__ \ "transferringMember" \ "memberDetails" \ jsonKey),
       constructAddressAt(
-        path      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        nestedKey = "addressDetails"
+        path = internalPath,
+        nestedKey
       )
     )
 
@@ -44,25 +45,20 @@ class MemberAddressTransformer extends Transformer with AddressTransformerStep w
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      transformPoBoxAt(JsPath \ "transferringMember" \ "memberDetails" \ jsonKey),
       deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        nestedKey = "addressDetails"
+        internalPath,
+        nestedKey
       ),
-      movePath(
-        from      = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey,
-        to        = JsPath \ "memberDetails" \ jsonKey,
-        _: JsObject
-      )
+      deconstructToExternal
     )
 
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
-  private def transformPoBoxAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
-    (path.asSingleJson(json) \ "poBoxNumber").asOpt[String] match {
-      case Some(pb) => setPath(path \ "poBoxNumber", JsString(pb), json)
-      case None     => Right(json)
-    }
+  private val deconstructToExternal: TransformerStep = { json =>
+    for {
+      withAddress <- movePath(internalPath \ nestedKey, externalPath)(json)
+      withPoBox   <- movePath(internalPath \ "poBoxNumber", externalPath \ "poBoxNumber")(withAddress)
+    } yield withPoBox
   }
 }

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsNameTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey                       = "nino"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  val jsonKey                       = "qropsFullName"
+  override val externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(

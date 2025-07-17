@@ -18,22 +18,23 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.BooleanTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberIsUKResidentTransformer extends Transformer with JsonHelpers with BooleanTransformerStep {
+class MemberIsUKResidentTransformer extends PathAwareTransformer with JsonHelpers with BooleanTransformerStep {
 
-  private val jsonKey = "memUkResident"
+  val jsonKey                       = "memUkResident"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = JsPath \ "memberDetails" \ jsonKey,
-        to   = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        _: JsObject
+        from = externalPath,
+        to   = internalPath
       ),
       constructBool(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+        internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
@@ -42,12 +43,11 @@ class MemberIsUKResidentTransformer extends Transformer with JsonHelpers with Bo
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructBool(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+        internalPath
       ),
       movePath(
-        from = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        to   = JsPath \ "memberDetails" \ jsonKey,
-        _: JsObject
+        from = internalPath,
+        to   = externalPath
       )
     )
 

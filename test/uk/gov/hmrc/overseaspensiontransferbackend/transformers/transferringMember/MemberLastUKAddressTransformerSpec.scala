@@ -26,39 +26,38 @@ class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
 
   "MemberLastUKAddressTransformer" - {
 
-    "must move and wrap memberDetails.lastPrincipalAddDetails into addressDetails and poBoxNumber under transferringMember.memberDetails.memberResidencyDetails" in {
-      val inputJson = Json.obj(
-        "memberDetails" -> Json.obj(
-          "lastPrincipalAddDetails" -> Json.obj(
-            "addressLine1" -> "321 Old St",
-            "addressLine2" -> "Oldtown",
-            "ukPostCode"   -> "OL9 4LD",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-            "poBoxNumber"  -> "OLD123"
+    "must move and wrap memberDetails.lastPrincipalAddDetails into addressDetails and poBoxNumber under" +
+      " transferringMember.memberDetails.memberResidencyDetails" in {
+        val inputJson = Json.obj(
+          "memberDetails" -> Json.obj(
+            "lastPrincipalAddDetails" -> Json.obj(
+              "addressLine1" -> "321 Old St",
+              "addressLine2" -> "Oldtown",
+              "ukPostCode"   -> "OL9 4LD",
+              "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            )
           )
         )
-      )
 
-      val expected = Json.obj(
-        "transferringMember" -> Json.obj(
-          "memberDetails" -> Json.obj(
-            "memberResidencyDetails" -> Json.obj(
-              "lastPrincipalAddDetails" -> Json.obj(
-                "addressDetails" -> Json.obj(
-                  "addressLine1" -> "321 Old St",
-                  "addressLine2" -> "Oldtown",
-                  "ukPostCode"   -> "OL9 4LD",
-                  "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
-                ),
-                "poBoxNumber"    -> "OLD123"
+        val expected = Json.obj(
+          "transferringMember" -> Json.obj(
+            "memberDetails" -> Json.obj(
+              "memberResidencyDetails" -> Json.obj(
+                "lastPrincipalAddDetails" -> Json.obj(
+                  "addressDetails" -> Json.obj(
+                    "addressLine1" -> "321 Old St",
+                    "addressLine2" -> "Oldtown",
+                    "ukPostCode"   -> "OL9 4LD",
+                    "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+                  )
+                )
               )
             )
           )
         )
-      )
 
-      transformer.construct(inputJson) mustBe Right(expected)
-    }
+        transformer.construct(inputJson) mustBe Right(expected)
+      }
 
     "must unwrap transferringMember.memberDetails.memberResidencyDetails.lastPrincipalAddDetails back to memberDetails.lastPrincipalAddDetails" in {
       val inputJson = Json.obj(
@@ -71,8 +70,7 @@ class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
                   "addressLine2" -> "Oldtown",
                   "ukPostCode"   -> "OL9 4LD",
                   "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
-                ),
-                "poBoxNumber"    -> "OLD123"
+                )
               )
             )
           )
@@ -85,8 +83,7 @@ class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
             "addressLine1" -> "321 Old St",
             "addressLine2" -> "Oldtown",
             "ukPostCode"   -> "OL9 4LD",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom"),
-            "poBoxNumber"  -> "OLD123"
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           )
         )
       )

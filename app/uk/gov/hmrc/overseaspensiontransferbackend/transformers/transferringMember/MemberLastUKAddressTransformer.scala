@@ -18,23 +18,25 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{Transformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberLastUKAddressTransformer extends Transformer with AddressTransformerStep with JsonHelpers {
+class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
 
-  private val jsonKey = "lastPrincipalAddDetails"
+  val jsonKey                       = "lastPrincipalAddDetails"
+  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
+  private val nestedKey             = "addressDetails"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from      = JsPath \ "memberDetails" \ jsonKey,
-        to        = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        _: JsObject
+        from = externalPath,
+        to   = internalPath
       ),
       constructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        nestedKey = "addressDetails"
+        internalPath,
+        nestedKey
       )
     )
 
@@ -44,13 +46,12 @@ class MemberLastUKAddressTransformer extends Transformer with AddressTransformer
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
-        JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        nestedKey = "addressDetails"
+        internalPath,
+        nestedKey
       ),
       movePath(
-        from      = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey,
-        to        = JsPath \ "memberDetails" \ jsonKey,
-        _: JsObject
+        from = internalPath \ nestedKey,
+        to   = externalPath
       )
     )
 
