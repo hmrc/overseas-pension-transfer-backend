@@ -44,15 +44,15 @@ trait AddressTransformerStep extends JsonHelpers {
   def deconstructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(container) =>
-        val nestedObj = (container \ nestedKey).asOpt[JsObject].getOrElse(Json.obj())
-        val flattened = JsObject(extractAddressFields(nestedObj))
-
-        val preserved = container.fields.filterNot(_._1 == nestedKey)
-        val rebuilt   = JsObject(preserved :+ (nestedKey -> flattened))
-
-        setPath(path, rebuilt, json)
-
-      case None => Right(json)
+        (container \ nestedKey).asOpt[JsObject] match {
+          case None            => Right(json)
+          case Some(nestedObj) =>
+            val flattened = JsObject(extractAddressFields(nestedObj))
+            val preserved = container.fields.filterNot(_._1 == nestedKey)
+            val rebuilt   = JsObject(preserved :+ (nestedKey -> flattened))
+            setPath(path, rebuilt, json)
+        }
+      case None            => Right(json)
     }
   }
 
