@@ -41,18 +41,15 @@ trait AddressTransformerStep extends JsonHelpers {
 
   /* This deconstructs an address in place, so if it is constructed at memberDetails \ memberAddress (where memberAddress is the nested key)
    * it will need to be deconstructed there and then moved from memberDetails \ memberAddress (including the nested key) */
-  def deconstructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
+  def deconstructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
-      case Some(container) =>
-        (container \ nestedKey).asOpt[JsObject] match {
-          case None            => Right(json)
-          case Some(nestedObj) =>
-            val flattened = JsObject(extractAddressFields(nestedObj))
-            val preserved = container.fields.filterNot(_._1 == nestedKey)
-            val rebuilt   = JsObject(preserved :+ (nestedKey -> flattened))
-            setPath(path, rebuilt, json)
-        }
-      case None            => Right(json)
+      case Some(addressObj) =>
+        val addressFields = extractAddressFields(addressObj)
+        val preserved     = addressObj.fields.filterNot { case (key, _) => addressFields.map(_._1).contains(key) }
+        val rebuilt       = JsObject(preserved ++ addressFields)
+        setPath(path, rebuilt, json)
+
+      case None => Right(json)
     }
   }
 

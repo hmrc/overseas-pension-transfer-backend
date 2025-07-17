@@ -46,8 +46,8 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
-        internalPath,
-        nestedKey
+        internalPath \
+          nestedKey
       ),
       deconstructToExternal
     )

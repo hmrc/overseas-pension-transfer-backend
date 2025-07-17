@@ -76,7 +76,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
         )
       )
 
-      deconstructAddressAt(__ \ "principalResAddDetails", nestedKey = "addressDetails")(input) mustBe Right(expected)
+      deconstructAddressAt(__ \ "principalResAddDetails" \ "addressDetails")(input) mustBe Right(expected)
     }
   }
 }

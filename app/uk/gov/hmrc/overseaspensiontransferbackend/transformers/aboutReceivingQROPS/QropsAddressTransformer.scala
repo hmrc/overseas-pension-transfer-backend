@@ -45,8 +45,8 @@ class QropsAddressTransformer extends PathAwareTransformer with AddressTransform
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
-        internalPath,
-        nestedKey = jsonKey
+        internalPath \
+          jsonKey
       ),
       movePath(internalPath \ jsonKey, externalPath \ jsonKey)
     )
