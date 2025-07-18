@@ -17,25 +17,24 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json._
+import play.api.libs.json.{__, Json, OFormat, OWrites, Reads}
 
-case class AboutReceivingQROPS(
-    qropsFullName: Option[String],
-    qropsRef: Option[String],
-    qropsSchemeManagerType: Option[QROPSSchemeManagerType]
+case class QROPSIndividual(
+    individualTitle: Option[String],
+    individualForename: Option[String],
+    individualSurname: Option[String]
   )
 
-object AboutReceivingQROPS {
+object QROPSIndividual {
 
-  implicit val reads: Reads[AboutReceivingQROPS] = (
-    (__ \ "qropsFullName").readNullable[String] and
-      (__ \ "qropsRef").readNullable[String] and
-      (__ \ "qropsSchemeManagerType").readNullable[QROPSSchemeManagerType]
-  )(AboutReceivingQROPS.apply _)
+  implicit val reads: Reads[QROPSIndividual] = (
+    (__ \ "individualTitle").readNullable[String] and
+      (__ \ "individualForename").readNullable[String] and
+      (__ \ "individualSurname").readNullable[String]
+  )(QROPSIndividual.apply _)
 
-  implicit val writes: OWrites[AboutReceivingQROPS] =
-    Json.writes[AboutReceivingQROPS]
+  implicit val writes: OWrites[QROPSIndividual] =
+    Json.writes[QROPSIndividual]
 
-  implicit val format: OFormat[AboutReceivingQROPS] =
-    OFormat(reads, writes)
+  implicit val format: OFormat[QROPSIndividual] = OFormat(reads, writes)
 }
