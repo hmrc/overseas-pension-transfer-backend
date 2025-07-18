@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 

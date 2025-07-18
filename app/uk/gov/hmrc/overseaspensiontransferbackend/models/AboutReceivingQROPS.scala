@@ -21,14 +21,16 @@ import play.api.libs.json._
 
 case class AboutReceivingQROPS(
     qropsFullName: Option[String],
-    qropsRef: Option[String]
+    qropsRef: Option[String],
+    receivingQropsAddress: Option[ReceivingQropsAddress]
   )
 
 object AboutReceivingQROPS {
 
   implicit val reads: Reads[AboutReceivingQROPS] = (
     (__ \ "qropsFullName").readNullable[String] and
-      (__ \ "qropsRef").readNullable[String]
+      (__ \ "qropsRef").readNullable[String] and
+      (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress]
   )(AboutReceivingQROPS.apply _)
 
   implicit val writes: OWrites[AboutReceivingQROPS] =

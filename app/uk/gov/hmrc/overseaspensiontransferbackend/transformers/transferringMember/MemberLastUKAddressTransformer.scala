@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
@@ -46,8 +47,7 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       deconstructAddressAt(
-        internalPath,
-        nestedKey
+        internalPath \ nestedKey
       ),
       movePath(
         from = internalPath \ nestedKey,
