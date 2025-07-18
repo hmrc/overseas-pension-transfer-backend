@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait NameTransformerStep extends JsonHelpers {
@@ -30,9 +31,7 @@ trait NameTransformerStep extends JsonHelpers {
       path: JsPath,
       foreNameKey: String = "foreName",
       lastNameKey: String = "lastName"
-    )(
-      json: JsObject
-    ): Either[JsError, JsObject] = {
+    ): TransformerStep = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(nameObj) =>
         val firstNameOpt = (nameObj \ "firstName").asOpt[String]
@@ -60,7 +59,7 @@ trait NameTransformerStep extends JsonHelpers {
       foreNameKey: String = "foreName",
       lastNameKey: String = "lastName",
       path: JsPath
-    ): JsObject => Either[JsError, JsObject] = { json =>
+    ): TransformerStep = { json =>
     val parentPath = JsPath(path.path.dropRight(1))
     val parentOpt  = parentPath.asSingleJson(json).asOpt[JsObject]
 

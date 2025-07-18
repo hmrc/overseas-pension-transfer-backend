@@ -59,7 +59,17 @@ object UserAnswersTestData {
   val qropsDetailsExternalJson: JsObject = Json.obj(
     "qropsDetails" -> Json.obj(
       "qropsFullName" -> "Test Scheme",
-      "qropsRef" -> "AB123"
+      "qropsRef" -> "AB123",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "2",
+        "addressLine2" -> "QROPS Place",
+        "addressLine3" -> "QROPS District",
+        "ukPostCode" -> "ZZ1 1ZZ",
+        "country" -> Json.obj(
+          "code" -> "UK",
+          "name" -> "United Kingdom"
+        )
+      )
     )
   )
 
@@ -111,7 +121,17 @@ object UserAnswersTestData {
   val qropsDetailsInternalJson: JsObject = Json.obj(
     "aboutReceivingQROPS" -> Json.obj(
       "qropsFullName" -> "Test Scheme",
-      "qropsRef" -> "AB123"
+      "qropsRef" -> "AB123",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "2",
+        "addressLine2" -> "QROPS Place",
+        "addressLine3" -> "QROPS District",
+        "ukPostCode" -> "ZZ1 1ZZ",
+        "country" -> Json.obj(
+          "code" -> "UK",
+          "name" -> "United Kingdom"
+        )
+      )
     )
   )
 

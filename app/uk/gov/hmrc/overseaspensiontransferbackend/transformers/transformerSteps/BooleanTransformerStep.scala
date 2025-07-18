@@ -17,12 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait BooleanTransformerStep extends JsonHelpers {
 
   /** Converts a boolean at the given path into a Yes/No string */
-  def constructBool(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
+  def constructBool(path: JsPath): TransformerStep = { json =>
     path.asSingleJson(json).validate[Boolean] match {
       case JsSuccess(value, _) =>
         val stringValue = JsString(if (value) "Yes" else "No")
@@ -33,7 +34,7 @@ trait BooleanTransformerStep extends JsonHelpers {
   }
 
   /** Converts a Yes/No string at the given path into a boolean */
-  def deconstructBool(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
+  def deconstructBool(path: JsPath): TransformerStep = { json =>
     path.asSingleJson(json).validate[String] match {
       case JsSuccess("Yes", _) => setPath(path, JsBoolean(true), json)
       case JsSuccess("No", _)  => setPath(path, JsBoolean(false), json)

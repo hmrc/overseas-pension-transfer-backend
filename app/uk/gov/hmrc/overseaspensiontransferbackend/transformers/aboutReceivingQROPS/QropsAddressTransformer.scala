@@ -14,36 +14,44 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
 
-  val jsonKey                       = "dateOfBirth"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  val jsonKey                       = "receivingQropsAddress"
+  override val externalPath: JsPath = JsPath \ "qropsDetails"
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS"
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       movePath(
-        from = externalPath,
-        to   = internalPath
+        from      = externalPath \ jsonKey,
+        to        = internalPath \ jsonKey
+      ),
+      constructAddressAt(
+        path      = internalPath,
+        nestedKey = jsonKey
       )
     )
+
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
-        from = internalPath,
-        to   = externalPath
-      )
+      deconstructAddressAt(
+        internalPath \
+          jsonKey
+      ),
+      movePath(internalPath \ jsonKey, externalPath \ jsonKey)
     )
+
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 }
