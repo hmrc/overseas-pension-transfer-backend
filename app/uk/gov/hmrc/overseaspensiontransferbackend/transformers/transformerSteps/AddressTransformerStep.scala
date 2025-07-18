@@ -17,13 +17,14 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait AddressTransformerStep extends JsonHelpers {
 
   /* This constructs an address at a path inside a nestedKey so for example if you pass addressDetails as a nested key
    * and memberDetails \ principalResAdd as a path, it will create the address at memberDetails \ principleResAdd \ addressDetails */
-  def constructAddressAt(path: JsPath, nestedKey: String): JsObject => Either[JsError, JsObject] = { json =>
+  def constructAddressAt(path: JsPath, nestedKey: String): TransformerStep = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
         val addressFields   = extractAddressFields(addressObj)
@@ -41,7 +42,7 @@ trait AddressTransformerStep extends JsonHelpers {
 
   /* This deconstructs an address in place, so if it is constructed at memberDetails \ memberAddress (where memberAddress is the nested key)
    * it will need to be deconstructed there and then moved from memberDetails \ memberAddress (including the nested key) */
-  def deconstructAddressAt(path: JsPath): JsObject => Either[JsError, JsObject] = { json =>
+  def deconstructAddressAt(path: JsPath): TransformerStep = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
         val addressFields = extractAddressFields(addressObj)

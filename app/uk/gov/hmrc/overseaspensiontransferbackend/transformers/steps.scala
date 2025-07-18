@@ -18,13 +18,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import play.api.libs.json.{JsError, JsObject}
 
-trait Transformer {
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  def construct(input: JsObject): Either[JsError, JsObject]
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  def deconstruct(input: JsObject): Either[JsError, JsObject]
+package object steps {
+  type TransformerStep = JsObject => Either[JsError, JsObject]
 }
