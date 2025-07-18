@@ -22,7 +22,8 @@ import play.api.libs.json._
 case class AboutReceivingQROPS(
     qropsFullName: Option[String],
     qropsRef: Option[String],
-    receivingQropsAddress: Option[ReceivingQropsAddress]
+    receivingQropsAddress: Option[ReceivingQropsAddress],
+    qropsSchemeManagerType: Option[QROPSSchemeManagerType]
   )
 
 object AboutReceivingQROPS {
@@ -30,7 +31,8 @@ object AboutReceivingQROPS {
   implicit val reads: Reads[AboutReceivingQROPS] = (
     (__ \ "qropsFullName").readNullable[String] and
       (__ \ "qropsRef").readNullable[String] and
-      (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress]
+      (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress] and
+      (__ \ "qropsSchemeManagerType").readNullable[QROPSSchemeManagerType]
   )(AboutReceivingQROPS.apply _)
 
   implicit val writes: OWrites[AboutReceivingQROPS] =
