@@ -30,7 +30,7 @@ class MemberNameTransformer extends PathAwareTransformer with NameTransformerSte
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       ),
@@ -47,7 +47,7 @@ class MemberNameTransformer extends PathAwareTransformer with NameTransformerSte
       unflattenName(
         path = internalPath
       ),
-      movePath(
+      moveStep(
         from = internalPath,
         to   = externalPath
       )

@@ -17,12 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.utils
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 
 trait JsonHelpers {
-
-  def movePath(from: JsPath, to: JsPath): TransformerStep =
-    (json: JsObject) => movePath(from, to, json)
 
   def movePath(from: JsPath, to: JsPath, json: JsObject): Either[JsError, JsObject] = {
     from.asSingleJson(json).toOption match {

@@ -31,7 +31,7 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       ),
@@ -49,7 +49,7 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
       deconstructAddressAt(
         internalPath \ nestedKey
       ),
-      movePath(
+      moveStep(
         from = internalPath \ nestedKey,
         to   = externalPath
       )

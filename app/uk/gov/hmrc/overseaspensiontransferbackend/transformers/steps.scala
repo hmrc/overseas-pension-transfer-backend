@@ -17,7 +17,11 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-package object steps {
+package object steps extends JsonHelpers {
   type TransformerStep = JsObject => Either[JsError, JsObject]
+
+  def moveStep(from: JsPath, to: JsPath): TransformerStep =
+    (json: JsObject) => movePath(from, to, json)
 }

@@ -30,7 +30,7 @@ class QropsAddressTransformer extends PathAwareTransformer with AddressTransform
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from      = externalPath \ jsonKey,
         to        = internalPath \ jsonKey
       ),
@@ -49,7 +49,7 @@ class QropsAddressTransformer extends PathAwareTransformer with AddressTransform
         internalPath \
           jsonKey
       ),
-      movePath(internalPath \ jsonKey, externalPath \ jsonKey)
+      moveStep(internalPath \ jsonKey, externalPath \ jsonKey)
     )
 
     TransformerUtils.applyPipeline(json, steps)(identity)

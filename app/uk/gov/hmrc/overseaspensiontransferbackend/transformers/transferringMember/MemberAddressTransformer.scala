@@ -31,7 +31,7 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       ),
@@ -58,8 +58,8 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
 
   private val deconstructToExternal: TransformerStep = { json =>
     for {
-      withAddress <- movePath(internalPath \ nestedKey, externalPath)(json)
-      withPoBox   <- movePath(internalPath \ "poBoxNumber", externalPath \ "poBoxNumber")(withAddress)
+      withAddress <- moveStep(internalPath \ nestedKey, externalPath)(json)
+      withPoBox   <- moveStep(internalPath \ "poBoxNumber", externalPath \ "poBoxNumber")(withAddress)
     } yield withPoBox
   }
 }

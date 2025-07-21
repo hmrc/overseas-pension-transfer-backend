@@ -45,7 +45,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
 
     "must move qropsDetails.qropsEstablishedOther to aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther" in {
       val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other"))
-      val expected = Json.obj("aboutReceivingQROPS" ->
+      val expected  = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
           Json.obj("qropsEstablishedOther" -> "Other")))
 
@@ -56,7 +56,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
       val inputJson = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
           Json.obj("qropsEstablishedOther" -> "Other")))
-      val expected = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other"))
+      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other"))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }
