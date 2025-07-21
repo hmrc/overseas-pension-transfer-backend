@@ -23,6 +23,7 @@ case class AboutReceivingQROPS(
     qropsFullName: Option[String],
     qropsRef: Option[String],
     receivingQropsAddress: Option[ReceivingQropsAddress],
+    receivingQropsEstablishedDetails: Option[ReceivingQropsEstablishedDetails],
     qropsSchemeManagerType: Option[QROPSSchemeManagerType]
   )
 
@@ -32,6 +33,7 @@ object AboutReceivingQROPS {
     (__ \ "qropsFullName").readNullable[String] and
       (__ \ "qropsRef").readNullable[String] and
       (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress] and
+      (__ \ "receivingQropsEstablishedDetails").readNullable[ReceivingQropsEstablishedDetails] and
       (__ \ "qropsSchemeManagerType").readNullable[QROPSSchemeManagerType]
   )(AboutReceivingQROPS.apply _)
 

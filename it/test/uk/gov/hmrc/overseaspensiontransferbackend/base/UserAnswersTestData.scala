@@ -22,53 +22,57 @@ object UserAnswersTestData {
 
   val memberDetailsExternalJson: JsObject = Json.obj(
     "memberDetails" -> Json.obj(
-      "name" -> Json.obj(
+      "name"                    -> Json.obj(
         "firstName" -> "Test",
         "lastName"  -> "McTest"
       ),
-      "dateOfBirth" -> "2011-06-05",
-      "nino" -> "AB123456B",
-      "principalResAddDetails" -> Json.obj(
+      "dateOfBirth"             -> "2011-06-05",
+      "nino"                    -> "AB123456B",
+      "principalResAddDetails"  -> Json.obj(
         "addressLine1" -> "1",
         "addressLine2" -> "Test road",
         "addressLine3" -> "Testville",
         "addressLine4" -> "East Testerly",
-        "country" -> Json.obj(
+        "country"      -> Json.obj(
           "code" -> "AE-AZ",
           "name" -> "Abu Dhabi"
         ),
-        "ukPostCode" -> "AB1 2CD",
-        "poBoxNumber" -> "PO321"
+        "ukPostCode"   -> "AB1 2CD",
+        "poBoxNumber"  -> "PO321"
       ),
-      "memUkResident" -> false,
-      "memEverUkResident" -> true,
+      "memUkResident"           -> false,
+      "memEverUkResident"       -> true,
       "lastPrincipalAddDetails" -> Json.obj(
         "addressLine1" -> "Flat 2",
         "addressLine2" -> "7 Other Place",
         "addressLine3" -> "Some District",
-        "ukPostCode" -> "ZZ1 1ZZ",
-        "country" -> Json.obj(
+        "ukPostCode"   -> "ZZ1 1ZZ",
+        "country"      -> Json.obj(
           "code" -> "UK",
           "name" -> "United Kingdom"
         )
       ),
-      "dateMemberLeftUk" -> "2011-06-06"
+      "dateMemberLeftUk"        -> "2011-06-06"
     )
   )
 
   val qropsDetailsExternalJson: JsObject = Json.obj(
     "qropsDetails" -> Json.obj(
-      "qropsFullName" -> "Test Scheme",
-      "qropsRef" -> "AB123",
+      "qropsFullName"         -> "Test Scheme",
+      "qropsRef"              -> "AB123",
       "receivingQropsAddress" -> Json.obj(
         "addressLine1" -> "2",
         "addressLine2" -> "QROPS Place",
         "addressLine3" -> "QROPS District",
-        "ukPostCode" -> "ZZ1 1ZZ",
-        "country" -> Json.obj(
+        "ukPostCode"   -> "ZZ1 1ZZ",
+        "country"      -> Json.obj(
           "code" -> "UK",
           "name" -> "United Kingdom"
         )
+      ),
+      "qropsEstablished"      -> Json.obj(
+        "code" -> "UK",
+        "name" -> "United Kingdom"
       )
     )
   )
@@ -84,34 +88,34 @@ object UserAnswersTestData {
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(
       "memberDetails" -> Json.obj(
-        "foreName" -> "Test",
-        "lastName" -> "McTest",
-        "dateOfBirth" -> "2011-06-05",
-        "nino" -> "AB123456B",
+        "foreName"               -> "Test",
+        "lastName"               -> "McTest",
+        "dateOfBirth"            -> "2011-06-05",
+        "nino"                   -> "AB123456B",
         "principalResAddDetails" -> Json.obj(
           "addressDetails" -> Json.obj(
             "addressLine1" -> "1",
             "addressLine2" -> "Test road",
             "addressLine3" -> "Testville",
             "addressLine4" -> "East Testerly",
-            "ukPostCode" -> "AB1 2CD",
-            "country" -> Json.obj(
+            "ukPostCode"   -> "AB1 2CD",
+            "country"      -> Json.obj(
               "code" -> "AE-AZ",
               "name" -> "Abu Dhabi"
             )
           ),
-          "poBoxNumber" -> "PO321"
+          "poBoxNumber"    -> "PO321"
         ),
         "memberResidencyDetails" -> Json.obj(
-          "memUkResident" -> "No",
-          "memEverUkResident" -> "Yes",
+          "memUkResident"           -> "No",
+          "memEverUkResident"       -> "Yes",
           "lastPrincipalAddDetails" -> Json.obj(
-            "addressDetails" -> Json.obj(
+            "addressDetails"   -> Json.obj(
               "addressLine1" -> "Flat 2",
               "addressLine2" -> "7 Other Place",
               "addressLine3" -> "Some District",
               "ukPostCode"   -> "ZZ1 1ZZ",
-              "country" -> Json.obj(
+              "country"      -> Json.obj(
                 "code" -> "UK",
                 "name" -> "United Kingdom"
               )
@@ -125,22 +129,28 @@ object UserAnswersTestData {
 
   val qropsDetailsInternalJson: JsObject = Json.obj(
     "aboutReceivingQROPS" -> Json.obj(
-      "qropsFullName" -> "Test Scheme",
-      "qropsRef" -> "AB123",
-      "receivingQropsAddress" -> Json.obj(
+      "qropsFullName"                    -> "Test Scheme",
+      "qropsRef"                         -> "AB123",
+      "receivingQropsAddress"            -> Json.obj(
         "addressLine1" -> "2",
         "addressLine2" -> "QROPS Place",
         "addressLine3" -> "QROPS District",
-        "ukPostCode" -> "ZZ1 1ZZ",
-        "country" -> Json.obj(
+        "ukPostCode"   -> "ZZ1 1ZZ",
+        "country"      -> Json.obj(
+          "code" -> "UK",
+          "name" -> "United Kingdom"
+        )
+      ),
+      "receivingQropsEstablishedDetails" -> Json.obj(
+        "qropsEstablished" -> Json.obj(
           "code" -> "UK",
           "name" -> "United Kingdom"
         )
       ),
       "qropsSchemeManagerType" -> Json.obj(
         "schemeManagerType" -> "02"
+        )
       )
-    )
   )
 
   val fullUserAnswersInternalJson: JsObject =
@@ -151,6 +161,70 @@ object UserAnswersTestData {
       "name" -> Json.obj(
         "firstName" -> "Updated",
         "lastName"  -> "User"
+      )
+    )
+  )
+
+  val qropsDetailsEstablishedExternalJson: JsObject = Json.obj(
+    "qropsDetails" -> Json.obj(
+      "qropsFullName"         -> "Structured Scheme",
+      "qropsRef"              -> "AB123",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "10",
+        "addressLine2" -> "Some Street",
+        "addressLine3" -> "Some City",
+        "ukPostCode"   -> "ZZ1 1ZZ",
+        "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+      ),
+      "qropsEstablished"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+    )
+  )
+
+  val qropsDetailsEstablishedInternalJson: JsObject = Json.obj(
+    "aboutReceivingQROPS" -> Json.obj(
+      "qropsFullName"         -> "Structured Scheme",
+      "qropsRef"              -> "AB123",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "10",
+        "addressLine2" -> "Some Street",
+        "addressLine3" -> "Some City",
+        "ukPostCode"   -> "ZZ1 1ZZ",
+        "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+      ),
+      "receivingQropsEstablishedDetails" -> Json.obj(
+        "qropsEstablished" -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+      )
+    )
+  )
+
+  val qropsDetailsEstablishedOtherExternalJson: JsObject = Json.obj(
+    "qropsDetails" -> Json.obj(
+      "qropsFullName"         -> "Text Scheme",
+      "qropsRef"              -> "CD456",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "22",
+        "addressLine2" -> "Other Street",
+        "addressLine3" -> "Other City",
+        "ukPostCode"   -> "YY2 2YY",
+        "country"      -> Json.obj("code" -> "FR", "name" -> "France")
+      ),
+      "qropsEstablishedOther" -> "Otherland"
+    )
+  )
+
+  val qropsDetailsEstablishedOtherInternalJson: JsObject = Json.obj(
+    "aboutReceivingQROPS" -> Json.obj(
+      "qropsFullName"         -> "Text Scheme",
+      "qropsRef"              -> "CD456",
+      "receivingQropsAddress" -> Json.obj(
+        "addressLine1" -> "22",
+        "addressLine2" -> "Other Street",
+        "addressLine3" -> "Other City",
+        "ukPostCode"   -> "YY2 2YY",
+        "country"      -> Json.obj("code" -> "FR", "name" -> "France")
+      ),
+      "receivingQropsEstablishedDetails" -> Json.obj(
+        "qropsEstablishedOther" -> "Otherland"
       )
     )
   )

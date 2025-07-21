@@ -14,43 +14,48 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
+package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json._
+import play.api.libs.json.{JsError, JsObject, JsPath}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
+class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey                       = "lastPrincipalAddDetails"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
-  private val nestedKey             = "addressDetails"
+  val jsonKey = "qropsEstablished"
 
+  override def externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
+
+  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ jsonKey
+
+  private val qropsEstablishedOtherPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ "qropsEstablishedOther"
+
+  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
+    *
+    * If the structured country is being set by the frontend, this removes any conflicting 'other' text-based value.
+    */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
+      conditionalPruneStep(
+        onlyIfSetAt = externalPath,
+        pruneTarget = qropsEstablishedOtherPath
       ),
-      constructAddressAt(
-        internalPath,
-        nestedKey
+      moveStep(
+        from        = externalPath,
+        to          = internalPath
       )
     )
 
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
+  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
+    */
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        internalPath \ nestedKey
-      ),
       moveStep(
-        from = internalPath \ nestedKey,
+        from = internalPath,
         to   = externalPath
       )
     )

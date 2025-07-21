@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 import java.time.Instant
 import java.util.UUID
@@ -73,11 +74,19 @@ trait BaseISpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    clearMongoData()
   }
 
   override def afterEach(): Unit = {
+    clearMongoData()
     super.afterEach()
   }
+
+  private def clearMongoData(): Unit = {
+    val repo = app.injector.instanceOf[SaveForLaterRepository]
+    await(repo.collection.drop().toFuture())
+  }
+
 
   def freshId(): String = UUID.randomUUID().toString
   def frozenNow(): Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)

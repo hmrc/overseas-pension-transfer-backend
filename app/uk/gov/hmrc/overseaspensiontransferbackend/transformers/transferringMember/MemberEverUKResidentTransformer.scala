@@ -30,7 +30,7 @@ class MemberEverUKResidentTransformer extends PathAwareTransformer with JsonHelp
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       ),
@@ -46,7 +46,7 @@ class MemberEverUKResidentTransformer extends PathAwareTransformer with JsonHelp
       deconstructBool(
         internalPath
       ),
-      movePath(
+      moveStep(
         from = internalPath,
         to   = externalPath
       )
