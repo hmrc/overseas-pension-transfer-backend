@@ -1,19 +1,3 @@
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package uk.gov.hmrc.overseaspensiontransferbackend.utils
 
 import org.scalatest.freespec.AnyFreeSpec
@@ -24,53 +8,80 @@ class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers {
 
   "JsonHelpers" - {
 
-    "must move a value from one path to another" in {
-      val input  = Json.obj("a" -> Json.obj("b" -> "value"))
-      val result = movePath(__ \ "a" \ "b", __ \ "x" \ "y", input)
-      // "a" gets removed, see prunePath comment
-      result mustBe Right(Json.obj("x" -> Json.obj("y" -> JsString("value"))))
+    "movePath" - {
+
+      "must move a value from one path to another and prune empty parents" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value"))
+        val result = movePath(__ \ "a" \ "b", __ \ "x" \ "y", input)
+        result mustBe Right(Json.obj("x" -> Json.obj("y" -> "value")))
+      }
+
+      "must return unchanged JSON if source path does not exist" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value"))
+        val result = movePath(__ \ "a" \ "missing", __ \ "x" \ "y", input)
+        result mustBe Right(input)
+      }
+
+      "must remove the original key and prune empty parents" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value", "c" -> "keep"))
+        val result = movePath(__ \ "a" \ "b", __ \ "x", input)
+        result mustBe Right(Json.obj("a" -> Json.obj("c" -> "keep"), "x" -> "value"))
+      }
     }
 
-    "must return unchanged JSON if source path does not exist" in {
-      val input  = Json.obj("a" -> Json.obj("b" -> "value"))
-      val result = movePath(__ \ "a" \ "missing", __ \ "x" \ "y", input)
+    "setPath" - {
 
-      result mustBe Right(input)
+      "must set a value at a nested path" in {
+        val input  = Json.obj("a" -> Json.obj())
+        val result = setPath(__ \ "a" \ "b" \ "c", JsString("value"), input)
+        result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "value"))))
+      }
+
+      "must overwrite an existing value at path" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "old")))
+        val result = setPath(__ \ "a" \ "b" \ "c", JsString("new"), input)
+        result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "new"))))
+      }
+
+      "must prune the path if setting an empty object" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "something")))
+        val result = setPath(__ \ "a" \ "b" \ "c", Json.obj(), input)
+        // Should remove "c" and also prune "b" and "a" since they are empty after
+        result mustBe Right(Json.obj())
+      }
+
+      "must return unchanged JSON if path is empty" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value"))
+        val result = setPath(JsPath(Nil), JsString("value"), input)
+        result mustBe Right(input)
+      }
+
+      "must create intermediate objects if necessary" in {
+        val input  = Json.obj()
+        val result = setPath(__ \ "a" \ "b" \ "c", JsString("new"), input)
+        result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "new"))))
+      }
     }
 
-    "must set a value at a nested path" in {
-      val input  = Json.obj("a" -> Json.obj())
-      val result = setPath(__ \ "a" \ "b" \ "c", JsString("value"), input)
+    "prunePath" - {
 
-      result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "value"))))
-    }
+      "must remove a nested key and prune empty parents" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value"))
+        val result = prunePath(__ \ "a" \ "b")(input)
+        result mustBe Json.obj()
+      }
 
-    "must overwrite existing value at path" in {
-      val input  = Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "old")))
-      val result = setPath(__ \ "a" \ "b" \ "c", JsString("new"), input)
+      "must remove a key but preserve non-empty parents" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value", "c" -> "keep"))
+        val result = prunePath(__ \ "a" \ "b")(input)
+        result mustBe Json.obj("a" -> Json.obj("c" -> "keep"))
+      }
 
-      result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "new"))))
-    }
-
-    "must fail for unsupported paths" in {
-      val input  = Json.obj("a" -> Json.obj())
-      val result = setPath(JsPath(Nil), JsString("value"), input)
-
-      result mustBe Right(input)
-    }
-
-    "must remove a nested key" in {
-      val input  = Json.obj("a" -> Json.obj("b" -> "value", "c" -> "keep"))
-      val result = movePath(__ \ "a" \ "b", __ \ "x", input)
-
-      result mustBe Right(Json.obj("a" -> Json.obj("c" -> "keep"), "x" -> "value"))
-    }
-
-    "must create intermediate objects if necessary" in {
-      val input  = Json.obj()
-      val result = setPath(__ \ "a" \ "b" \ "c", JsString("new"), input)
-
-      result mustBe Right(Json.obj("a" -> Json.obj("b" -> Json.obj("c" -> "new"))))
+      "must do nothing if path does not exist" in {
+        val input  = Json.obj("a" -> Json.obj("b" -> "value"))
+        val result = prunePath(__ \ "a" \ "missing")(input)
+        result mustBe input
+      }
     }
   }
 }
