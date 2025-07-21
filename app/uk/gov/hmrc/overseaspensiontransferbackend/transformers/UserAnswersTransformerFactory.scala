@@ -23,6 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQRO
   QropsNameTransformer,
   QropsRefTransformer,
   QropsSchemeManagerAddressTransformer,
+  QropsSchemeManagerEmailTransformer,
   QropsSchemeManagerTypeTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
@@ -51,7 +52,8 @@ case class UserAnswersTransformerFactory() {
 
   private def qropsSchemeManagerDetailsTransformers: Seq[Transformer] = Seq(
     new QropsSchemeManagerTypeTransformer,
-    new QropsSchemeManagerAddressTransformer
+    new QropsSchemeManagerAddressTransformer,
+    new QropsSchemeManagerEmailTransformer
   )
 
   def build(): UserAnswersTransformer = {
