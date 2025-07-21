@@ -134,5 +134,42 @@ class SaveForLaterServiceISpec extends BaseISpec {
           fail(s"Expected successful result but got error: $err")
       }
     }
+
+    "transform and persist qropsEstablished correctly" in {
+      val rawJson = UserAnswersTestData.memberDetailsExternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedExternalJson)
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(repository.get(id)).value
+      result.referenceId mustBe id
+      result.lastUpdated mustBe now
+
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
+
+      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+    }
+
+    "transform and persist qropsEstablishedOther correctly" in {
+      val rawJson = UserAnswersTestData.memberDetailsExternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(repository.get(id)).value
+      result.referenceId mustBe id
+      result.lastUpdated mustBe now
+
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
+
+      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+    }
+
   }
 }

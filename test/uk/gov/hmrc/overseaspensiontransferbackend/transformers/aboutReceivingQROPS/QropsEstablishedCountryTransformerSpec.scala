@@ -16,22 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
@@ -41,22 +25,99 @@ class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer = new QropsEstablishedCountryTransformer
 
+  private val country = Country("UK", "United Kingdom")
+
   "QropsEstablishedCountryTransformer" - {
 
     "must move qropsDetails.qropsEstablished to aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablished" in {
-      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> Country("UK", "United Kingdom")))
+      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> country))
       val expected  = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
-          Json.obj("qropsEstablished" -> Country("UK", "United Kingdom"))))
+          Json.obj("qropsEstablished" -> country)))
 
       transformer.construct(inputJson) mustBe Right(expected)
+    }
+
+    "must remove qropsEstablishedOther if qropsEstablished is being set" in {
+      val incomingFrontendJson = Json.obj(
+        "qropsDetails" -> Json.obj("qropsEstablished" -> country)
+      )
+
+      val existingInternalJson = Json.obj(
+        "aboutReceivingQROPS" -> Json.obj(
+          "receivingQropsEstablishedDetails" -> Json.obj(
+            "qropsEstablishedOther" -> "Some Other Country"
+          )
+        )
+      )
+
+      val mergedInput = existingInternalJson.deepMerge(incomingFrontendJson)
+
+      val expected = Json.obj(
+        "aboutReceivingQROPS" -> Json.obj(
+          "receivingQropsEstablishedDetails" -> Json.obj(
+            "qropsEstablished" -> country
+          )
+        )
+      )
+
+      transformer.construct(mergedInput) mustBe Right(expected)
+    }
+
+    "must preserve qropsEstablishedOther if qropsEstablished is NOT being set" in {
+      val incomingFrontendJson = Json.obj(
+        "qropsDetails" -> Json.obj()
+      )
+
+      val existingInternalJson = Json.obj(
+        "aboutReceivingQROPS" -> Json.obj(
+          "receivingQropsEstablishedDetails" -> Json.obj(
+            "qropsEstablishedOther" -> "Other"
+          )
+        )
+      )
+
+      val mergedInput = existingInternalJson.deepMerge(incomingFrontendJson)
+
+      transformer.construct(mergedInput) mustBe Right(mergedInput)
+    }
+
+    "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablished if value is already set" in {
+      val oldCountry = Country("FR", "France")
+      val newCountry = Country("DE", "Germany")
+
+      val incomingFrontendJson = Json.obj(
+        "qropsDetails" -> Json.obj(
+          "qropsEstablished" -> newCountry
+        )
+      )
+
+      val existingInternalJson = Json.obj(
+        "aboutReceivingQROPS" -> Json.obj(
+          "receivingQropsEstablishedDetails" -> Json.obj(
+            "qropsEstablished" -> oldCountry
+          )
+        )
+      )
+
+      val mergedInput = existingInternalJson.deepMerge(incomingFrontendJson)
+
+      val expected = Json.obj(
+        "aboutReceivingQROPS" -> Json.obj(
+          "receivingQropsEstablishedDetails" -> Json.obj(
+            "qropsEstablished" -> newCountry
+          )
+        )
+      )
+
+      transformer.construct(mergedInput) mustBe Right(expected)
     }
 
     "must move aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablished to qropsDetails.qropsEstablished" in {
       val inputJson = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
-          Json.obj("qropsEstablished" -> Country("UK", "United Kingdom"))))
-      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> Country("UK", "United Kingdom")))
+          Json.obj("qropsEstablished" -> country)))
+      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> country))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }

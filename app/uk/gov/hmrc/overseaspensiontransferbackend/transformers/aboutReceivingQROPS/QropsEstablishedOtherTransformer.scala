@@ -32,12 +32,18 @@ class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHel
   private val qropsEstablishedPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ "qropsEstablished"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
+    *
+    * If the free-text "other" field is being set by the frontend, this removes any conflicting structured country value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
+      conditionalPruneStep(
+        onlyIfSetAt = externalPath,
+        pruneTarget = qropsEstablishedPath
+      ),
       moveStep(
-        from = externalPath,
-        to   = internalPath
+        from        = externalPath,
+        to          = internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)

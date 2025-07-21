@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{__, JsError, JsObject, JsPath, Json}
+import play.api.libs.json.{JsError, JsObject, JsPath}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
@@ -33,14 +33,21 @@ class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonH
   private val qropsEstablishedOtherPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ "qropsEstablishedOther"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
+    *
+    * If the structured country is being set by the frontend, this removes any conflicting 'other' text-based value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
+      conditionalPruneStep(
+        onlyIfSetAt = externalPath,
+        pruneTarget = qropsEstablishedOtherPath
+      ),
       moveStep(
-        from = externalPath,
-        to   = internalPath
+        from        = externalPath,
+        to          = internalPath
       )
     )
+
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 
@@ -53,6 +60,7 @@ class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonH
         to   = externalPath
       )
     )
+
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
 }

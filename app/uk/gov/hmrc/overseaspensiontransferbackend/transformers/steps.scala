@@ -24,4 +24,28 @@ package object steps extends JsonHelpers {
 
   def moveStep(from: JsPath, to: JsPath): TransformerStep =
     (json: JsObject) => movePath(from, to, json)
+
+  /** This function conditionally prunes an internal JSON key if the *external* key is being set.
+    *
+    * For example, if the frontend sends `qropsEstablishedCountry`, then the internal `qropsEstablishedOther` field should be removed if it exists, to avoid
+    * conflicting data.
+    *
+    * Usage: conditionalPruneStep( onlyIfSetAt = qropsEstablishedCountryPath, // this is the external (frontend) path pruneTarget = qropsEstablishedOtherPath //
+    * this is the internal path to remove )
+    */
+  def conditionalPruneStep(onlyIfSetAt: JsPath, pruneTarget: JsPath): TransformerStep =
+    (json: JsObject) => {
+      val isSet = onlyIfSetAt.asSingleJson(json) match {
+        case JsDefined(JsNull) => false
+        case JsDefined(_)      => true
+        case _                 => false
+      }
+
+      if (isSet) {
+        Right(prunePath(pruneTarget)(json))
+      } else {
+        Right(json)
+      }
+    }
+
 }
