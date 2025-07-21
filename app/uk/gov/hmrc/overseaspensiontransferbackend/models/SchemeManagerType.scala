@@ -32,9 +32,9 @@ object SchemeManagerType {
 
   implicit val reads: Reads[SchemeManagerType] =
     Reads {
-      case JsString("individual")   => JsSuccess(Individual)
-      case JsString("organisation") => JsSuccess(Organisation)
-      case _                        => JsError("Invalid value provided for SchemeManagerType")
+      case JsString("individual") | JsString("01")   => JsSuccess(Individual)
+      case JsString("organisation") | JsString("02") => JsSuccess(Organisation)
+      case _                                         => JsError("Invalid value provided for SchemeManagerType")
     }
 
   implicit val writes: Writes[SchemeManagerType] =

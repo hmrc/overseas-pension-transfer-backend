@@ -72,9 +72,14 @@ object UserAnswersTestData {
       )
     )
   )
+  val schemeManagerDetails: JsObject = Json.obj(
+    "schemeManagerDetails" -> Json.obj(
+      "schemeManagerType" -> "organisation"
+    )
+  )
 
   val fullUserAnswersExternalJson: JsObject =
-    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson)
+    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetails)
 
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(
@@ -131,6 +136,9 @@ object UserAnswersTestData {
           "code" -> "UK",
           "name" -> "United Kingdom"
         )
+      ),
+      "qropsSchemeManagerType" -> Json.obj(
+        "schemeManagerType" -> "02"
       )
     )
   )
