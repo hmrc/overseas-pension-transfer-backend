@@ -104,7 +104,7 @@ trait JsonHelpers {
           }
         }
 
-      case _                                 => Left(JsError(s"Unsupported path: $path"))
+      case _ => Left(JsError(s"Unsupported path: $path"))
     }
   }
 }
