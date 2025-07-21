@@ -16,16 +16,20 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 
 case class SchemeManagerDetails(
-    schemeManagerType: Option[String]
+    schemeManagerType: Option[String],
+    schemeManagerAddress: Option[SchemeManagerAddress]
   )
 
 object SchemeManagerDetails {
 
-  implicit val reads: Reads[SchemeManagerDetails] =
-    (__ \ "schemeManagerType").readNullable[String].map(SchemeManagerDetails.apply)
+  implicit val reads: Reads[SchemeManagerDetails] = (
+    (__ \ "schemeManagerType").readNullable[String] and
+      (__ \ "schemeManagerAddress").readNullable[SchemeManagerAddress]
+  )(SchemeManagerDetails.apply _)
 
   implicit val writes: OWrites[SchemeManagerDetails] =
     Json.writes[SchemeManagerDetails]

@@ -25,7 +25,18 @@ class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
   "SchemeManagerDetails" - {
 
     "must serialize and deserialize correctly with value" in {
-      val model  = SchemeManagerDetails(Some("Some Type"))
+      val schemeManagerAddress: SchemeManagerAddress =
+        SchemeManagerAddress(
+          "42",
+          "Sesame Street",
+          None,
+          None,
+          None,
+          Some("ZZ1 1ZZ"),
+          None
+        )
+
+      val model  = SchemeManagerDetails(Some("Some Type"), Some(schemeManagerAddress))
       val json   = Json.toJson(model)
       val result = json.validate[SchemeManagerDetails]
 
@@ -36,7 +47,7 @@ class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
       val json   = Json.obj()
       val result = json.validate[SchemeManagerDetails]
 
-      result mustBe JsSuccess(SchemeManagerDetails(None))
+      result mustBe JsSuccess(SchemeManagerDetails(None, None))
     }
   }
 }
