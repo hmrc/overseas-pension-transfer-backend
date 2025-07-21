@@ -20,8 +20,8 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 trait AddressBase {
-  def addressLine1: String
-  def addressLine2: String
+  def addressLine1: Option[String]
+  def addressLine2: Option[String]
   def addressLine3: Option[String]
   def addressLine4: Option[String]
   def addressLine5: Option[String]
@@ -30,8 +30,8 @@ trait AddressBase {
 }
 
 case class Address(
-    addressLine1: String,
-    addressLine2: String,
+    addressLine1: Option[String],
+    addressLine2: Option[String],
     addressLine3: Option[String],
     addressLine4: Option[String],
     addressLine5: Option[String],
@@ -42,8 +42,8 @@ case class Address(
 object Address {
 
   implicit val reads: Reads[Address] = (
-    (__ \ "addressLine1").read[String] and
-      (__ \ "addressLine2").read[String] and
+    (__ \ "addressLine1").readNullable[String] and
+      (__ \ "addressLine2").readNullable[String] and
       (__ \ "addressLine3").readNullable[String] and
       (__ \ "addressLine4").readNullable[String] and
       (__ \ "addressLine5").readNullable[String] and

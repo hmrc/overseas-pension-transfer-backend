@@ -78,5 +78,13 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
 
       deconstructAddressAt(__ \ "principalResAddDetails" \ "addressDetails")(input) mustBe Right(expected)
     }
+
+    "must not modify JSON if address object is empty" in {
+      val input = Json.obj(
+        "principalResAddRetails" -> Json.obj()
+      )
+
+      constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(input)
+    }
   }
 }
