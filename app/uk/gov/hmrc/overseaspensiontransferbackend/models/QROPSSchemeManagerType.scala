@@ -21,7 +21,7 @@ import play.api.libs.json._
 
 case class QROPSSchemeManagerType(
     schemeManagerType: Option[SchemeManagerType],
-    schemeManagerAddress: Option[Address],
+    schemeManagerAddress: Option[SchemeManagerAddress],
     schemeManagerEmail: Option[String],
     schemeManagerPhone: Option[String],
     qropsIndividual: Option[QROPSIndividual],
@@ -32,7 +32,7 @@ object QROPSSchemeManagerType {
 
   implicit val reads: Reads[QROPSSchemeManagerType] = (
     (__ \ "schemeManagerType").readNullable[SchemeManagerType] and
-      (__ \ "schemeManagerAddress").readNullable[Address] and
+      (__ \ "schemeManagerAddress").readNullable[SchemeManagerAddress] and
       (__ \ "schemeManagerEmail").readNullable[String] and
       (__ \ "schemeManagerPhone").readNullable[String] and
       (__ \ "qropsIndividual").readNullable[QROPSIndividual] and
