@@ -20,7 +20,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 
 case class QROPSSchemeManagerType(
-    schemeManagerType: Option[String],
+    schemeManagerType: Option[SchemeManagerType],
     schemeManagerAddress: Option[Address],
     schemeManagerEmail: Option[String],
     schemeManagerPhone: Option[String],
@@ -31,8 +31,8 @@ case class QROPSSchemeManagerType(
 object QROPSSchemeManagerType {
 
   implicit val reads: Reads[QROPSSchemeManagerType] = (
-    (__ \ "qropsFullName").readNullable[String] and
-      (__ \ "schemaManagerAddress").readNullable[Address] and
+    (__ \ "schemeManagerType").readNullable[SchemeManagerType] and
+      (__ \ "schemeManagerAddress").readNullable[Address] and
       (__ \ "schemeManagerEmail").readNullable[String] and
       (__ \ "schemeManagerPhone").readNullable[String] and
       (__ \ "qropsIndividual").readNullable[QROPSIndividual] and

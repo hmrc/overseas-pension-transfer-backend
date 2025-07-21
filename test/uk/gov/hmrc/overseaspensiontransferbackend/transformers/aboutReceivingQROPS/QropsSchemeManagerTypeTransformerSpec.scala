@@ -27,13 +27,13 @@ class QropsSchemeManagerTypeTransformerSpec extends AnyFreeSpec with Matchers {
   "QropsSchemeManagerTypeTransformerSpec" - {
     "must move schemeManagerDetails.schemeManagerType to aboutReceivingQrops.qropsSchemeManagerType.schemeManagerType" in {
       val inputJson = Json.obj("schemeManagerDetails" -> Json.obj("schemeManagerType" -> "individual"))
-      val expected  = Json.obj("aboutReceivingQROPS" -> Json.obj("qropsSchemeManagerType" -> Json.obj("schemeManagerType" -> "individual")))
+      val expected  = Json.obj("aboutReceivingQROPS" -> Json.obj("qropsSchemeManagerType" -> Json.obj("schemeManagerType" -> "01")))
 
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
     "must move aboutReceivingQrops.qropsSchemeManagerType.schemeManagerType to schemeManagerDetails.schemeManagerType" in {
-      val inputJson = Json.obj("aboutReceivingQROPS" -> Json.obj("qropsSchemeManagerType" -> Json.obj("schemeManagerType" -> "individual")))
+      val inputJson = Json.obj("aboutReceivingQROPS" -> Json.obj("qropsSchemeManagerType" -> Json.obj("schemeManagerType" -> "01")))
       val expected  = Json.obj("schemeManagerDetails" -> Json.obj("schemeManagerType" -> "individual"))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)

@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
+import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTransformerStep {
 
   val jsonKey = "schemeManagerType"
 
@@ -36,6 +38,10 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with JsonHe
       movePath(
         from = externalPath,
         to   = internalPath
+      ),
+      constructEnum[SchemeManagerType](
+        internalPath,
+        schemeManagerType => JsString(schemeManagerType.downstreamValue)
       )
     )
     TransformerUtils.applyPipeline(input, steps)(identity)
@@ -45,6 +51,7 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with JsonHe
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
+      deconstructEnum[SchemeManagerType](internalPath, string => SchemeManagerType(string)),
       movePath(
         from = internalPath,
         to   = externalPath
