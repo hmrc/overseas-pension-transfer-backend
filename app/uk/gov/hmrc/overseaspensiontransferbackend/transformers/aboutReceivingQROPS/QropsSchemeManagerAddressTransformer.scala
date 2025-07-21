@@ -17,7 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 
@@ -33,7 +33,7 @@ class QropsSchemeManagerAddressTransformer extends PathAwareTransformer with Add
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from      = externalPath \ jsonKey,
         to        = internalPath \ jsonKey
       ),
@@ -54,7 +54,7 @@ class QropsSchemeManagerAddressTransformer extends PathAwareTransformer with Add
         internalPath \
           jsonKey
       ),
-      movePath(internalPath \ jsonKey, externalPath \ jsonKey)
+      moveStep(internalPath \ jsonKey, externalPath \ jsonKey)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)

@@ -29,7 +29,7 @@ class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       )
@@ -39,7 +39,7 @@ class MemberDOBTransformer extends PathAwareTransformer with JsonHelpers {
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = internalPath,
         to   = externalPath
       )

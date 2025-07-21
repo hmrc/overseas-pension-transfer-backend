@@ -20,9 +20,6 @@ import play.api.libs.json._
 
 trait JsonHelpers {
 
-  def movePath(from: JsPath, to: JsPath): JsObject => Either[JsError, JsObject] =
-    (json: JsObject) => movePath(from, to, json)
-
   def movePath(from: JsPath, to: JsPath, json: JsObject): Either[JsError, JsObject] = {
     from.asSingleJson(json).toOption match {
       case Some(value) =>
