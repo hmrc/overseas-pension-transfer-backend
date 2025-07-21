@@ -74,7 +74,16 @@ object UserAnswersTestData {
   )
   val schemeManagerDetails: JsObject = Json.obj(
     "schemeManagerDetails" -> Json.obj(
-      "schemeManagerType" -> "organisation"
+      "schemeManagerType" -> "organisation",
+      "schemeManagerAddress" -> Json.obj(
+        "addressLine1" -> "42",
+        "addressLine2" -> "Sesame Street",
+        "ukPostCode" -> "ZZ1 1ZZ",
+        "country" -> Json.obj(
+          "code" -> "UK",
+          "name" -> "United Kingdom"
+        )
+      )
     )
   )
 
@@ -138,7 +147,16 @@ object UserAnswersTestData {
         )
       ),
       "qropsSchemeManagerType" -> Json.obj(
-        "schemeManagerType" -> "02"
+        "schemeManagerType" -> "02",
+        "schemeManagerAddress" -> Json.obj(
+          "addressLine1" -> "42",
+          "addressLine2" -> "Sesame Street",
+          "ukPostCode" -> "ZZ1 1ZZ",
+          "country" -> Json.obj(
+            "code" -> "UK",
+            "name" -> "United Kingdom"
+          )
+        )
       )
     )
   )
