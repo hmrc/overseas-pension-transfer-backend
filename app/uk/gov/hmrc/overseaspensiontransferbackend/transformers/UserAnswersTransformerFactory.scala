@@ -18,6 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.{
   QropsAddressTransformer,
+  QropsEstablishedCountryTransformer,
+  QropsEstablishedOtherTransformer,
   QropsNameTransformer,
   QropsRefTransformer,
   QropsSchemeManagerTypeTransformer
@@ -41,7 +43,9 @@ case class UserAnswersTransformerFactory() {
   private def qropsDetailsTransformers: Seq[Transformer] = Seq(
     new QropsNameTransformer(),
     new QropsRefTransformer(),
-    new QropsAddressTransformer()
+    new QropsAddressTransformer(),
+    new QropsEstablishedCountryTransformer(),
+    new QropsEstablishedOtherTransformer()
   )
 
   private def qropsSchemeManagerDetailsTransformers: Seq[Transformer] = Seq(

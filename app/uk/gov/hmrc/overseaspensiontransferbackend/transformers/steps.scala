@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.{JsError, JsObject}
+import play.api.libs.json._
 
 package object steps {
   type TransformerStep = JsObject => Either[JsError, JsObject]

@@ -23,6 +23,8 @@ case class AboutReceivingQROPS(
     qropsFullName: Option[String],
     qropsRef: Option[String],
     receivingQropsAddress: Option[ReceivingQropsAddress],
+    receivingQropsEstablishedDetails: Option[ReceivingQropsEstablishedDetails],
+    receivingQropsAddress: Option[ReceivingQropsAddress],
     qropsSchemeManagerType: Option[QROPSSchemeManagerType]
   )
 
@@ -31,6 +33,8 @@ object AboutReceivingQROPS {
   implicit val reads: Reads[AboutReceivingQROPS] = (
     (__ \ "qropsFullName").readNullable[String] and
       (__ \ "qropsRef").readNullable[String] and
+      (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress] and
+      (__ \ "receivingQropsEstablishedDetails").readNullable[ReceivingQropsEstablishedDetails] and
       (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress] and
       (__ \ "qropsSchemeManagerType").readNullable[QROPSSchemeManagerType]
   )(AboutReceivingQROPS.apply _)
