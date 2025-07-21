@@ -25,7 +25,7 @@ class AboutReceivingQROPSSpec extends AnyFreeSpec with Matchers {
   "AboutReceivingQROPS" - {
 
     "must serialize and deserialize correctly with value" in {
-      val model  = AboutReceivingQROPS(Some("Example QROPS"), None, None, None)
+      val model  = AboutReceivingQROPS(Some("Example QROPS"), None, None, None, None)
       val json   = Json.toJson(model)
       val result = json.validate[AboutReceivingQROPS]
 
@@ -36,7 +36,7 @@ class AboutReceivingQROPSSpec extends AnyFreeSpec with Matchers {
       val json   = Json.obj()
       val result = json.validate[AboutReceivingQROPS]
 
-      result mustBe JsSuccess(AboutReceivingQROPS(None, None, None, None))
+      result mustBe JsSuccess(AboutReceivingQROPS(None, None, None, None, None))
     }
   }
 }

@@ -19,8 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Reads.StringReads
-import play.api.libs.json.{__, JsNumber, JsPath, JsString, Json}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Individual, SchemeManagerType}
+import play.api.libs.json._
 
 class EnumTransformerStepSpec extends AnyFreeSpec with Matchers with EnumTransformerStep {
 

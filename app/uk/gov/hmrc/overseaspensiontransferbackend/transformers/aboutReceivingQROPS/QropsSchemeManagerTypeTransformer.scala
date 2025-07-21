@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 
 import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
@@ -36,7 +36,7 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
     val enumConversion: SchemeManagerType => JsString = schemeManagerType => JsString(schemeManagerType.downstreamValue)
 
     val steps: Seq[TransformerStep] = Seq(
-      movePath(
+      moveStep(
         from = externalPath,
         to   = internalPath
       ),
@@ -55,7 +55,7 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
 
     val steps: Seq[TransformerStep] = Seq(
       deconstructEnum[SchemeManagerType](internalPath, stringConversion),
-      movePath(
+      moveStep(
         from = internalPath,
         to   = externalPath
       )

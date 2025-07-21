@@ -17,9 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonHelpers {

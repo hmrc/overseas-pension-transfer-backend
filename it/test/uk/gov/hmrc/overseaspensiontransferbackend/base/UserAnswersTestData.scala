@@ -145,8 +145,7 @@ object UserAnswersTestData {
         "qropsEstablished" -> Json.obj(
           "code" -> "UK",
           "name" -> "United Kingdom"
-        ),
-        "qropsEstablishedOther" -> "Other"
+        )
       ),
       "qropsSchemeManagerType" -> Json.obj(
         "schemeManagerType" -> "02"
