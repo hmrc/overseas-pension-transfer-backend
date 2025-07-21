@@ -21,7 +21,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTransformerStep {
 
@@ -53,13 +52,13 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
     val stringConversion: String => SchemeManagerType = string => SchemeManagerType(string)
-    
+
     val steps: Seq[TransformerStep] = Seq(
       deconstructEnum[SchemeManagerType](internalPath, stringConversion),
-        movePath(
-          from = internalPath,
-          to   = externalPath
-        )
+      movePath(
+        from = internalPath,
+        to   = externalPath
+      )
     )
     TransformerUtils.applyPipeline(input, steps)(identity)
   }
