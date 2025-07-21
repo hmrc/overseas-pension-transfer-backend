@@ -34,6 +34,8 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: SchemeManagerType => JsString = schemeManagerType => JsString(schemeManagerType.downstreamValue)
+
     val steps: Seq[TransformerStep] = Seq(
       movePath(
         from = externalPath,
@@ -41,7 +43,7 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
       ),
       constructEnum[SchemeManagerType](
         internalPath,
-        schemeManagerType => JsString(schemeManagerType.downstreamValue)
+        enumConversion
       )
     )
     TransformerUtils.applyPipeline(input, steps)(identity)
@@ -50,12 +52,14 @@ class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTr
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+    val stringConversion: String => SchemeManagerType = string => SchemeManagerType(string)
+    
     val steps: Seq[TransformerStep] = Seq(
-      deconstructEnum[SchemeManagerType](internalPath, string => SchemeManagerType(string)),
-      movePath(
-        from = internalPath,
-        to   = externalPath
-      )
+      deconstructEnum[SchemeManagerType](internalPath, stringConversion),
+        movePath(
+          from = internalPath,
+          to   = externalPath
+        )
     )
     TransformerUtils.applyPipeline(input, steps)(identity)
   }
