@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
-import play.api.libs.json.{JsError, JsPath, JsString, JsSuccess, Reads}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
+import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
@@ -29,8 +28,7 @@ trait EnumTransformerStep extends JsonHelpers {
       case JsError(_)          => Right(json)
     }
 
-  //
-  def deconstructEnum[A](path: JsPath, func: String => A)(implicit reads: Reads[A]): TransformerStep = json =>
+  def deconstructEnum[A](path: JsPath, func: String => A): TransformerStep = json =>
     path.asSingleJson(json).validate[String] match {
       case JsSuccess(value, _) => setPath(path, JsString(func(value).toString), json)
       case JsError(_)          => Right(json)
