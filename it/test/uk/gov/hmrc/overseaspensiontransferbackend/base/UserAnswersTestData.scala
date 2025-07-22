@@ -88,7 +88,8 @@ object UserAnswersTestData {
           "name" -> "United Kingdom"
         )
       ),
-      "schemeManagerEmail" -> "scheme.manager@email.com"
+      "schemeManagerEmail" -> "scheme.manager@email.com",
+      "schemeManagerPhone" -> "07777777777"
     )
   )
 
@@ -168,7 +169,8 @@ object UserAnswersTestData {
             "name" -> "United Kingdom"
           )
         ),
-        "schemeManagerEmail" -> "scheme.manager@email.com"
+        "schemeManagerEmail" -> "scheme.manager@email.com",
+        "schemeManagerPhone" -> "07777777777"
       )
     )
   )
