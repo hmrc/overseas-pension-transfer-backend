@@ -31,11 +31,14 @@ trait JsonHelpers {
   }
 
   def setPath(path: JsPath, value: JsValue, json: JsObject): Either[JsError, JsObject] = {
-    path.json.prune andThen
-      path.json.put(value)
-    Json.obj(path.path.lastOption.map(_.toString).getOrElse("unknown") -> value) // fallback
-
-    setNested(json, path, value)
+    setNested(json, path, value).map { updated =>
+      // If the value is empty, prune the path we just set
+      value match {
+        case obj: JsObject if obj.fields.isEmpty =>
+          prunePath(path)(updated)
+        case _                                   => updated
+      }
+    }
   }
 
   /** Recursively removes a value at the given JsPath from the JSON object.
@@ -88,10 +91,17 @@ trait JsonHelpers {
           case obj: JsObject => obj
         }.getOrElse(Json.obj())
 
-        setNested(nestedObj, remaining, value).map(nested =>
-          json + (head -> nested)
-        )
-      case _                                 => Left(JsError(s"Unsupported path: $path"))
+        setNested(nestedObj, remaining, value).map { nested =>
+          val rebuilt = json + (head -> nested)
+
+          if (nested.fields.isEmpty) {
+            rebuilt - head
+          } else {
+            rebuilt
+          }
+        }
+
+      case _ => Left(JsError(s"Unsupported path: $path"))
     }
   }
 }

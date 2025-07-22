@@ -26,7 +26,7 @@ trait AddressTransformerStep extends JsonHelpers {
    * and memberDetails \ principalResAdd as a path, it will create the address at memberDetails \ principleResAdd \ addressDetails */
   def constructAddressAt(path: JsPath, nestedKey: String): TransformerStep = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
-      case Some(addressObj) =>
+      case Some(addressObj) if addressObj.fields.nonEmpty =>
         val addressFields   = extractAddressFields(addressObj)
         val preservedFields = addressObj.fields.filterNot {
           case (key, _) => addressFields.map(_._1).contains(key)
@@ -36,7 +36,7 @@ trait AddressTransformerStep extends JsonHelpers {
 
         setPath(path, rebuilt, json)
 
-      case None => Right(json)
+      case _ => Right(json)
     }
   }
 

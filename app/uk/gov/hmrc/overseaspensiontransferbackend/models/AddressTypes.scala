@@ -25,8 +25,8 @@ case class PrincipalResAddDetails(
     addressDetails: Option[Address],
     poBoxNumber: Option[String]
   ) extends AddressBase {
-  override def addressLine1: String         = addressDetails.map(_.addressLine1).orNull
-  override def addressLine2: String         = addressDetails.map(_.addressLine2).orNull
+  override def addressLine1: Option[String] = addressDetails.flatMap(_.addressLine1)
+  override def addressLine2: Option[String] = addressDetails.flatMap(_.addressLine2)
   override def addressLine3: Option[String] = addressDetails.flatMap(_.addressLine3)
   override def addressLine4: Option[String] = addressDetails.flatMap(_.addressLine4)
   override def addressLine5: Option[String] = addressDetails.flatMap(_.addressLine5)
@@ -49,8 +49,8 @@ case class LastPrincipalAddDetails(
     addressDetails: Option[Address],
     dateMemberLeftUk: Option[LocalDate]
   ) extends AddressBase {
-  override def addressLine1: String         = addressDetails.map(_.addressLine1).orNull
-  override def addressLine2: String         = addressDetails.map(_.addressLine2).orNull
+  override def addressLine1: Option[String] = addressDetails.flatMap(_.addressLine1)
+  override def addressLine2: Option[String] = addressDetails.flatMap(_.addressLine2)
   override def addressLine3: Option[String] = addressDetails.flatMap(_.addressLine3)
   override def addressLine4: Option[String] = addressDetails.flatMap(_.addressLine4)
   override def addressLine5: Option[String] = addressDetails.flatMap(_.addressLine5)
@@ -70,8 +70,8 @@ object LastPrincipalAddDetails {
 }
 
 case class PropertyAddress(
-    addressLine1: String,
-    addressLine2: String,
+    addressLine1: Option[String],
+    addressLine2: Option[String],
     addressLine3: Option[String],
     addressLine4: Option[String],
     addressLine5: Option[String],
@@ -86,8 +86,8 @@ object PropertyAddress {
 }
 
 case class ReceivingQropsAddress(
-    addressLine1: String,
-    addressLine2: String,
+    addressLine1: Option[String],
+    addressLine2: Option[String],
     addressLine3: Option[String],
     addressLine4: Option[String],
     addressLine5: Option[String],
@@ -102,8 +102,8 @@ object ReceivingQropsAddress {
 }
 
 case class SchemeManagerAddress(
-    addressLine1: String,
-    addressLine2: String,
+    addressLine1: Option[String],
+    addressLine2: Option[String],
     addressLine3: Option[String],
     addressLine4: Option[String],
     addressLine5: Option[String],
