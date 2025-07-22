@@ -87,7 +87,8 @@ object UserAnswersTestData {
           "code" -> "UK",
           "name" -> "United Kingdom"
         )
-      )
+      ),
+      "schemeManagerEmail" -> "scheme.manager@email.com"
     )
   )
 
@@ -166,7 +167,8 @@ object UserAnswersTestData {
             "code" -> "UK",
             "name" -> "United Kingdom"
           )
-        )
+        ),
+        "schemeManagerEmail" -> "scheme.manager@email.com"
       )
     )
   )

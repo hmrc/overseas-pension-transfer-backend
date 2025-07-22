@@ -27,8 +27,8 @@ class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
     "must serialize and deserialize correctly with value" in {
       val schemeManagerAddress: SchemeManagerAddress =
         SchemeManagerAddress(
-          "42",
-          "Sesame Street",
+          Some("42"),
+          Some("Sesame Street"),
           None,
           None,
           None,
