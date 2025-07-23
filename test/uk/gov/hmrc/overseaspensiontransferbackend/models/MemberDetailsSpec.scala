@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.MemberDetails
 
 class MemberDetailsSpec extends AnyFreeSpec with Matchers {
 

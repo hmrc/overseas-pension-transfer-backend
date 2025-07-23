@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json._
-
-case class TransferringMember(
-    memberDetails: Option[MemberDetails] = None
-  )
-
-object TransferringMember {
-
-  implicit val reads: Reads[TransferringMember] =
-    (__ \ "memberDetails").readNullable[MemberDetails].map(TransferringMember.apply)
-
-  implicit val writes: OWrites[TransferringMember] = Json.writes[TransferringMember]
-
-  implicit val format: OFormat[TransferringMember] = OFormat(reads, writes)
+class WithName(string: String) {
+  override val toString: String = string
 }

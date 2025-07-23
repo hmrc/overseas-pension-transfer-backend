@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.internal
 
-import play.api.libs.json._
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 
 case class ReceivingQropsEstablishedDetails(
     qropsEstablished: Option[Country],

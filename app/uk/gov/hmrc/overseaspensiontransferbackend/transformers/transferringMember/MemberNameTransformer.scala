@@ -17,6 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.external.{MemberDetailsExternalField, TaskField}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.{AnswersData, AnswersDataField, TransferringMemberField}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
@@ -24,9 +26,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberNameTransformer extends PathAwareTransformer with NameTransformerStep with JsonHelpers {
 
-  val jsonKey                       = "name"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  private val jsonKey               = MemberDetailsExternalField.Name.toString
+  override val externalPath: JsPath = JsPath \ TaskField.MemberDetails.toString \ jsonKey
+  override val internalPath: JsPath = JsPath \ AnswersDataField.TransferringMember.toString \ TransferringMemberField.MemberDetails.toString \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(

@@ -55,19 +55,3 @@ object Address {
 
   implicit val format: OFormat[Address] = OFormat(reads, writes)
 }
-
-case class Country(code: String, name: String) {
-  override def toString: String = name
-}
-
-object Country {
-
-  implicit val reads: Reads[Country] = (
-    (__ \ "code").read[String] and
-      (__ \ "name").read[String]
-  )(Country.apply _)
-
-  implicit val writes: OWrites[Country] = Json.writes[Country]
-
-  implicit val format: OFormat[Country] = OFormat(reads, writes)
-}

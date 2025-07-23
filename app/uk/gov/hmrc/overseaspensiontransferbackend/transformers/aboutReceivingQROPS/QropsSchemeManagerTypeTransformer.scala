@@ -17,7 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.SchemeManagerType
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}

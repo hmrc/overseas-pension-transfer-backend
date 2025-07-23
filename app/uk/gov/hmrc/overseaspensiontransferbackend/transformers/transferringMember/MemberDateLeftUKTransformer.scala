@@ -17,15 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.external.{MemberDetailsExternalField, TaskField}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.{AddressTypeField, AnswersDataField, MemberDetailsInternalField, TransferringMemberField}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberDateLeftUKTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey                       = "dateMemberLeftUk"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails" \ jsonKey
+  private val jsonKey               = MemberDetailsExternalField.DateMemberLeftUkExternal.toString
+  override val externalPath: JsPath = JsPath \ TaskField.MemberDetails.toString \ jsonKey
+
+  override val internalPath: JsPath =
+    JsPath \ AnswersDataField.TransferringMember.toString \
+      TransferringMemberField.MemberDetails.toString \ MemberDetailsInternalField.MemberResidencyDetails.toString \ AddressTypeField.LastPrincipalAddDetails.toString \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(

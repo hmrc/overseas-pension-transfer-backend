@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.internal
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -41,7 +41,7 @@ object AnswersData {
   // A custom reads with readNullable will need to be written for every key we save to mongo.
   // This is due to the way that play handles nullable values.
   implicit val reads: Reads[AnswersData] = (
-    (__ \ "transferringMember").readNullable[TransferringMember] and
+    (__ \ AnswersDataField.TransferringMember.toString).readNullable[TransferringMember] and
       (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
       (__ \ "transferDetails").readNullable[TransferDetails]

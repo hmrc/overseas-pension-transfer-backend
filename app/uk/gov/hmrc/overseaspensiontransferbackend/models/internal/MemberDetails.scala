@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.internal
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.MemberDetailsInternalField._
+
 import java.time.LocalDate
 
 case class MemberDetails(
@@ -33,13 +35,13 @@ case class MemberDetails(
 object MemberDetails {
 
   implicit val reads: Reads[MemberDetails] = (
-    (__ \ "foreName").readNullable[String] and
-      (__ \ "lastName").readNullable[String] and
-      (__ \ "dateOfBirth").readNullable[LocalDate] and
-      (__ \ "nino").readNullable[String] and
-      (__ \ "memberNoNino").readNullable[String] and
-      (__ \ "principalResAddDetails").readNullable[PrincipalResAddDetails] and
-      (__ \ "memberResidencyDetails").readNullable[MemberResidencyDetails]
+    (__ \ ForeName.toString).readNullable[String] and
+      (__ \ LastName.toString).readNullable[String] and
+      (__ \ DateOfBirth.toString).readNullable[LocalDate] and
+      (__ \ Nino.toString).readNullable[String] and
+      (__ \ MemberNoNino.toString).readNullable[String] and
+      (__ \ PrincipalResAddDetails.toString).readNullable[PrincipalResAddDetails] and
+      (__ \ MemberResidencyDetails.toString).readNullable[MemberResidencyDetails]
   )(MemberDetails.apply _)
 
   implicit val writes: OWrites[MemberDetails] = Json.writes[MemberDetails]

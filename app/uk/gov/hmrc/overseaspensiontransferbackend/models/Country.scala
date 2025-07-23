@@ -16,24 +16,21 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class SchemeManagerDetails(
-    schemeManagerType: Option[String],
-    schemeManagerAddress: Option[SchemeManagerAddress]
-  )
+case class Country(code: String, name: String) {
+  override def toString: String = name
+}
 
-object SchemeManagerDetails {
+object Country {
 
-  implicit val reads: Reads[SchemeManagerDetails] = (
-    (__ \ "schemeManagerType").readNullable[String] and
-      (__ \ "schemeManagerAddress").readNullable[SchemeManagerAddress]
-  )(SchemeManagerDetails.apply _)
+  implicit val reads: Reads[Country] = (
+    (__ \ "code").read[String] and
+      (__ \ "name").read[String]
+  )(Country.apply _)
 
-  implicit val writes: OWrites[SchemeManagerDetails] =
-    Json.writes[SchemeManagerDetails]
+  implicit val writes: OWrites[Country] = Json.writes[Country]
 
-  implicit val format: OFormat[SchemeManagerDetails] =
-    OFormat(reads, writes)
+  implicit val format: OFormat[Country] = OFormat(reads, writes)
 }

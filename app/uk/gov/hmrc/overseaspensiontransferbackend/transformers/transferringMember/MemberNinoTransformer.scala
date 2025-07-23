@@ -17,15 +17,17 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.external.{MemberDetailsExternalField, TaskField}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.internal.{AnswersDataField, TransferringMemberField}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 class MemberNinoTransformer extends PathAwareTransformer with JsonHelpers {
 
-  val jsonKey                       = "nino"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  private val jsonKey               = MemberDetailsExternalField.Nino.toString
+  override val externalPath: JsPath = JsPath \ TaskField.MemberDetails.toString \ jsonKey
+  override val internalPath: JsPath = JsPath \ AnswersDataField.TransferringMember.toString \ TransferringMemberField.MemberDetails.toString \ jsonKey
 
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
