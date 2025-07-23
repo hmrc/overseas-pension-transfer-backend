@@ -86,4 +86,33 @@ trait NameTransformerStep extends JsonHelpers {
         Right(json)
     }
   }
+
+  def deconstructName(
+      foreNameKey: String,
+      lastNameKey: String,
+      path: JsPath
+    ): TransformerStep = {
+    json =>
+      path.asSingleJson(json).asOpt[JsObject] match {
+        case Some(parent) =>
+          val foreNameOpt = (parent \ foreNameKey).asOpt[String]
+          val lastNameOpt = (parent \ lastNameKey).asOpt[String]
+
+          if (foreNameOpt.isEmpty && lastNameOpt.isEmpty) {
+            Right(json)
+          } else {
+            val nameFields    = Seq(
+              foreNameOpt.map("firstName" -> JsString(_)),
+              lastNameOpt.map("lastName" -> JsString(_))
+            ).flatten
+            val nameObject    = JsObject(nameFields)
+            val updatedParent = parent - foreNameKey - lastNameKey
+            val withName      = updatedParent + (path.path.last.asInstanceOf[KeyPathNode].key -> nameObject)
+
+            setPath(JsPath(path.path.dropRight(1)), withName, json)
+          }
+
+        case None => Right(json)
+      }
+  }
 }

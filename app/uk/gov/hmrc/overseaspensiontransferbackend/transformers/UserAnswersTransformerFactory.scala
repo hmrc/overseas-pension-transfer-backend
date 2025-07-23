@@ -16,17 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.{
-  QropsAddressTransformer,
-  QropsEstablishedCountryTransformer,
-  QropsEstablishedOtherTransformer,
-  QropsNameTransformer,
-  QropsRefTransformer,
-  QropsSchemeManagerAddressTransformer,
-  QropsSchemeManagerEmailTransformer,
-  QropsSchemeManagerPhoneTranformer,
-  QropsSchemeManagerTypeTransformer
-}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
 case class UserAnswersTransformerFactory() {
@@ -55,16 +45,13 @@ case class UserAnswersTransformerFactory() {
     new QropsSchemeManagerTypeTransformer,
     new QropsSchemeManagerAddressTransformer,
     new QropsSchemeManagerEmailTransformer,
-    new QropsSchemeManagerPhoneTranformer
+    new QropsSchemeManagerPhoneTranformer,
+    new QropsSchemeManagerIndividualTransformer
   )
 
   def build(): UserAnswersTransformer = {
     val allTransformers =
-      Seq(
-        memberDetailsTransformers,
-        qropsDetailsTransformers,
-        qropsSchemeManagerDetailsTransformers
-      ).flatten
+      memberDetailsTransformers ++ qropsDetailsTransformers ++ qropsSchemeManagerDetailsTransformers
 
     new UserAnswersTransformer(allTransformers)
   }

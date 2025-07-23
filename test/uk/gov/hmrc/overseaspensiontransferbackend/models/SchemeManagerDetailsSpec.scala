@@ -36,7 +36,7 @@ class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
           None
         )
 
-      val model  = SchemeManagerDetails(Some("Some Type"), Some(schemeManagerAddress))
+      val model  = SchemeManagerDetails(Some("Some Type"), Some(schemeManagerAddress), None, None, None, None, None)
       val json   = Json.toJson(model)
       val result = json.validate[SchemeManagerDetails]
 
@@ -47,7 +47,7 @@ class SchemeManagerDetailsSpec extends AnyFreeSpec with Matchers {
       val json   = Json.obj()
       val result = json.validate[SchemeManagerDetails]
 
-      result mustBe JsSuccess(SchemeManagerDetails(None, None))
+      result mustBe JsSuccess(SchemeManagerDetails(None, None, None, None, None, None, None))
     }
   }
 }
