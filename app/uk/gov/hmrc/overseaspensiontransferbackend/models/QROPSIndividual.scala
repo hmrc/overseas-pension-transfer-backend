@@ -20,7 +20,6 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Json, OFormat, OWrites, Reads}
 
 case class QROPSIndividual(
-    individualTitle: Option[String],
     individualForename: Option[String],
     individualSurname: Option[String]
   )
@@ -28,8 +27,7 @@ case class QROPSIndividual(
 object QROPSIndividual {
 
   implicit val reads: Reads[QROPSIndividual] = (
-    (__ \ "individualTitle").readNullable[String] and
-      (__ \ "individualForename").readNullable[String] and
+    (__ \ "individualForename").readNullable[String] and
       (__ \ "individualSurname").readNullable[String]
   )(QROPSIndividual.apply _)
 

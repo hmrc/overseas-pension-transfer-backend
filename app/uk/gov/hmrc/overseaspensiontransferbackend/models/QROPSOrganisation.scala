@@ -21,7 +21,6 @@ import play.api.libs.json.{__, Json, OFormat, OWrites, Reads}
 
 case class QROPSOrganisation(
     orgName: Option[String],
-    orgTitle: Option[String],
     orgForename: Option[String],
     orgSurname: Option[String]
   )
@@ -30,7 +29,6 @@ object QROPSOrganisation {
 
   implicit val reads: Reads[QROPSOrganisation] = (
     (__ \ "orgName").readNullable[String] and
-      (__ \ "orgTitle").readNullable[String] and
       (__ \ "orgForename").readNullable[String] and
       (__ \ "orgSurname").readNullable[String]
   )(QROPSOrganisation.apply _)

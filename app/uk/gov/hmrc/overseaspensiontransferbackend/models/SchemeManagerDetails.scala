@@ -21,14 +21,24 @@ import play.api.libs.json._
 
 case class SchemeManagerDetails(
     schemeManagerType: Option[String],
-    schemeManagerAddress: Option[SchemeManagerAddress]
+    schemeManagerAddress: Option[SchemeManagerAddress],
+    schemeManagerEmail: Option[String],
+    schemeManagerPhone: Option[String],
+    individualContactName: Option[String],
+    organisationContactName: Option[String],
+    orgName: Option[String]
   )
 
 object SchemeManagerDetails {
 
   implicit val reads: Reads[SchemeManagerDetails] = (
     (__ \ "schemeManagerType").readNullable[String] and
-      (__ \ "schemeManagerAddress").readNullable[SchemeManagerAddress]
+      (__ \ "schemeManagerAddress").readNullable[SchemeManagerAddress] and
+      (__ \ "schemeManagerEmail").readNullable[String] and
+      (__ \ "schemeManagerPhone").readNullable[String] and
+      (__ \ "individualContactName").readNullable[String] and
+      (__ \ "organisationContactName").readNullable[String] and
+      (__ \ "orgName").readNullable[String]
   )(SchemeManagerDetails.apply _)
 
   implicit val writes: OWrites[SchemeManagerDetails] =

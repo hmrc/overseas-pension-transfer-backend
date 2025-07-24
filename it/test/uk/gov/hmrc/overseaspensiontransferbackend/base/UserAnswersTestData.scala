@@ -88,7 +88,12 @@ object UserAnswersTestData {
           "name" -> "United Kingdom"
         )
       ),
-      "schemeManagerEmail" -> "scheme.manager@email.com"
+      "schemeManagerEmail" -> "scheme.manager@email.com",
+      "schemeManagerPhone" -> "07777777777",
+      "individualContactName" -> Json.obj(
+        "firstName" -> "Individual",
+        "lastName" -> "Lastname"
+      )
     )
   )
 
@@ -168,7 +173,12 @@ object UserAnswersTestData {
             "name" -> "United Kingdom"
           )
         ),
-        "schemeManagerEmail" -> "scheme.manager@email.com"
+        "schemeManagerEmail" -> "scheme.manager@email.com",
+        "schemeManagerPhone" -> "07777777777",
+        "qropsIndividual" -> Json.obj(
+          "individualForename" -> "Individual",
+          "individualSurname" -> "Lastname"
+        )
       )
     )
   )
