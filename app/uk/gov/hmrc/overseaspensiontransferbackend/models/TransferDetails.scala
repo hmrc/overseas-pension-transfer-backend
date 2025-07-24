@@ -24,7 +24,8 @@ import java.time.LocalDate
 case class TransferDetails(
     transferAmount: Option[BigDecimal],
     allowanceBeforeTransfer: Option[BigDecimal],
-    dateMemberTransferred: Option[LocalDate]
+    dateMemberTransferred: Option[LocalDate],
+    cashOnlyTransfer: Option[String]
   )
 
 object TransferDetails {
@@ -32,7 +33,8 @@ object TransferDetails {
   implicit val reads: Reads[TransferDetails] = (
     (__ \ "transferAmount").readNullable[BigDecimal] and
       (__ \ "allowanceBeforeTransfer").readNullable[BigDecimal] and
-      (__ \ "dateMemberTransferred").readNullable[LocalDate]
+      (__ \ "dateMemberTransferred").readNullable[LocalDate] and
+      (__ \ "cashOnlyTransfer").readNullable[String]
   )(TransferDetails.apply _)
 
   implicit val writes: OWrites[TransferDetails] =
