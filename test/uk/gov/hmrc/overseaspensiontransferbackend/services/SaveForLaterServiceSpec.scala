@@ -43,7 +43,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val validSaved = SavedUserAnswers(
     referenceId = testId,
-    data        = AnswersData(Some(TransferringMember(None)), None, None, None),
+    data        = AnswersData(Some(TransferringMember(None)), None, None),
     lastUpdated = now
   )
 

@@ -30,10 +30,9 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
       val original = SavedUserAnswers(
         referenceId = "ref-123",
         data        = AnswersData(
-          transferringMember   = Some(TransferringMember(None)),
-          aboutReceivingQROPS  = None,
-          schemeManagerDetails = None,
-          transferDetails      = None
+          transferringMember  = Some(TransferringMember(None)),
+          aboutReceivingQROPS = None,
+          transferDetails     = None
         ),
         lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
       )
@@ -46,10 +45,9 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
     "must flatten AnswersData to JsObject in writes" in {
       val data = AnswersData(
-        transferringMember   = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
-        aboutReceivingQROPS  = None,
-        schemeManagerDetails = None,
-        transferDetails      = None
+        transferringMember  = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
+        aboutReceivingQROPS = None,
+        transferDetails     = None
       )
 
       val obj = SavedUserAnswers("ref-456", data, Instant.parse("2025-01-01T10:00:00Z"))
