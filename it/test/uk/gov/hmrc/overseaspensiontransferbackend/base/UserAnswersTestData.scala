@@ -102,7 +102,8 @@ object UserAnswersTestData {
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
-      "cashOnlyTransfer" -> false
+      "cashOnlyTransfer" -> false,
+      "paymentTaxableOverseas" -> true
     )
   )
 
@@ -197,7 +198,8 @@ object UserAnswersTestData {
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
-      "cashOnlyTransfer" -> "No"
+      "cashOnlyTransfer" -> "No",
+      "paymentTaxableOverseas" -> "Yes"
     )
   )
 
