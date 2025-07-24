@@ -97,8 +97,14 @@ object UserAnswersTestData {
     )
   )
 
+  val transferDetails = Json.obj(
+    "transferDetails" -> Json.obj(
+      "transferAmount" -> 12345.99
+    )
+  )
+
   val fullUserAnswersExternalJson: JsObject =
-    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetails)
+    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetails).deepMerge(transferDetails)
 
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(
@@ -183,8 +189,14 @@ object UserAnswersTestData {
     )
   )
 
+  val transferDetailsInternalJson = Json.obj(
+    "transferDetails" -> Json.obj(
+      "transferAmount" -> 12345.99
+    )
+  )
+
   val fullUserAnswersInternalJson: JsObject =
-    transferringMemberInternalJson.deepMerge(qropsDetailsInternalJson)
+    transferringMemberInternalJson.deepMerge(qropsDetailsInternalJson).deepMerge(transferDetailsInternalJson)
 
   val memberDetailsExternalUpdateJson: JsObject = Json.obj(
     "memberDetails" -> Json.obj(
