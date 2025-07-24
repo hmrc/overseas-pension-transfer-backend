@@ -20,30 +20,31 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json
 
-class CashOnlyTransferTransformerSpec extends AnyFreeSpec with Matchers {
+class PaymentTaxableOverseasTransformerSpec extends AnyFreeSpec with Matchers {
 
-  private val transformer = new CashOnlyTransferTransformer
+  private val transformer = new PaymentTaxableOverseasTransformer
 
-  "CashOnlyTransferTransformer" - {
+  "PaymentTaxableOverseasTransformer" - {
 
-    "must convert transferDetails.cashOnlyTransfer boolean to nested Yes/No string" in {
-      val input    = Json.obj("transferDetails" -> Json.obj("cashOnlyTransfer" -> true))
-      val expected = Json.obj("transferDetails" -> Json.obj("cashOnlyTransfer" -> "Yes"))
+    "must convert transferDetails.paymentTaxableOverseas boolean to nested Yes/No string" in {
+      val input    = Json.obj("transferDetails" -> Json.obj("paymentTaxableOverseas" -> true))
+      val expected = Json.obj("transferDetails" -> Json.obj("paymentTaxableOverseas" -> "Yes"))
 
       transformer.construct(input) mustBe Right(expected)
     }
 
     "must convert nested Yes/No string back to boolean" in {
-      val input    = Json.obj("transferDetails" -> Json.obj("cashOnlyTransfer" -> "Yes"))
-      val expected = Json.obj("transferDetails" -> Json.obj("cashOnlyTransfer" -> true))
+      val input    = Json.obj("transferDetails" -> Json.obj("paymentTaxableOverseas" -> "Yes"))
+      val expected = Json.obj("transferDetails" -> Json.obj("paymentTaxableOverseas" -> true))
 
       transformer.deconstruct(input) mustBe Right(expected)
     }
 
-    "must leave JSON unchanged if cashOnlyTransfer is missing" in {
+    "must leave JSON unchanged if paymentTaxableOverseas is missing" in {
       val input = Json.obj("transferDetails" -> Json.obj())
 
       transformer.construct(input) mustBe Right(input)
     }
   }
+
 }
