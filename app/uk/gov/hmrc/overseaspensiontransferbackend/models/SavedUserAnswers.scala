@@ -31,7 +31,6 @@ final case class SavedUserAnswers(
 final case class AnswersData(
     transferringMember: Option[TransferringMember],
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
-    schemeManagerDetails: Option[SchemeManagerDetails],
     transferDetails: Option[TransferDetails]
   )
 
@@ -43,7 +42,6 @@ object AnswersData {
   implicit val reads: Reads[AnswersData] = (
     (__ \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
-      (__ \ "schemeManagerDetails").readNullable[SchemeManagerDetails] and
       (__ \ "transferDetails").readNullable[TransferDetails]
   )(AnswersData.apply _)
 
