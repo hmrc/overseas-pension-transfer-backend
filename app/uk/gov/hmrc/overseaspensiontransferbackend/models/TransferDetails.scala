@@ -19,16 +19,20 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 
+import java.time.LocalDate
+
 case class TransferDetails(
     transferAmount: Option[BigDecimal],
-    allowanceBeforeTransfer: Option[BigDecimal]
+    allowanceBeforeTransfer: Option[BigDecimal],
+    dateMemberTransferred: Option[LocalDate]
   )
 
 object TransferDetails {
 
   implicit val reads: Reads[TransferDetails] = (
     (__ \ "transferAmount").readNullable[BigDecimal] and
-      (__ \ "allowanceBeforeTransfer").readNullable[BigDecimal]
+      (__ \ "allowanceBeforeTransfer").readNullable[BigDecimal] and
+      (__ \ "dateMemberTransferred").readNullable[LocalDate]
   )(TransferDetails.apply _)
 
   implicit val writes: OWrites[TransferDetails] =

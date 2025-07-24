@@ -100,7 +100,8 @@ object UserAnswersTestData {
   val transferDetails = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
-      "allowanceBeforeTransfer" -> 54321.99
+      "allowanceBeforeTransfer" -> 54321.99,
+      "dateMemberTransferred" -> "2012-12-12"
     )
   )
 
@@ -193,7 +194,8 @@ object UserAnswersTestData {
   val transferDetailsInternalJson = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
-      "allowanceBeforeTransfer" -> 54321.99
+      "allowanceBeforeTransfer" -> 54321.99,
+      "dateMemberTransferred" -> "2012-12-12"
     )
   )
 
