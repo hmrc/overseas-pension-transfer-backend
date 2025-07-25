@@ -104,7 +104,8 @@ object UserAnswersTestData {
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
-      "applicableExclusion" -> "occupational"
+      "applicableExclusion" -> "occupational",
+      "amountTaxDeducted" -> 9876543.21
     )
   )
 
@@ -202,7 +203,8 @@ object UserAnswersTestData {
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
       "taxableOverseasTransferDetails" -> Json.obj(
-        "applicableExclusion" -> "01"
+        "applicableExclusion" -> "01",
+        "amountTaxDeducted" -> 9876543.21
       )
     )
   )

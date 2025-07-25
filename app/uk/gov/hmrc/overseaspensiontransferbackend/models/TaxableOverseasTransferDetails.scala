@@ -28,7 +28,7 @@ object TaxableOverseasTransferDetails {
 
   implicit val reads: Reads[TaxableOverseasTransferDetails] = (
     (__ \ "applicableExclusion").readNullable[ApplicableExclusion] and
-      (__ \ "amountTaxDeductions").readNullable[BigDecimal]
+      (__ \ "amountTaxDeducted").readNullable[BigDecimal]
   )(TaxableOverseasTransferDetails.apply _)
 
   implicit val writes: Writes[TaxableOverseasTransferDetails] = Json.writes[TaxableOverseasTransferDetails]

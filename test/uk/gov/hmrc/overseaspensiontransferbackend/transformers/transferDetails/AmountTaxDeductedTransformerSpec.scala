@@ -20,32 +20,32 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json
 
-class ApplicableExclusionTransformerSpec extends AnyFreeSpec with Matchers {
+class AmountTaxDeductedTransformerSpec extends AnyFreeSpec with Matchers {
 
-  private val transformer = new ApplicableExclusionTransformer
+  private val transformer = new AmountTaxDeductedTransformer
 
-  "ApplicableExclusionTransfromerSpec" - {
-    "must move transferDetails.applicableExclusion to transferDetails.taxableOverseasTransferDetails.applicableExclusion" in {
-      val inputJson = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> "publicService"))
-      val expected  = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> "02")))
+  "AmountTaxDeductedTransformerSpec" - {
+    "must move transferDetails.amountTaxDeducted to transferDetails.taxableOverseasTransferDetails.amountTaxDeducted" in {
+      val inputJson = Json.obj("transferDetails" -> Json.obj("amountTaxDeducted" -> 12345.99))
+      val expected  = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("amountTaxDeducted" -> 12345.99)))
 
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
-    "must move transferDetails.taxableOverseasTransferDetails.applicableExclusion to transferDetails.applicableExclusion" in {
-      val inputJson = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> "04")))
-      val expected  = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> "resident"))
+    "must move transferDetails.taxableOverseasTransferDetails.amountTaxDeducted to transferDetails.amountTaxDeducted" in {
+      val inputJson = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("amountTaxDeducted" -> 100000.00)))
+      val expected  = Json.obj("transferDetails" -> Json.obj("amountTaxDeducted" -> 100000.00))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }
 
-    "must leave Json unchanged if transferDetails.applicableExclusion is missing" in {
+    "must leave Json unchanged if transferDetails is missing" in {
       val inputJson = Json.obj("transferDetails" -> Json.obj())
 
       transformer.construct(inputJson) mustBe Right(inputJson)
     }
 
-    "must leave Json unchanged if transferDetails.taxableOverseasTransferDetails.applicableExclusion is missing" in {
+    "must leave Json unchanged if transferDetails.taxableOverseasTransferDetails.amountTaxDeducted is missing" in {
       val inputJson = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj()))
 
       transformer.deconstruct(inputJson) mustBe Right(inputJson)
