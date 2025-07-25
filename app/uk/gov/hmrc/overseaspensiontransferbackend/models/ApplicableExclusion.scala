@@ -50,12 +50,12 @@ object ApplicableExclusion {
     Format(reads, writes)
 }
 
-case object Occupational     extends ApplicableExclusion {
+case object Occupational extends ApplicableExclusion {
   override def toString: String        = "occupational"
   override val downstreamValue: String = "01"
 }
 
-case object PublicService    extends ApplicableExclusion {
+case object PublicService extends ApplicableExclusion {
   override def toString: String        = "publicService"
   override val downstreamValue: String = "02"
 }
@@ -65,7 +65,7 @@ case object InternationalOrg extends ApplicableExclusion {
   override val downstreamValue: String = "03"
 }
 
-case object Resident         extends ApplicableExclusion {
+case object Resident extends ApplicableExclusion {
   override def toString: String        = "resident"
   override val downstreamValue: String = "04"
 }
