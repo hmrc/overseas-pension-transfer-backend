@@ -27,7 +27,14 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
   "TransferDetails" - {
 
     "must serialize and deserialize correctly with value" in {
-      val model  = TransferDetails(Some(12345.67), Some(54321.99), Some(LocalDate.of(2012, 12, 12)), Some("No"), Some("Yes"))
+      val model  = TransferDetails(
+        Some(12345.67),
+        Some(54321.99),
+        Some(LocalDate.of(2012, 12, 12)),
+        Some("No"),
+        Some("Yes"),
+        Some(TaxableOverseasTransferDetails(Some(Occupational), None))
+      )
       val json   = Json.toJson(model)
       val result = json.validate[TransferDetails]
 
@@ -38,7 +45,7 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
       val json   = Json.obj()
       val result = json.validate[TransferDetails]
 
-      result mustBe JsSuccess(TransferDetails(None, None, None, None, None))
+      result mustBe JsSuccess(TransferDetails(None, None, None, None, None, None))
     }
   }
 }
