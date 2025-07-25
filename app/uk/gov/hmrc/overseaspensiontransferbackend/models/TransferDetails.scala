@@ -26,7 +26,8 @@ case class TransferDetails(
     allowanceBeforeTransfer: Option[BigDecimal],
     dateMemberTransferred: Option[LocalDate],
     cashOnlyTransfer: Option[String],
-    paymentTaxableOverseas: Option[String]
+    paymentTaxableOverseas: Option[String],
+    taxableOverseasTransferDetails: Option[TaxableOverseasTransferDetails]
   )
 
 object TransferDetails {
@@ -36,7 +37,8 @@ object TransferDetails {
       (__ \ "allowanceBeforeTransfer").readNullable[BigDecimal] and
       (__ \ "dateMemberTransferred").readNullable[LocalDate] and
       (__ \ "cashOnlyTransfer").readNullable[String] and
-      (__ \ "paymentTaxableOverseas").readNullable[String]
+      (__ \ "paymentTaxableOverseas").readNullable[String] and
+      (__ \ "taxableOverseasTransferDetails").readNullable[TaxableOverseasTransferDetails]
   )(TransferDetails.apply _)
 
   implicit val writes: OWrites[TransferDetails] =
