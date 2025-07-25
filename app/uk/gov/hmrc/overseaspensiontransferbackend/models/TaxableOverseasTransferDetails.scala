@@ -21,14 +21,16 @@ import play.api.libs.json.{__, Format, Json, Reads, Writes}
 
 case class TaxableOverseasTransferDetails(
     applicableExclusion: Option[ApplicableExclusion],
-    amountTaxDeducted: Option[BigDecimal]
+    amountTaxDeducted: Option[BigDecimal],
+    transferMinusTax: Option[BigDecimal]
   )
 
 object TaxableOverseasTransferDetails {
 
   implicit val reads: Reads[TaxableOverseasTransferDetails] = (
     (__ \ "applicableExclusion").readNullable[ApplicableExclusion] and
-      (__ \ "amountTaxDeducted").readNullable[BigDecimal]
+      (__ \ "amountTaxDeducted").readNullable[BigDecimal] and
+      (__ \ "transferMinusTax").readNullable[BigDecimal]
   )(TaxableOverseasTransferDetails.apply _)
 
   implicit val writes: Writes[TaxableOverseasTransferDetails] = Json.writes[TaxableOverseasTransferDetails]

@@ -33,7 +33,7 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
         Some(LocalDate.of(2012, 12, 12)),
         Some("No"),
         Some("Yes"),
-        Some(TaxableOverseasTransferDetails(Some(Occupational), None))
+        Some(TaxableOverseasTransferDetails(Some(Occupational), Some(12345.99), Some(54321.99)))
       )
       val json   = Json.toJson(model)
       val result = json.validate[TransferDetails]

@@ -105,7 +105,8 @@ object UserAnswersTestData {
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
       "applicableExclusion" -> "occupational",
-      "amountTaxDeducted" -> 9876543.21
+      "amountTaxDeducted" -> 9876543.21,
+      "transferMinusTax" -> 123456.99
     )
   )
 
@@ -204,7 +205,8 @@ object UserAnswersTestData {
       "paymentTaxableOverseas" -> "Yes",
       "taxableOverseasTransferDetails" -> Json.obj(
         "applicableExclusion" -> "01",
-        "amountTaxDeducted" -> 9876543.21
+        "amountTaxDeducted" -> 9876543.21,
+        "transferMinusTax" -> 123456.99
       )
     )
   )

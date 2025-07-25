@@ -21,7 +21,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   AmountTaxDeductedTransformer,
   ApplicableExclusionTransformer,
   CashOnlyTransferTransformer,
-  PaymentTaxableOverseasTransformer
+  PaymentTaxableOverseasTransformer,
+  TransferMinusTaxTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
@@ -59,7 +60,8 @@ case class UserAnswersTransformerFactory() {
     new CashOnlyTransferTransformer,
     new PaymentTaxableOverseasTransformer,
     new ApplicableExclusionTransformer,
-    new AmountTaxDeductedTransformer
+    new AmountTaxDeductedTransformer,
+    new TransferMinusTaxTransformer
   )
 
   def build(): UserAnswersTransformer = {
