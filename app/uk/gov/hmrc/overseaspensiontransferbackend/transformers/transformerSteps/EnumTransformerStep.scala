@@ -22,10 +22,14 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 trait EnumTransformerStep extends JsonHelpers {
 
-  def constructEnum[A](path: JsPath, func: A => JsString)(implicit reads: Reads[A]): TransformerStep = json =>
+  def constructEnum[A](path: JsPath, func: A => JsValue)(implicit reads: Reads[A]): TransformerStep = json =>
     path.asSingleJson(json).validate[A] match {
-      case JsSuccess(value, _) => setPath(path, func(value), json)
-      case JsError(_)          => Right(json)
+      case JsSuccess(value, _) => {
+        setPath(path, func(value), json)
+      }
+      case JsError(_)          => {
+        Right(json)
+      }
     }
 
   def deconstructEnum[A](path: JsPath, func: String => A): TransformerStep = json =>
