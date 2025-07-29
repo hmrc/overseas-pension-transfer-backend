@@ -20,6 +20,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQRO
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   AmountTaxDeductedTransformer,
   ApplicableExclusionTransformer,
+  AssetTypeTransformer,
+  CashAssetsTransformer,
   CashOnlyTransferTransformer,
   PaymentTaxableOverseasTransformer,
   TransferMinusTaxTransformer
@@ -61,7 +63,9 @@ case class UserAnswersTransformerFactory() {
     new PaymentTaxableOverseasTransformer,
     new ApplicableExclusionTransformer,
     new AmountTaxDeductedTransformer,
-    new TransferMinusTaxTransformer
+    new TransferMinusTaxTransformer,
+    new CashAssetsTransformer,
+    new AssetTypeTransformer
   )
 
   def build(): UserAnswersTransformer = {

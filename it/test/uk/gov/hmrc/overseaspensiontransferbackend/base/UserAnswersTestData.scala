@@ -106,7 +106,8 @@ object UserAnswersTestData {
       "paymentTaxableOverseas" -> true,
       "applicableExclusion" -> "occupational",
       "amountTaxDeducted" -> 9876543.21,
-      "transferMinusTax" -> 123456.99
+      "transferMinusTax" -> 123456.99,
+      "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
     )
   )
 
@@ -207,6 +208,13 @@ object UserAnswersTestData {
         "applicableExclusion" -> "01",
         "amountTaxDeducted" -> 9876543.21,
         "transferMinusTax" -> 123456.99
+      ),
+      "typeOfAssets" -> Json.obj(
+        "cashAssets" -> "Yes",
+        "quotedShareAssets" -> "No",
+        "unquotedShareAssets" -> "Yes",
+        "propertyAsset" -> "No",
+        "otherAsset" -> "Yes"
       )
     )
   )
