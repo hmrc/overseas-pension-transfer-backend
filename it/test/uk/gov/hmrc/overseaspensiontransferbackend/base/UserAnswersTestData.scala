@@ -103,7 +103,8 @@ object UserAnswersTestData {
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
-      "paymentTaxableOverseas" -> true
+      "paymentTaxableOverseas" -> true,
+      "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
     )
   )
 
@@ -199,7 +200,14 @@ object UserAnswersTestData {
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> "No",
-      "paymentTaxableOverseas" -> "Yes"
+      "paymentTaxableOverseas" -> "Yes",
+      "typeOfAssets" -> Json.obj(
+        "cashAssets" -> "Yes",
+        "quotedShareAssets" -> "No",
+        "unquotedShareAssets" -> "Yes",
+        "propertyAsset" -> "No",
+        "otherAsset" -> "Yes"
+      )
     )
   )
 
