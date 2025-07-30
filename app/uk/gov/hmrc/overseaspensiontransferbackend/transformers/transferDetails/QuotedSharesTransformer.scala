@@ -16,38 +16,29 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import play.api.libs.json.{JsArray, JsError, JsObject, JsPath, Json, Reads}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{QuotedShares, UnquotedShares}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import AssetType._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 
-class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep {
+class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerStep {
 
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
+  override def externalPath: JsPath = JsPath \ "transferDetails" \ "quotedShares"
 
-  override def internalPath: JsPath = externalPath
+  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "quotedShares"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: List[AssetType] => JsObject = listOfAssets => {
-      val fullAssetTypeSet: Seq[AssetType] =
-        Seq(Cash, AssetType.QuotedShares, AssetType.UnquotedShares, Property, Other)
+    implicit val reads: Reads[QuotedShares] = QuotedShares.upstreamReads
 
-      fullAssetTypeSet.foldLeft(Json.obj()) {
-        (acc, asset) =>
-          if (listOfAssets.contains(asset)) {
-            acc.deepMerge(Json.obj(asset.jsonKey -> "Yes"))
-          } else {
-            acc.deepMerge(Json.obj(asset.jsonKey -> "No"))
-          }
-      }
-    }
+    val enumConversion: List[QuotedShares] => JsArray = listOfShares =>
+      JsArray(listOfShares.map(Json.toJson(_)))
 
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[List[AssetType]](internalPath, enumConversion)
+      constructEnum[List[QuotedShares]](externalPath, enumConversion),
+      moveStep(externalPath, internalPath)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
@@ -56,19 +47,15 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: TypeOfAssets => JsArray = typeOfAssets => typeOfAssets.getAssets
+    val enumConversion: List[QuotedShares] => JsArray = quotedShares =>
+      JsArray(quotedShares.map(_.toUpstreamJson))
 
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[TypeOfAssets](
-        internalPath,
-        enumConversion
-      ),
-      moveStep(
-        internalPath,
-        externalPath
-      )
+      constructEnum[List[QuotedShares]](internalPath, enumConversion),
+      moveStep(internalPath, externalPath)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
   }
+
 }
