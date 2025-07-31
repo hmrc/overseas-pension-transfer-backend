@@ -17,14 +17,14 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 
-class PropertyTransformer extends PathAwareTransformer {
+class OtherAssetsTransformer extends PathAwareTransformer {
 
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "propertyAssets"
+  override def externalPath: JsPath = JsPath \ "transferDetails" \ "otherAssets"
 
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "propertyAssets"
+  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "otherAssets"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */

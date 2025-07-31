@@ -30,11 +30,11 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
     "addressLine3" -> "",
     "addressLine4" -> "",
     "addressLine5" -> "",
-    "ukPostcode"   -> "",
+    "ukPostCode"   -> "",
     "country"      -> Json.obj("name" -> "", "code" -> "")
   )
 
-  "UnquotedSharesTransformer" - {
+  "PropertyTransformer" - {
     "convert transferDetails.propertyAssets to transferDetails.typeOfAssets.propertyAssets" in {
       val input = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
