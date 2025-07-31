@@ -104,6 +104,9 @@ object UserAnswersTestData {
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
+      "applicableExclusion" -> "occupational",
+      "amountTaxDeducted" -> 9876543.21,
+      "transferMinusTax" -> 123456.99,
       "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
     )
   )
@@ -194,13 +197,18 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetailsInternalJson = Json.obj(
+  val transferDetailsInternalJson: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
+      "taxableOverseasTransferDetails" -> Json.obj(
+        "applicableExclusion" -> "01",
+        "amountTaxDeducted" -> 9876543.21,
+        "transferMinusTax" -> 123456.99
+      ),
       "typeOfAssets" -> Json.obj(
         "cashAssets" -> "Yes",
         "quotedShareAssets" -> "No",

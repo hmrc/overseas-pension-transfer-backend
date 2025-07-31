@@ -27,6 +27,7 @@ case class TransferDetails(
     dateMemberTransferred: Option[LocalDate],
     cashOnlyTransfer: Option[String],
     paymentTaxableOverseas: Option[String],
+    taxableOverseasTransferDetails: Option[TaxableOverseasTransferDetails],
     typeOfAssets: Option[TypeOfAssets]
   )
 
@@ -38,6 +39,7 @@ object TransferDetails {
       (__ \ "dateMemberTransferred").readNullable[LocalDate] and
       (__ \ "cashOnlyTransfer").readNullable[String] and
       (__ \ "paymentTaxableOverseas").readNullable[String] and
+      (__ \ "taxableOverseasTransferDetails").readNullable[TaxableOverseasTransferDetails] and
       (__ \ "typeOfAssets").readNullable[TypeOfAssets]
   )(TransferDetails.apply _)
 
