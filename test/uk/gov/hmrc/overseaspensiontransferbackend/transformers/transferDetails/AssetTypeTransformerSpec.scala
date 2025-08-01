@@ -64,11 +64,15 @@ class AssetTypeTransformerSpec extends AnyFreeSpec with Matchers {
           "quotedShareAssets"   -> "Yes",
           "unquotedShareAssets" -> "Yes",
           "propertyAsset"       -> "Yes",
-          "otherAsset"          -> "Yes"
+          "otherAsset"          -> "Yes",
+          "moreProp"            -> "No"
         )))
 
       val expected = Json.obj("transferDetails" ->
-        Json.obj("typeOfAssets" -> Seq("cash", "unquotedShares", "quotedShares", "property", "other")))
+        Json.obj(
+          "typeOfAssets" -> Json.obj("moreProp" -> "No"),
+          "typeOfAsset"  -> Seq("cash", "unquotedShares", "quotedShares", "property", "other")
+        ))
 
       transformer.deconstruct(input) mustBe Right(expected)
     }
@@ -84,7 +88,10 @@ class AssetTypeTransformerSpec extends AnyFreeSpec with Matchers {
         )))
 
       val expected = Json.obj("transferDetails" ->
-        Json.obj("typeOfAssets" -> Seq.empty[String]))
+        Json.obj(
+          "typeOfAssets" -> Json.obj(),
+          "typeOfAsset"  -> Seq.empty[String]
+        ))
 
       transformer.deconstruct(input) mustBe Right(expected)
     }

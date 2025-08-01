@@ -97,14 +97,21 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetails = Json.obj(
+  val transferDetails: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
-      "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
+      "applicableExclusion" -> "occupational",
+      "amountTaxDeducted" -> 9876543.21,
+      "transferMinusTax" -> 123456.99,
+      "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
+      "moreQuoted" -> false,
+      "moreUnquoted" -> true,
+      "moreAsset" -> false,
+      "moreProp" -> false
     )
   )
 
@@ -194,19 +201,28 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetailsInternalJson = Json.obj(
+  val transferDetailsInternalJson: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
+      "taxableOverseasTransferDetails" -> Json.obj(
+        "applicableExclusion" -> "01",
+        "amountTaxDeducted" -> 9876543.21,
+        "transferMinusTax" -> 123456.99
+      ),
       "typeOfAssets" -> Json.obj(
         "cashAssets" -> "Yes",
         "quotedShareAssets" -> "No",
         "unquotedShareAssets" -> "Yes",
         "propertyAsset" -> "No",
-        "otherAsset" -> "Yes"
+        "otherAsset" -> "Yes",
+        "moreQuoted" -> "No",
+        "moreUnquoted" -> "Yes",
+        "moreAsset" -> "No",
+        "moreProp" -> "No"
       )
     )
   )

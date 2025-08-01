@@ -18,10 +18,17 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
+  AmountTaxDeductedTransformer,
+  ApplicableExclusionTransformer,
   AssetTypeTransformer,
   CashAssetsTransformer,
   CashOnlyTransferTransformer,
-  PaymentTaxableOverseasTransformer
+  MoreOtherAssetTransformer,
+  MorePropertyTransformer,
+  MoreQuotedTransformer,
+  MoreUnquotedTransformer,
+  PaymentTaxableOverseasTransformer,
+  TransferMinusTaxTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
@@ -58,8 +65,15 @@ case class UserAnswersTransformerFactory() {
   private def transferDetailsTransformers: Seq[Transformer] = Seq(
     new CashOnlyTransferTransformer,
     new PaymentTaxableOverseasTransformer,
+    new ApplicableExclusionTransformer,
+    new AmountTaxDeductedTransformer,
+    new TransferMinusTaxTransformer,
     new CashAssetsTransformer,
-    new AssetTypeTransformer
+    new AssetTypeTransformer,
+    new MoreQuotedTransformer,
+    new MoreUnquotedTransformer,
+    new MorePropertyTransformer,
+    new MoreOtherAssetTransformer
   )
 
   def build(): UserAnswersTransformer = {
