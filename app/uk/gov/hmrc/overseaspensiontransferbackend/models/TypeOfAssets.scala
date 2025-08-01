@@ -18,26 +18,29 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, JsArray, JsString, Json, Reads, Writes}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.UnquotedShares.reads
 
 case class TypeOfAssets(
     cashAssets: Option[String],
     cashValue: Option[BigDecimal],
     unquotedShareAssets: Option[String],
     moreUnquoted: Option[String],
-    unquotedShares: Option[List[Shares]],
+    unquotedShares: Option[List[UnquotedShares]],
     quotedShareAssets: Option[String],
     moreQuoted: Option[String],
-    quotedShares: Option[List[Shares]],
+    quotedShares: Option[List[QuotedShares]],
     propertyAsset: Option[String],
     moreProp: Option[String],
     propertyAssets: Option[List[PropertyAssets]],
     otherAsset: Option[String],
+    moreAsset: Option[String],
     otherAssets: Option[List[OtherAssets]]
   ) {
 
   def getAssets: JsArray = {
     val typeOfAssetsList = List(cashAssets, unquotedShareAssets, quotedShareAssets, propertyAsset, otherAsset)
-    val assetTypes       = List(Cash, UnquotedShares, QuotedShares, Property, Other)
+    val assetTypes       =
+      List(AssetType.Cash, AssetType.UnquotedShares, AssetType.QuotedShares, AssetType.Property, AssetType.Other)
 
     val zipped = assetTypes.zip(typeOfAssetsList)
 
@@ -59,14 +62,15 @@ object TypeOfAssets {
       (__ \ "cashValue").readNullable[BigDecimal] and
       (__ \ "unquotedShareAssets").readNullable[String] and
       (__ \ "moreUnquoted").readNullable[String] and
-      (__ \ "unquotedShares").readNullable[List[Shares]] and
+      (__ \ "unquotedShares").readNullable[List[UnquotedShares]] and
       (__ \ "quotedShareAssets").readNullable[String] and
       (__ \ "moreQuoted").readNullable[String] and
-      (__ \ "quotedShares").readNullable[List[Shares]] and
+      (__ \ "quotedShares").readNullable[List[QuotedShares]] and
       (__ \ "propertyAsset").readNullable[String] and
       (__ \ "moreProp").readNullable[String] and
       (__ \ "propertyAssets").readNullable[List[PropertyAssets]] and
       (__ \ "otherAsset").readNullable[String] and
+      (__ \ "moreAsset").readNullable[String] and
       (__ \ "otherAssets").readNullable[List[OtherAssets]]
   )(TypeOfAssets.apply _)
 

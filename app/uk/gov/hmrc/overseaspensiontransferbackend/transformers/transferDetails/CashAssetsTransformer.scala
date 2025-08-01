@@ -17,8 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Cash, TypeOfAssets}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.AssetType.Cash
+import uk.gov.hmrc.overseaspensiontransferbackend.models.TypeOfAssets
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.{BooleanTransformerStep, EnumTransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 

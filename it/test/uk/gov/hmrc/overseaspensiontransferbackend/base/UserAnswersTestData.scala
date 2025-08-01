@@ -97,7 +97,7 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetails = Json.obj(
+  val transferDetails: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
@@ -107,7 +107,48 @@ object UserAnswersTestData {
       "applicableExclusion" -> "occupational",
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
-      "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
+      "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
+      "moreQuoted" -> false,
+      "moreUnquoted" -> true,
+      "moreAsset" -> false,
+      "moreProp" -> false,
+      "quotedShares" -> Seq(
+        Json.obj(
+          "valueOfShares" -> 1234.99,
+          "numberOfShares" -> 54,
+          "companyName" -> "Some Company",
+          "classOfShares" -> "ABC"
+        )
+      ),
+      "unquotedShares" -> Seq(
+        Json.obj(
+          "valueOfShares" -> 99999.99,
+          "numberOfShares" -> 12,
+          "companyName" -> "Unquoted",
+          "classOfShares" -> "Class"
+        )
+      ),
+      "propertyAssets" -> Seq(
+        Json.obj(
+          "propertyAddress" -> Json.obj(
+            "addressLine1" -> "11 Test Street",
+            "addressLine2" -> "Test Town",
+            "ukPostCode" -> "ZZ00 0ZZ",
+            "country" -> Json.obj(
+              "code" -> "UK",
+              "name" -> "United Kingdom"
+            )
+          ),
+          "propValue" -> 650000.00,
+          "propDescription" -> "Allotment in London"
+        )
+      ),
+      "otherAssets" -> Seq(
+        Json.obj(
+          "assetValue" -> 9876.99,
+          "assetDescription" -> "Vintage Car"
+        )
+      )
     )
   )
 
@@ -214,7 +255,48 @@ object UserAnswersTestData {
         "quotedShareAssets" -> "No",
         "unquotedShareAssets" -> "Yes",
         "propertyAsset" -> "No",
-        "otherAsset" -> "Yes"
+        "otherAsset" -> "Yes",
+        "moreQuoted" -> "No",
+        "moreUnquoted" -> "Yes",
+        "moreAsset" -> "No",
+        "moreProp" -> "No",
+        "quotedShares" -> Seq(
+          Json.obj(
+            "quotedValue" -> 1234.99,
+            "quotedShareTotal" -> 54,
+            "quotedCompany" -> "Some Company",
+            "quotedClass" -> "ABC"
+          )
+        ),
+        "unquotedShares" -> Seq(
+          Json.obj(
+            "unquotedValue" -> 99999.99,
+            "unquotedShareTotal" -> 12,
+            "unquotedCompany" -> "Unquoted",
+            "unquotedClass" -> "Class"
+          )
+        ),
+        "propertyAssets" -> Seq(
+          Json.obj(
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "11 Test Street",
+              "addressLine2" -> "Test Town",
+              "ukPostCode" -> "ZZ00 0ZZ",
+              "country" -> Json.obj(
+                "code" -> "UK",
+                "name" -> "United Kingdom"
+              )
+            ),
+            "propValue" -> 650000.00,
+            "propDescription" -> "Allotment in London"
+          )
+        ),
+        "otherAssets" -> Seq(
+          Json.obj(
+            "assetValue" -> 9876.99,
+            "assetDescription" -> "Vintage Car"
+          )
+        )
       )
     )
   )

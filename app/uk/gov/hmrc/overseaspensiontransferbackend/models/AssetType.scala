@@ -16,13 +16,38 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{JsError, JsString, JsSuccess, Json, Reads, Writes}
+import play.api.libs.json._
 
 trait AssetType {
   val jsonKey: String
 }
 
 object AssetType {
+
+  case object Cash extends AssetType {
+    override def toString: String = "cash"
+    override val jsonKey: String  = "cashAssets"
+  }
+
+  case object Property extends AssetType {
+    override def toString: String = "property"
+    override val jsonKey: String  = "propertyAsset"
+  }
+
+  case object UnquotedShares extends AssetType {
+    override def toString: String = "unquotedShares"
+    override val jsonKey: String  = "unquotedShareAssets"
+  }
+
+  case object QuotedShares extends AssetType {
+    override def toString: String = "quotedShares"
+    override val jsonKey: String  = "quotedShareAssets"
+  }
+
+  case object Other extends AssetType {
+    override def toString: String = "other"
+    override val jsonKey: String  = "otherAsset"
+  }
 
   def apply(value: String) =
     value match {
@@ -47,29 +72,4 @@ object AssetType {
     Writes {
       assetType => JsString(assetType.toString)
     }
-}
-
-case object Cash extends AssetType {
-  override def toString: String = "cash"
-  override val jsonKey: String  = "cashAssets"
-}
-
-case object Property extends AssetType {
-  override def toString: String = "property"
-  override val jsonKey: String  = "propertyAsset"
-}
-
-case object UnquotedShares extends AssetType {
-  override def toString: String = "unquotedShares"
-  override val jsonKey: String  = "unquotedShareAssets"
-}
-
-case object QuotedShares extends AssetType {
-  override def toString: String = "quotedShares"
-  override val jsonKey: String  = "quotedShareAssets"
-}
-
-case object Other extends AssetType {
-  override def toString: String = "other"
-  override val jsonKey: String  = "otherAsset"
 }

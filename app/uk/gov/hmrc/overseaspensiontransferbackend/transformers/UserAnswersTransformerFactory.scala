@@ -23,8 +23,16 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   AssetTypeTransformer,
   CashAssetsTransformer,
   CashOnlyTransferTransformer,
+  MoreOtherAssetTransformer,
+  MorePropertyTransformer,
+  MoreQuotedTransformer,
+  MoreUnquotedTransformer,
+  OtherAssetsTransformer,
   PaymentTaxableOverseasTransformer,
-  TransferMinusTaxTransformer
+  PropertyTransformer,
+  QuotedSharesTransformer,
+  TransferMinusTaxTransformer,
+  UnquotedSharesTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 
@@ -65,7 +73,15 @@ case class UserAnswersTransformerFactory() {
     new AmountTaxDeductedTransformer,
     new TransferMinusTaxTransformer,
     new CashAssetsTransformer,
-    new AssetTypeTransformer
+    new AssetTypeTransformer,
+    new MoreQuotedTransformer,
+    new MoreUnquotedTransformer,
+    new MorePropertyTransformer,
+    new MoreOtherAssetTransformer,
+    new QuotedSharesTransformer,
+    new UnquotedSharesTransformer,
+    new PropertyTransformer,
+    new OtherAssetsTransformer
   )
 
   def build(): UserAnswersTransformer = {
