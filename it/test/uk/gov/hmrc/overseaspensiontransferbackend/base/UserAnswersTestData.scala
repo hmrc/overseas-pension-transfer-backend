@@ -97,7 +97,7 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetails = Json.obj(
+  val transferDetails: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
@@ -107,7 +107,11 @@ object UserAnswersTestData {
       "applicableExclusion" -> "occupational",
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
-      "typeOfAssets" -> Seq("cash", "unquotedShares", "other")
+      "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
+      "moreQuoted" -> false,
+      "moreUnquoted" -> true,
+      "moreAsset" -> false,
+      "moreProp" -> false
     )
   )
 
@@ -214,7 +218,11 @@ object UserAnswersTestData {
         "quotedShareAssets" -> "No",
         "unquotedShareAssets" -> "Yes",
         "propertyAsset" -> "No",
-        "otherAsset" -> "Yes"
+        "otherAsset" -> "Yes",
+        "moreQuoted" -> "No",
+        "moreUnquoted" -> "Yes",
+        "moreAsset" -> "No",
+        "moreProp" -> "No"
       )
     )
   )

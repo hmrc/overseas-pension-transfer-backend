@@ -32,6 +32,7 @@ case class TypeOfAssets(
     moreProp: Option[String],
     propertyAssets: Option[List[PropertyAssets]],
     otherAsset: Option[String],
+    moreAsset: Option[String],
     otherAssets: Option[List[OtherAssets]]
   ) {
 
@@ -67,6 +68,7 @@ object TypeOfAssets {
       (__ \ "moreProp").readNullable[String] and
       (__ \ "propertyAssets").readNullable[List[PropertyAssets]] and
       (__ \ "otherAsset").readNullable[String] and
+      (__ \ "moreAsset").readNullable[String] and
       (__ \ "otherAssets").readNullable[List[OtherAssets]]
   )(TypeOfAssets.apply _)
 

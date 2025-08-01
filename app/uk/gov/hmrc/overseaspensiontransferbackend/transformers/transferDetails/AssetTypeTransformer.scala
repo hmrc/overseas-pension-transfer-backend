@@ -24,9 +24,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransfo
 
 class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep {
 
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
+  override def externalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAsset"
 
-  override def internalPath: JsPath = externalPath
+  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
@@ -45,6 +45,7 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
     }
 
     val steps: Seq[TransformerStep] = Seq(
+      moveStep(externalPath, internalPath),
       constructEnum[List[AssetType]](internalPath, enumConversion)
     )
 
@@ -54,17 +55,29 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: TypeOfAssets => JsArray = typeOfAssets => typeOfAssets.getAssets
+    def setTypeOfAsset(): TransformerStep = json => {
+      val enumConversion: TypeOfAssets => JsArray = typeOfAssets => {
+        typeOfAssets.getAssets
+      }
+
+      internalPath.asSingleJson(json).validate[TypeOfAssets] match {
+        case JsSuccess(value, _) => setPath(externalPath, enumConversion(value), json)
+        case _                   => Right(input)
+      }
+    }
+
+    def removeKeys(): TransformerStep = json => {
+      val fullAssetTypeSet = Seq(Cash, QuotedShares, UnquotedShares, Property, Other)
+
+      Right(fullAssetTypeSet.foldLeft(json) {
+        (acc, curr) =>
+          pruneAtPath(internalPath \ curr.jsonKey)(acc)
+      })
+    }
 
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[TypeOfAssets](
-        internalPath,
-        enumConversion
-      ),
-      moveStep(
-        internalPath,
-        externalPath
-      )
+      setTypeOfAsset(),
+      removeKeys()
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
