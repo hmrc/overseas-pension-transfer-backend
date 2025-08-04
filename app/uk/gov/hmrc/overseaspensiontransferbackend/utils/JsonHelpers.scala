@@ -80,6 +80,23 @@ trait JsonHelpers {
     }
   }
 
+  /** Recursively removes a value at the given JsPath from the JSON object.
+    *
+    * ⚠️ This function performs *aggressive pruning*: if removing the value causes its parent object to become empty, the parent is also removed. This is done
+    * to remove empty objects that get attached to json paths when moving objects.
+    *
+    *   - If other transformations depend on the parent key still existing, this may cause failures.
+    *   - It introduces asymmetry: reversing a transformation may require reintroducing structure.
+    *
+    * Unlike prunePath, there is no safety check to determine whether a path has an existing value. The child object of the path will be removed.
+    */
+  def pruneAtPath(path: JsPath)(json: JsObject): JsObject = {
+    path.prune(json) match {
+      case JsSuccess(value, _) => value
+      case _                   => json
+    }
+  }
+
   private def setNested(json: JsObject, path: JsPath, value: JsValue): Either[JsError, JsObject] = {
     path.path match {
       case Nil                               => Right(json)
