@@ -18,7 +18,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json.{Json, Reads, Writes}
 
-case class PropertyAssets(value: String)
+case class PropertyAssets(
+    propertyAddress: Address,
+    propValue: BigDecimal,
+    propDescription: String
+  )
 
 object PropertyAssets {
   implicit val reads: Reads[PropertyAssets]   = Json.reads[PropertyAssets]

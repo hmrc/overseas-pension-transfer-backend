@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.AssetType.{Cash, Other, Property}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
@@ -32,7 +33,8 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val enumConversion: List[AssetType] => JsObject = listOfAssets => {
-      val fullAssetTypeSet = Seq(Cash, QuotedShares, UnquotedShares, Property, Other)
+      val fullAssetTypeSet: Seq[AssetType] =
+        Seq(Cash, AssetType.QuotedShares, AssetType.UnquotedShares, Property, Other)
 
       fullAssetTypeSet.foldLeft(Json.obj()) {
         (acc, asset) =>
@@ -67,7 +69,7 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
     }
 
     def removeKeys(): TransformerStep = json => {
-      val fullAssetTypeSet = Seq(Cash, QuotedShares, UnquotedShares, Property, Other)
+      val fullAssetTypeSet = Seq(Cash, AssetType.QuotedShares, AssetType.UnquotedShares, Property, Other)
 
       Right(fullAssetTypeSet.foldLeft(json) {
         (acc, curr) =>
