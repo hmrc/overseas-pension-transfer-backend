@@ -26,7 +26,7 @@ trait AddressBase {
   def addressLine4: Option[String]
   def addressLine5: Option[String]
   def ukPostCode: Option[String]
-  def country: Option[Country]
+  def country: Option[String]
 }
 
 case class Address(
@@ -36,7 +36,7 @@ case class Address(
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: Option[Country]
+    country: Option[String]
   )
 
 object Address {
@@ -48,7 +48,7 @@ object Address {
       (__ \ "addressLine4").readNullable[String] and
       (__ \ "addressLine5").readNullable[String] and
       (__ \ "ukPostCode").readNullable[String] and
-      (__ \ "country").readNullable[Country]
+      (__ \ "country" \ "code").readNullable[String]
   )(Address.apply _)
 
   implicit val writes: OWrites[Address] = Json.writes[Address]

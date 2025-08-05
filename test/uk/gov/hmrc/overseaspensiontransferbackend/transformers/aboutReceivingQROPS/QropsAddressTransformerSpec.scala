@@ -47,7 +47,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )
@@ -64,7 +64,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )
@@ -76,7 +76,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )

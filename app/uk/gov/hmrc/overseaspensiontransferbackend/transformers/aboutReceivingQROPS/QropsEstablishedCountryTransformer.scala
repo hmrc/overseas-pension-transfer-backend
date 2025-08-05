@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
+import play.api.libs.json.{JsError, JsObject, JsPath, JsString, JsValue}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsEstablishedCountryTransformer extends PathAwareTransformer with EnumTransformerStep with JsonHelpers {
 
   val jsonKey = "qropsEstablished"
 
@@ -36,6 +38,8 @@ class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonH
     * If the structured country is being set by the frontend, this removes any conflicting 'other' text-based value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: Country => JsValue = country => JsString(country.code)
+
     val steps: Seq[TransformerStep] = Seq(
       conditionalPruneStep(
         onlyIfSetAt = externalPath,
@@ -44,7 +48,8 @@ class QropsEstablishedCountryTransformer extends PathAwareTransformer with JsonH
       moveStep(
         from        = externalPath,
         to          = internalPath
-      )
+      ),
+      constructEnum[Country](internalPath, enumConversion)
     )
 
     TransformerUtils.applyPipeline(json, steps)(identity)

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Address
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
@@ -62,7 +63,7 @@ trait AddressTransformerStep extends JsonHelpers {
       "addressLine4" -> (jsObj \ "addressLine4").asOpt[String].map(JsString),
       "addressLine5" -> (jsObj \ "addressLine5").asOpt[String].map(JsString),
       "ukPostCode"   -> (jsObj \ "ukPostCode").asOpt[String].map(JsString),
-      "country"      -> (jsObj \ "country").asOpt[JsObject]
+      "country"      -> (jsObj \ "country" \ "code").asOpt[String].map(JsString)
     ).collect {
       case (key, Some(value)) => key -> value
     }

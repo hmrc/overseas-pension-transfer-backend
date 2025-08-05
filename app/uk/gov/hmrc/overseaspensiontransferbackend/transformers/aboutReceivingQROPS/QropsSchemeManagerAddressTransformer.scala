@@ -35,7 +35,7 @@ class QropsSchemeManagerAddressTransformer extends PathAwareTransformer with Add
     val steps: Seq[TransformerStep] = Seq(
       moveStep(
         from      = externalPath \ jsonKey,
-        to        = internalPath \ jsonKey
+        to        = internalPath
       ),
       constructAddressAt(
         path      = internalPath,
