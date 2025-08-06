@@ -17,7 +17,6 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.Address
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
@@ -25,7 +24,7 @@ trait AddressTransformerStep extends JsonHelpers {
 
   /* This constructs an address at a path inside a nestedKey so for example if you pass addressDetails as a nested key
    * and memberDetails \ principalResAdd as a path, it will create the address at memberDetails \ principleResAdd \ addressDetails */
-  def constructAddressAt(path: JsPath, nestedKey: String): TransformerStep = { json =>
+  def constructAddressAt(path: JsPath, nestedKey: Option[String]): TransformerStep = { json =>
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) if addressObj.fields.nonEmpty =>
         val addressFields   = extractAddressFields(addressObj)
@@ -33,7 +32,14 @@ trait AddressTransformerStep extends JsonHelpers {
           case (key, _) => addressFields.map(_._1).contains(key)
         }
 
-        val rebuilt = Json.obj(nestedKey -> JsObject(addressFields)) ++ JsObject(preservedFields)
+        val rebuilt = {
+          nestedKey match {
+            case Some(key) =>
+              Json.obj(key -> JsObject(addressFields)) ++ JsObject(preservedFields)
+            case None      =>
+              JsObject(addressFields) ++ JsObject(preservedFields)
+          }
+        }
 
         setPath(path, rebuilt, json)
 
@@ -47,8 +53,18 @@ trait AddressTransformerStep extends JsonHelpers {
     path.asSingleJson(json).asOpt[JsObject] match {
       case Some(addressObj) =>
         val addressFields = extractAddressFields(addressObj)
-        val preserved     = addressObj.fields.filterNot { case (key, _) => addressFields.map(_._1).contains(key) }
-        val rebuilt       = JsObject(preserved ++ addressFields)
+        val preserved     = addressObj.fields.filterNot {
+          case (key, _) => addressFields.map(_._1).contains(key)
+        }.map {
+          case (key, value) =>
+            if (key == "country") {
+              key -> Json.obj("code" -> value)
+            } else {
+              key -> value
+            }
+        }
+
+        val rebuilt = JsObject(addressFields ++ preserved)
         setPath(path, rebuilt, json)
 
       case None => Right(json)

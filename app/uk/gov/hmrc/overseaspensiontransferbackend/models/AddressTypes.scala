@@ -37,7 +37,7 @@ case class PrincipalResAddDetails(
 object PrincipalResAddDetails {
 
   implicit val reads: Reads[PrincipalResAddDetails] = (
-    (__ \ "addressDetails").readNullable[Address] and
+    (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "poBoxNumber").readNullable[String]
   )(PrincipalResAddDetails.apply _)
 
@@ -61,7 +61,7 @@ case class LastPrincipalAddDetails(
 object LastPrincipalAddDetails {
 
   implicit val reads: Reads[LastPrincipalAddDetails] = (
-    (__ \ "addressDetails").readNullable[Address] and
+    (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "dateMemberLeftUk").readNullable[LocalDate]
   )(LastPrincipalAddDetails.apply _)
 

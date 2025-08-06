@@ -32,11 +32,11 @@ class QropsAddressTransformer extends PathAwareTransformer with AddressTransform
     val steps: Seq[TransformerStep] = Seq(
       moveStep(
         from      = externalPath \ jsonKey,
-        to        = internalPath
+        to        = internalPath \ jsonKey
       ),
       constructAddressAt(
-        path      = internalPath,
-        nestedKey = jsonKey
+        path      = internalPath \ jsonKey,
+        nestedKey = None
       )
     )
 

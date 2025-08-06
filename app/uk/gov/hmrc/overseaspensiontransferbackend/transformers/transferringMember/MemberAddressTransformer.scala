@@ -37,7 +37,7 @@ class MemberAddressTransformer extends PathAwareTransformer with AddressTransfor
       ),
       constructAddressAt(
         path = internalPath,
-        nestedKey
+        Some(nestedKey)
       )
     )
 

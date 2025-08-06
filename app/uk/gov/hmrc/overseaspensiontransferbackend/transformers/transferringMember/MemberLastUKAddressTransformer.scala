@@ -37,7 +37,7 @@ class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTr
       ),
       constructAddressAt(
         internalPath,
-        nestedKey
+        Some(nestedKey)
       )
     )
 

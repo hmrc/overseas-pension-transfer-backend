@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.PropertyAssets
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.{AddressTransformerStep, EnumTransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
-class PropertyTransformer extends PathAwareTransformer {
+class PropertyTransformer extends PathAwareTransformer with EnumTransformerStep with AddressTransformerStep {
 
   override def externalPath: JsPath = JsPath \ "transferDetails" \ "propertyAssets"
 
@@ -29,8 +31,12 @@ class PropertyTransformer extends PathAwareTransformer {
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
+    def enumConversion: List[PropertyAssets] => JsArray = listOfProperties =>
+      JsArray(listOfProperties.map(Json.toJson(_)))
+
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(externalPath, internalPath)
+      moveStep(externalPath, internalPath),
+      constructEnum[List[PropertyAssets]](internalPath, enumConversion)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
@@ -39,8 +45,15 @@ class PropertyTransformer extends PathAwareTransformer {
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+    implicit val reads: Reads[PropertyAssets]   = PropertyAssets.upstreamReads
+    implicit val writes: Writes[PropertyAssets] = PropertyAssets.upstreamWrites
+
+    def enumConversion: List[PropertyAssets] => JsArray = listOfProperties =>
+      JsArray(listOfProperties.map(Json.toJson(_)))
+
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(internalPath, externalPath)
+      moveStep(internalPath, externalPath),
+      constructEnum[List[PropertyAssets]](externalPath, enumConversion)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)

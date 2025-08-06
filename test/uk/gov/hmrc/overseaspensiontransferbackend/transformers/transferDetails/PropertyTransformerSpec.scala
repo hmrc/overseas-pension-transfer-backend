@@ -24,21 +24,29 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer: PropertyTransformer = new PropertyTransformer
 
-  private val address = Json.obj(
-    "addressLine1" -> "",
-    "addressLine2" -> "",
+  private val externalAddress = Json.obj(
+    "addressLine1" -> "line 1",
+    "addressLine2" -> "line 2",
     "addressLine3" -> "",
     "addressLine4" -> "",
     "addressLine5" -> "",
-    "ukPostCode"   -> "",
-    "country"      -> Json.obj("name" -> "", "code" -> "")
+    "ukPostCode"   -> "ZZ11 1ZZ",
+    "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
   )
 
   "PropertyTransformer" - {
     "convert transferDetails.propertyAssets to transferDetails.typeOfAssets.propertyAssets" in {
       val input = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-          "propertyAddress" -> address,
+          "propertyAddress" -> Json.obj(
+            "addressLine1" -> "line 1",
+            "addressLine2" -> "line 2",
+            "addressLine3" -> "",
+            "addressLine4" -> "",
+            "addressLine5" -> "",
+            "ukPostCode"   -> "ZZ11 1ZZ",
+            "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
+          ),
           "propValue"       -> 123456.00,
           "propDescription" -> "Buckingham Palace"
         )))))
@@ -46,7 +54,15 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
       val expected = Json.obj("transferDetails" ->
         Json.obj(
           "typeOfAssets" -> Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-            "propertyAddress" -> address,
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "line 1",
+              "addressLine2" -> "line 2",
+              "addressLine3" -> "",
+              "addressLine4" -> "",
+              "addressLine5" -> "",
+              "ukPostCode"   -> "ZZ11 1ZZ",
+              "country"      -> "UK"
+            ),
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
           ))))
@@ -59,12 +75,28 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
       val newArray = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(
           Json.obj(
-            "propertyAddress" -> address,
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "line 1",
+              "addressLine2" -> "line 2",
+              "addressLine3" -> "",
+              "addressLine4" -> "",
+              "addressLine5" -> "",
+              "ukPostCode"   -> "ZZ11 1ZZ",
+              "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
+            ),
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
           ),
           Json.obj(
-            "propertyAddress" -> address,
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "line 1",
+              "addressLine2" -> "line 2",
+              "addressLine3" -> "",
+              "addressLine4" -> "",
+              "addressLine5" -> "",
+              "ukPostCode"   -> "ZZ11 1ZZ",
+              "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
+            ),
             "propValue"       -> 650000.00,
             "propDescription" -> "Countryside Pub"
           )
@@ -73,7 +105,15 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
       val existingArray = Json.obj("transferDetails" ->
         Json.obj(
           "typeOfAssets" -> Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-            "propertyAddress" -> address,
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "line 1",
+              "addressLine2" -> "line 2",
+              "addressLine3" -> "",
+              "addressLine4" -> "",
+              "addressLine5" -> "",
+              "ukPostCode"   -> "ZZ11 1ZZ",
+              "country"      -> "UK"
+            ),
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
           ))))
@@ -85,12 +125,28 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
         Json.obj(
           "typeOfAssets" -> Json.obj("propertyAssets" -> JsArray(Seq(
             Json.obj(
-              "propertyAddress" -> address,
+              "propertyAddress" -> Json.obj(
+                "addressLine1" -> "line 1",
+                "addressLine2" -> "line 2",
+                "addressLine3" -> "",
+                "addressLine4" -> "",
+                "addressLine5" -> "",
+                "ukPostCode"   -> "ZZ11 1ZZ",
+                "country"      -> "UK"
+              ),
               "propValue"       -> 123456.00,
               "propDescription" -> "Buckingham Palace"
             ),
             Json.obj(
-              "propertyAddress" -> address,
+              "propertyAddress" -> Json.obj(
+                "addressLine1" -> "line 1",
+                "addressLine2" -> "line 2",
+                "addressLine3" -> "",
+                "addressLine4" -> "",
+                "addressLine5" -> "",
+                "ukPostCode"   -> "ZZ11 1ZZ",
+                "country"      -> "UK"
+              ),
               "propValue"       -> 650000.00,
               "propDescription" -> "Countryside Pub"
             )
@@ -105,7 +161,12 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
       val input = Json.obj("transferDetails" ->
         Json.obj(
           "typeOfAssets" -> Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-            "propertyAddress" -> address,
+            "propertyAddress" -> Json.obj(
+              "addressLine1" -> "line 1",
+              "addressLine2" -> "line 2",
+              "ukPostCode"   -> "ZZ11 1ZZ",
+              "country"      -> "UK"
+            ),
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
           ))))
@@ -113,7 +174,12 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
 
       val expected = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-          "propertyAddress" -> address,
+          "propertyAddress" -> Json.obj(
+            "addressLine1" -> "line 1",
+            "addressLine2" -> "line 2",
+            "ukPostCode"   -> "ZZ11 1ZZ",
+            "country"      -> Json.obj("code" -> "UK")
+          ),
           "propValue"       -> 123456.00,
           "propDescription" -> "Buckingham Palace"
         )))))

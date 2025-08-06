@@ -79,7 +79,7 @@ class QropsSchemeManagerAddressTransformerSpec extends AnyFreeSpec with Matchers
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> "GB"
+            "country"      -> Json.obj("code" -> "GB")
           )
         )
       )

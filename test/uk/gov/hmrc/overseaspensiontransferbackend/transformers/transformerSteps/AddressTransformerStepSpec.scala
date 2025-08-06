@@ -48,7 +48,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
         )
       )
 
-      constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(expected)
+      constructAddressAt(__ \ "principalResAddRetails", nestedKey = Some("addressDetails"))(input) mustBe Right(expected)
     }
 
     "must convert nested backend-style address back to flat frontend-style structure" in {
@@ -71,7 +71,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> "GB"
+            "country"      -> Json.obj("code" -> "GB")
           )
         )
       )
@@ -84,7 +84,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
         "principalResAddRetails" -> Json.obj()
       )
 
-      constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(input)
+      constructAddressAt(__ \ "principalResAddRetails", nestedKey = Some("addressDetails"))(input) mustBe Right(input)
     }
   }
 }

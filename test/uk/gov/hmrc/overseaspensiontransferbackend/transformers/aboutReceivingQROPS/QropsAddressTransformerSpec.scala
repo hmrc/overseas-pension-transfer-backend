@@ -76,7 +76,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> "GB"
+            "country"      -> Json.obj("code" -> "GB")
           )
         )
       )

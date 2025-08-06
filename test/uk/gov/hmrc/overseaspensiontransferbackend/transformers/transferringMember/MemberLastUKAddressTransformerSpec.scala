@@ -83,7 +83,7 @@ class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
             "addressLine1" -> "321 Old St",
             "addressLine2" -> "Oldtown",
             "ukPostCode"   -> "OL9 4LD",
-            "country"      -> "GB"
+            "country"      -> Json.obj("code" -> "GB")
           )
         )
       )

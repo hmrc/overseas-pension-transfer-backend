@@ -25,7 +25,7 @@ class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer = new QropsEstablishedCountryTransformer
 
-  private val country = Country("UK", "United Kingdom")
+  private val country = Country("UK", Some("United Kingdom"))
 
   "QropsEstablishedCountryTransformer" - {
 
@@ -83,8 +83,8 @@ class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers {
     }
 
     "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablished if value is already set" in {
-      val oldCountry = Country("FR", "France")
-      val newCountry = Country("DE", "Germany")
+      val oldCountry = Country("FR", Some("France"))
+      val newCountry = Country("DE", Some("Germany"))
 
       val incomingFrontendJson = Json.obj(
         "qropsDetails" -> Json.obj(
