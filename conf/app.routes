@@ -2,3 +2,5 @@
 
 GET         /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.getAnswers(referenceId)
 POST        /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.saveAnswers(referenceId)
+
+POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitAnswers(referenceId)
