@@ -17,10 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
 trait AddressTransformerStep extends JsonHelpers {
+
+  val countryCodeReader: CountryCodeReader
 
   /* This constructs an address at a path inside a nestedKey so for example if you pass addressDetails as a nested key
    * and memberDetails \ principalResAdd as a path, it will create the address at memberDetails \ principleResAdd \ addressDetails */
@@ -58,7 +61,7 @@ trait AddressTransformerStep extends JsonHelpers {
         }.map {
           case (key, value) =>
             if (key == "country") {
-              key -> Json.obj("code" -> value)
+              key -> Json.toJson(countryCodeReader.readCountryCode(value.as[String]))
             } else {
               key -> value
             }

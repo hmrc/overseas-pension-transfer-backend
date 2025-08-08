@@ -19,11 +19,12 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 
-class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers {
+class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val transformer = new QropsEstablishedCountryTransformer
+  private val transformer = applicationBuilder().injector().instanceOf[QropsEstablishedCountryTransformer]
 
   private val country = Country("UK", Some("United Kingdom"))
 
@@ -117,7 +118,7 @@ class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers {
       val inputJson = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
           Json.obj("qropsEstablished" -> country.code)))
-      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> "UK"))
+      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablished" -> Json.obj("code" -> "UK")))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }

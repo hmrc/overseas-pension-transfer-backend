@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
+import com.google.inject.Inject
+import play.api.libs.json.{JsError, JsObject, JsPath, JsValue, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCodeReader) extends PathAwareTransformer with EnumTransformerStep with JsonHelpers {
 
   val jsonKey = "qropsEstablishedOther"
 
@@ -52,7 +54,11 @@ class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHel
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: String => JsValue = string =>
+      Json.toJson(countryCodeReader.readCountryCode(string))
+
     val steps: Seq[TransformerStep] = Seq(
+      constructEnum[String](internalPath, enumConversion),
       moveStep(
         from = internalPath,
         to   = externalPath

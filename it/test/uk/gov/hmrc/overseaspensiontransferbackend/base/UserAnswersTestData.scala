@@ -33,11 +33,11 @@ object UserAnswersTestData {
         "addressLine2" -> "Test road",
         "addressLine3" -> "Testville",
         "addressLine4" -> "East Testerly",
+        "ukPostCode"   -> "AB1 2CD",
         "country"      -> Json.obj(
           "code" -> "AE-AZ",
           "name" -> "Abu Dhabi"
         ),
-        "ukPostCode"   -> "AB1 2CD",
         "poBoxNumber"  -> "PO321"
       ),
       "memUkResident"           -> false,
@@ -110,8 +110,8 @@ object UserAnswersTestData {
       "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
       "moreQuoted" -> false,
       "moreUnquoted" -> true,
-      "moreAsset" -> false,
       "moreProp" -> false,
+      "moreAsset" -> false,
       "quotedShares" -> Seq(
         Json.obj(
           "valueOfShares" -> 1234.99,
@@ -153,7 +153,7 @@ object UserAnswersTestData {
   )
 
   val fullUserAnswersExternalJson: JsObject =
-    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetailsExternalJson).deepMerge(transferDetailsExternalJson)
+    transferDetailsExternalJson.deepMerge(memberDetailsExternalJson).deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetailsExternalJson)
 
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(

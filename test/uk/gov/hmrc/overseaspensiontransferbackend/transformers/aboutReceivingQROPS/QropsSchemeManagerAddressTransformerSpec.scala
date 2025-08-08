@@ -19,12 +19,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class QropsSchemeManagerAddressTransformerSpec extends AnyFreeSpec with Matchers {
+class QropsSchemeManagerAddressTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  val transformer = new QropsSchemeManagerAddressTransformer
+  private val transformer = applicationBuilder().injector().instanceOf[QropsSchemeManagerAddressTransformer]
 
-  "QropsAddressTransformer" - {
+  "QropsSchemeManagerAddressTransformer" - {
 
     "must move and wrap schemeManagerDetails.schemeManagerDetails into aboutReceivingQROPS.qropsSchemeManagerType.schemeManagerAddress" in {
       val inputJson = Json.obj(
@@ -79,7 +80,7 @@ class QropsSchemeManagerAddressTransformerSpec extends AnyFreeSpec with Matchers
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB")
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           )
         )
       )

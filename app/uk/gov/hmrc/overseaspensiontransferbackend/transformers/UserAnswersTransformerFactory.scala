@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
+import com.google.inject.Inject
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   AmountTaxDeductedTransformer,
@@ -35,32 +36,33 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   UnquotedSharesTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-case class UserAnswersTransformerFactory() {
+class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeReader) {
 
   private def memberDetailsTransformers: Seq[Transformer] = Seq(
     new MemberNameTransformer(),
     new MemberDOBTransformer(),
     new MemberNinoTransformer(),
     new MemberNoNinoTransformer(),
-    new MemberAddressTransformer(),
+    new MemberAddressTransformer(countryCodeReader),
     new MemberIsUKResidentTransformer(),
     new MemberEverUKResidentTransformer(),
-    new MemberLastUKAddressTransformer(),
+    new MemberLastUKAddressTransformer(countryCodeReader),
     new MemberDateLeftUKTransformer()
   )
 
   private def qropsDetailsTransformers: Seq[Transformer] = Seq(
     new QropsNameTransformer(),
     new QropsRefTransformer(),
-    new QropsAddressTransformer(),
-    new QropsEstablishedCountryTransformer(),
-    new QropsEstablishedOtherTransformer()
+    new QropsAddressTransformer(countryCodeReader),
+    new QropsEstablishedCountryTransformer(countryCodeReader),
+    new QropsEstablishedOtherTransformer(countryCodeReader)
   )
 
   private def qropsSchemeManagerDetailsTransformers: Seq[Transformer] = Seq(
     new QropsSchemeManagerTypeTransformer,
-    new QropsSchemeManagerAddressTransformer,
+    new QropsSchemeManagerAddressTransformer(countryCodeReader),
     new QropsSchemeManagerEmailTransformer,
     new QropsSchemeManagerPhoneTranformer,
     new QropsSchemeManagerIndividualTransformer
@@ -80,7 +82,7 @@ case class UserAnswersTransformerFactory() {
     new MoreOtherAssetTransformer,
     new QuotedSharesTransformer,
     new UnquotedSharesTransformer,
-    new PropertyTransformer,
+    new PropertyTransformer(countryCodeReader),
     new OtherAssetsTransformer
   )
 

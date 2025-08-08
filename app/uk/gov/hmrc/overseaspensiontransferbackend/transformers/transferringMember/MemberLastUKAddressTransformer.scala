@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
+import com.google.inject.Inject
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class MemberLastUKAddressTransformer extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
+class MemberLastUKAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep
+    with JsonHelpers {
 
   val jsonKey                       = "lastPrincipalAddDetails"
   override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey

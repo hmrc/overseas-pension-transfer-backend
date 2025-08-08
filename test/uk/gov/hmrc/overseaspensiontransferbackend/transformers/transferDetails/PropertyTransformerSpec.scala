@@ -19,10 +19,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsArray, Json}
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
+class PropertyTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val transformer: PropertyTransformer = new PropertyTransformer
+  private val transformer: PropertyTransformer = applicationBuilder().injector().instanceOf[PropertyTransformer]
 
   private val externalAddress = Json.obj(
     "addressLine1" -> "line 1",
@@ -38,15 +39,7 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
     "convert transferDetails.propertyAssets to transferDetails.typeOfAssets.propertyAssets" in {
       val input = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(Json.obj(
-          "propertyAddress" -> Json.obj(
-            "addressLine1" -> "line 1",
-            "addressLine2" -> "line 2",
-            "addressLine3" -> "",
-            "addressLine4" -> "",
-            "addressLine5" -> "",
-            "ukPostCode"   -> "ZZ11 1ZZ",
-            "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
-          ),
+          "propertyAddress" -> externalAddress,
           "propValue"       -> 123456.00,
           "propDescription" -> "Buckingham Palace"
         )))))
@@ -75,28 +68,12 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
       val newArray = Json.obj("transferDetails" ->
         Json.obj("propertyAssets" -> JsArray(Seq(
           Json.obj(
-            "propertyAddress" -> Json.obj(
-              "addressLine1" -> "line 1",
-              "addressLine2" -> "line 2",
-              "addressLine3" -> "",
-              "addressLine4" -> "",
-              "addressLine5" -> "",
-              "ukPostCode"   -> "ZZ11 1ZZ",
-              "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
-            ),
+            "propertyAddress" -> externalAddress,
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
           ),
           Json.obj(
-            "propertyAddress" -> Json.obj(
-              "addressLine1" -> "line 1",
-              "addressLine2" -> "line 2",
-              "addressLine3" -> "",
-              "addressLine4" -> "",
-              "addressLine5" -> "",
-              "ukPostCode"   -> "ZZ11 1ZZ",
-              "country"      -> Json.obj("name" -> "United Kingdom", "code" -> "UK")
-            ),
+            "propertyAddress" -> externalAddress,
             "propValue"       -> 650000.00,
             "propDescription" -> "Countryside Pub"
           )
@@ -165,7 +142,7 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
               "addressLine1" -> "line 1",
               "addressLine2" -> "line 2",
               "ukPostCode"   -> "ZZ11 1ZZ",
-              "country"      -> "UK"
+              "country"      -> "GB"
             ),
             "propValue"       -> 123456.00,
             "propDescription" -> "Buckingham Palace"
@@ -178,7 +155,7 @@ class PropertyTransformerSpec extends AnyFreeSpec with Matchers {
             "addressLine1" -> "line 1",
             "addressLine2" -> "line 2",
             "ukPostCode"   -> "ZZ11 1ZZ",
-            "country"      -> Json.obj("code" -> "UK")
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           ),
           "propValue"       -> 123456.00,
           "propDescription" -> "Buckingham Palace"

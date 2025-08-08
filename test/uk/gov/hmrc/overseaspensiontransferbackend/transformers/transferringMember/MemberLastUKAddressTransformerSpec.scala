@@ -19,10 +19,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
+class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val transformer = new MemberLastUKAddressTransformer
+  private val transformer = applicationBuilder().injector().instanceOf[MemberLastUKAddressTransformer]
 
   "MemberLastUKAddressTransformer" - {
 
@@ -83,7 +84,7 @@ class MemberLastUKAddressTransformerSpec extends AnyFreeSpec with Matchers {
             "addressLine1" -> "321 Old St",
             "addressLine2" -> "Oldtown",
             "ukPostCode"   -> "OL9 4LD",
-            "country"      -> Json.obj("code" -> "GB")
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           )
         )
       )

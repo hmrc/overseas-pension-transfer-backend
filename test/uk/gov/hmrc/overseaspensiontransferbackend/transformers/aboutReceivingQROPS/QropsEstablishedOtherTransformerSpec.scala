@@ -19,31 +19,32 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
+class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val transformer = new QropsEstablishedOtherTransformer
+  private val transformer = applicationBuilder().injector().instanceOf[QropsEstablishedOtherTransformer]
 
   "QropsEstablishedOtherTransformer" - {
 
     "must move qropsDetails.qropsEstablishedOther to aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther" in {
-      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other"))
+      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "CV"))
       val expected  = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
-          Json.obj("qropsEstablishedOther" -> "Other")))
+          Json.obj("qropsEstablishedOther" -> "CV")))
 
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
     "must remove qropsEstablished if qropsEstablishedOther is being set" in {
       val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other")
+        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "DE")
       )
 
       val existingInternalJson = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
+            "qropsEstablished" -> Json.obj("code" -> "FR")
           )
         )
       )
@@ -53,7 +54,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
       val expected = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablishedOther" -> "Other"
+            "qropsEstablishedOther" -> "DE"
           )
         )
       )
@@ -69,7 +70,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
       val existingInternalJson = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
+            "qropsEstablished" -> Json.obj("code" -> "FR")
           )
         )
       )
@@ -81,13 +82,13 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
 
     "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther if value is already set" in {
       val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Updated Other")
+        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "ZZ")
       )
 
       val existingInternalJson = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablishedOther" -> "Something Else"
+            "qropsEstablishedOther" -> "ES"
           )
         )
       )
@@ -97,7 +98,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
       val expected = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablishedOther" -> "Updated Other"
+            "qropsEstablishedOther" -> "ZZ"
           )
         )
       )
@@ -108,8 +109,8 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers {
     "must move aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther to qropsDetails.qropsEstablishedOther" in {
       val inputJson = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
-          Json.obj("qropsEstablishedOther" -> "Other")))
-      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Other"))
+          Json.obj("qropsEstablishedOther" -> "IE")))
+      val expected  = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> Json.obj("code" -> "IE", "name" -> "Ireland")))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }

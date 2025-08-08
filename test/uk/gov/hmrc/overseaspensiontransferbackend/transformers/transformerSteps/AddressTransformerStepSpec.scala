@@ -19,8 +19,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep {
+class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep with SpecBase {
 
   "AddressTransformerStep" - {
     "must convert flat frontend-style address to backend-style nested structure" in {
@@ -71,7 +73,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB")
+            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
           )
         )
       )
@@ -87,4 +89,5 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
       constructAddressAt(__ \ "principalResAddRetails", nestedKey = Some("addressDetails"))(input) mustBe Right(input)
     }
   }
+  override val countryCodeReader: CountryCodeReader = applicationBuilder().injector().instanceOf[CountryCodeReader]
 }
