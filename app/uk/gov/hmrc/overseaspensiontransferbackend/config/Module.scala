@@ -17,8 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl, SubmissionService, SubmissionServiceImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{DummySubmissionServiceImpl, SaveForLaterService, SaveForLaterServiceImpl, SubmissionService}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -27,7 +28,8 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
-    bind(classOf[SubmissionService]).to(classOf[SubmissionServiceImpl])
+    bind(classOf[SubmissionService]).to(classOf[DummySubmissionServiceImpl])
+    bind(classOf[SubmissionValidator]).to(classOf[DummySubmissionValidatorImpl])
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
   }
 

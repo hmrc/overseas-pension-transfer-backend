@@ -16,30 +16,47 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
-import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{NormalisedSubmission, QtNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
-import scala.concurrent.Future
-
-sealed trait SubmissionError
-
-object SubmissionError {
-  final case class TransformationError(msg: String) extends SubmissionError
-  final case object SubmissionFailed                extends SubmissionError
-}
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 }
 
-class SubmissionServiceImpl extends SubmissionService {
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = ???
+@Singleton
+class SubmissionServiceImpl @Inject() (
+    repository: SaveForLaterRepository,
+    validator: SubmissionValidator
+  )(implicit ec: ExecutionContext
+  ) extends SubmissionService {
+
+  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
+    repository.get(submission.referenceId).flatMap {
+      case Some(saved) =>
+        validator.validate(saved) match {
+          case Left(err)        =>
+            Future.successful(Left(SubmissionTransformationError(err.message)))
+          case Right(validated) => ???
+        }
+      case None        =>
+        Future.successful(Left(SubmissionTransformationError(
+          s"No prepared submission for referenceId ${submission.referenceId}"
+        )))
+    }
 }
 
-case class SubmissionResponse(qtNumber: QtNumber)
+@Singleton
+class DummySubmissionServiceImpl @Inject() (
+    implicit ec: ExecutionContext
+  ) extends SubmissionService {
 
-object SubmissionResponse {
-  implicit val format: OFormat[SubmissionResponse] = Json.format[SubmissionResponse]
+  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
+    Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
+  }
 }

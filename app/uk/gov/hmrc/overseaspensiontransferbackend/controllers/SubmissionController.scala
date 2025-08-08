@@ -19,9 +19,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{NormalisedSubmission, Submitter}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{SubmissionError, SubmissionService}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{SubmissionFailed, SubmissionTransformationError}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
@@ -41,16 +41,16 @@ class SubmissionController @Inject() (
       val normalised = request.body.normalise(referenceId)
 
       submissionService.submitAnswers(normalised).map {
-        case Right(submissionResponse)                      =>
+        case Right(submissionResponse)                =>
           Ok(Json.toJson(submissionResponse))
-        case Left(SubmissionError.TransformationError(msg)) =>
+        case Left(SubmissionTransformationError(msg)) =>
           BadRequest(Json.obj(
             "error"   -> "Transformation failed",
             "details" -> msg
           ))
-        case Left(SubmissionError.SubmissionFailed)         =>
+        case Left(SubmissionFailed)                   =>
           InternalServerError(Json.obj("error" -> "Failed to submit"))
-        case Left(other)                                    =>
+        case Left(other)                              =>
           InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }

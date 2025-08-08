@@ -25,9 +25,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{SubmissionFailed, SubmissionResponse, SubmissionTransformationError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{SubmissionError, SubmissionResponse, SubmissionService}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 
 import scala.concurrent.Future
 
@@ -129,7 +130,7 @@ class SubmissionControllerSpec
       val mockService = mock[SubmissionService]
 
       when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Left(SubmissionError.TransformationError("bad data"))))
+        .thenReturn(Future.successful(Left(SubmissionTransformationError("bad data"))))
 
       val app: Application =
         applicationBuilder()
@@ -156,7 +157,7 @@ class SubmissionControllerSpec
       val mockService = mock[SubmissionService]
 
       when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Left(SubmissionError.SubmissionFailed)))
+        .thenReturn(Future.successful(Left(SubmissionFailed)))
 
       val app: Application =
         applicationBuilder()
