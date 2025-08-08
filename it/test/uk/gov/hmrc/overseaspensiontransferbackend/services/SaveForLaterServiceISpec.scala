@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, MemberDetails, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 class SaveForLaterServiceISpec extends BaseISpec {
@@ -61,115 +61,115 @@ class SaveForLaterServiceISpec extends BaseISpec {
           fail(s"Expected successful result but got error: $err")
       }
     }
-//
-//    "save user answers into internal format and return as external format" in {
-//      val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
-//
-//      val dto = withSavedDto(id, rawJson, now)
-//
-//      await(service.saveAnswer(dto)) mustBe Right(())
-//
-//      val result = await(service.getAnswers(id))
-//
-//      result match {
-//        case Right(dto) =>
-//
-//          dto.referenceId mustBe id
-//          dto.lastUpdated mustBe now
-//          dto.data mustEqual UserAnswersTestData.fullUserAnswersExternalJson
-//        case Left(err) =>
-//          fail(s"Expected successful result but got error: $err")
-//      }
-//    }
-//
-//    "incrementally add new data while maintaining previously added data" in {
-//      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))               mustBe Right(())
-//      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.qropsDetailsExternalJson, now.plusSeconds(1)))) mustBe Right(())
-//
-//      val result = await(service.getAnswers(id))
-//
-//      result match {
-//        case Right(dto) =>
-//          val memberDetailsExpected = (UserAnswersTestData.memberDetailsExternalJson \ "memberDetails").as[JsObject]
-//          val memberDetailsActual = (dto.data \ "memberDetails").as[JsObject]
-//
-//          memberDetailsExpected mustBe memberDetailsActual
-//
-//          val qropsDetails = dto.data \ "qropsDetails"
-//
-//          assertJson(
-//            qropsDetails,
-//            Map(
-//              "qropsFullName" -> "Test Scheme"
-//            )
-//          )
-//      }
-//    }
-//
-//    "merge and overwrite specific fields without affecting others" in {
-//
-//      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))                      mustBe Right(())
-//      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalUpdateJson, now.plusSeconds(1)))) mustBe Right(())
-//
-//      val result = await(service.getAnswers(id))
-//
-//      result match {
-//        case Right(dto) =>
-//          val memberDetails = (dto.data \ "memberDetails").as[JsObject]
-//
-//          assertJson(
-//            memberDetails \ "name",
-//            Map(
-//              "firstName" -> "Updated",
-//              "lastName"  -> "User"
-//            )
-//          )
-//
-//          val actualWithoutName   = memberDetails - "name"
-//          val expectedWithoutName = (UserAnswersTestData.memberDetailsExternalJson \ "memberDetails").as[JsObject] - "name"
-//
-//          actualWithoutName mustEqual expectedWithoutName
-//
-//        case Left(err) =>
-//          fail(s"Expected successful result but got error: $err")
-//      }
-//    }
-//
-//    "transform and persist qropsEstablished correctly" in {
-//      val rawJson = UserAnswersTestData.memberDetailsExternalJson
-//        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedExternalJson)
-//
-//      val dto = withSavedDto(id, rawJson, now)
-//
-//      await(service.saveAnswer(dto)) mustBe Right(())
-//
-//      val result = await(repository.get(id)).value
-//      result.referenceId mustBe id
-//      result.lastUpdated mustBe now
-//
-//      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
-//        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
-//
-//      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
-//    }
-//
-//    "transform and persist qropsEstablishedOther correctly" in {
-//      val rawJson = UserAnswersTestData.memberDetailsExternalJson
-//        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
-//
-//      val dto = withSavedDto(id, rawJson, now)
-//
-//      await(service.saveAnswer(dto)) mustBe Right(())
-//
-//      val result = await(repository.get(id)).value
-//      result.referenceId mustBe id
-//      result.lastUpdated mustBe now
-//
-//      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
-//        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
-//
-//      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
-//    }
+
+    "save user answers into internal format and return as external format" in {
+      val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(service.getAnswers(id))
+
+      result match {
+        case Right(dto) =>
+
+          dto.referenceId mustBe id
+          dto.lastUpdated mustBe now
+          dto.data mustEqual UserAnswersTestData.fullUserAnswersExternalJson
+        case Left(err) =>
+          fail(s"Expected successful result but got error: $err")
+      }
+    }
+
+    "incrementally add new data while maintaining previously added data" in {
+      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))               mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.qropsDetailsExternalJson, now.plusSeconds(1)))) mustBe Right(())
+
+      val result = await(service.getAnswers(id))
+
+      result match {
+        case Right(dto) =>
+          val memberDetailsExpected = (UserAnswersTestData.memberDetailsExternalJson \ "memberDetails").as[JsObject]
+          val memberDetailsActual = (dto.data \ "memberDetails").as[JsObject]
+
+          memberDetailsExpected mustBe memberDetailsActual
+
+          val qropsDetails = dto.data \ "qropsDetails"
+
+          assertJson(
+            qropsDetails,
+            Map(
+              "qropsFullName" -> "Test Scheme"
+            )
+          )
+      }
+    }
+
+    "merge and overwrite specific fields without affecting others" in {
+
+      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))                      mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalUpdateJson, now.plusSeconds(1)))) mustBe Right(())
+
+      val result = await(service.getAnswers(id))
+
+      result match {
+        case Right(dto) =>
+          val memberDetails = (dto.data \ "memberDetails").as[JsObject]
+
+          assertJson(
+            memberDetails \ "name",
+            Map(
+              "firstName" -> "Updated",
+              "lastName"  -> "User"
+            )
+          )
+
+          val actualWithoutName   = memberDetails - "name"
+          val expectedWithoutName = (UserAnswersTestData.memberDetailsExternalJson \ "memberDetails").as[JsObject] - "name"
+
+          actualWithoutName mustEqual expectedWithoutName
+
+        case Left(err) =>
+          fail(s"Expected successful result but got error: $err")
+      }
+    }
+
+    "transform and persist qropsEstablished correctly" in {
+      val rawJson = UserAnswersTestData.memberDetailsExternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedExternalJson)
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(repository.get(id)).value
+      result.referenceId mustBe id
+      result.lastUpdated mustBe now
+
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
+
+      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+    }
+
+    "transform and persist qropsEstablishedOther correctly" in {
+      val rawJson = UserAnswersTestData.memberDetailsExternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
+
+      val dto = withSavedDto(id, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(repository.get(id)).value
+      result.referenceId mustBe id
+      result.lastUpdated mustBe now
+
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
+
+      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+    }
 
   }
 }

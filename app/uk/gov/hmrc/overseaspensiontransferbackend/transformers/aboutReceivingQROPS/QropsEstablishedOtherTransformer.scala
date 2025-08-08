@@ -17,7 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import com.google.inject.Inject
-import play.api.libs.json.{JsError, JsObject, JsPath, JsValue, Json}
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
@@ -38,6 +39,8 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
     * If the free-text "other" field is being set by the frontend, this removes any conflicting structured country value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: Country => JsValue = country => JsString(country.code)
+
     val steps: Seq[TransformerStep] = Seq(
       conditionalPruneStep(
         onlyIfSetAt = externalPath,
@@ -46,7 +49,8 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
       moveStep(
         from        = externalPath,
         to          = internalPath
-      )
+      ),
+      constructEnum[Country](internalPath, enumConversion)
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
   }

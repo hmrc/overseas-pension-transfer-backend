@@ -35,8 +35,8 @@ object UserAnswersTestData {
         "addressLine4" -> "East Testerly",
         "ukPostCode"   -> "AB1 2CD",
         "country"      -> Json.obj(
-          "code" -> "AE-AZ",
-          "name" -> "Abu Dhabi"
+          "code" -> "AE",
+          "name" -> "United Arab Emirates"
         ),
         "poBoxNumber"  -> "PO321"
       ),
@@ -48,7 +48,7 @@ object UserAnswersTestData {
         "addressLine3" -> "Some District",
         "ukPostCode"   -> "ZZ1 1ZZ",
         "country"      -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
@@ -66,12 +66,12 @@ object UserAnswersTestData {
         "addressLine3" -> "QROPS District",
         "ukPostCode"   -> "ZZ1 1ZZ",
         "country"      -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
       "qropsEstablished"      -> Json.obj(
-        "code" -> "UK",
+        "code" -> "GB",
         "name" -> "United Kingdom"
       )
     )
@@ -84,7 +84,7 @@ object UserAnswersTestData {
         "addressLine2" -> "Sesame Street",
         "ukPostCode" -> "ZZ1 1ZZ",
         "country" -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
@@ -135,7 +135,7 @@ object UserAnswersTestData {
             "addressLine2" -> "Test Town",
             "ukPostCode" -> "ZZ00 0ZZ",
             "country" -> Json.obj(
-              "code" -> "UK",
+              "code" -> "GB",
               "name" -> "United Kingdom"
             )
           ),
@@ -169,7 +169,7 @@ object UserAnswersTestData {
             "addressLine3" -> "Testville",
             "addressLine4" -> "East Testerly",
             "ukPostCode"   -> "AB1 2CD",
-            "country"      -> "AE-AZ"
+            "country"      -> "AE"
           ),
           "poBoxNumber"    -> "PO321"
         ),
@@ -182,7 +182,7 @@ object UserAnswersTestData {
               "addressLine2" -> "7 Other Place",
               "addressLine3" -> "Some District",
               "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> "UK"
+              "country"      -> "GB"
             ),
             "dateMemberLeftUk" -> "2011-06-06"
           )
@@ -200,10 +200,10 @@ object UserAnswersTestData {
         "addressLine2" -> "QROPS Place",
         "addressLine3" -> "QROPS District",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      ->  "UK"
+        "country"      ->  "GB"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablished" -> "UK"
+        "qropsEstablished" -> "GB"
       ),
       "qropsSchemeManagerType" -> Json.obj(
         "schemeManagerType" -> "02",
@@ -211,7 +211,7 @@ object UserAnswersTestData {
           "addressLine1" -> "42",
           "addressLine2" -> "Sesame Street",
           "ukPostCode" -> "ZZ1 1ZZ",
-          "country" -> "UK"
+          "country" -> "GB"
         ),
         "schemeManagerEmail" -> "scheme.manager@email.com",
         "schemeManagerPhone" -> "07777777777",
@@ -267,7 +267,7 @@ object UserAnswersTestData {
               "addressLine1" -> "11 Test Street",
               "addressLine2" -> "Test Town",
               "ukPostCode" -> "ZZ00 0ZZ",
-              "country" -> "UK"
+              "country" -> "GB"
             ),
             "propValue" -> 650000.00,
             "propDescription" -> "Allotment in London"
@@ -304,9 +304,9 @@ object UserAnswersTestData {
         "addressLine2" -> "Some Street",
         "addressLine3" -> "Some City",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+        "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
       ),
-      "qropsEstablished"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+      "qropsEstablished"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
     )
   )
 
@@ -319,10 +319,10 @@ object UserAnswersTestData {
         "addressLine2" -> "Some Street",
         "addressLine3" -> "Some City",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      -> "UK"
+        "country"      -> "GB"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablished" -> "UK"
+        "qropsEstablished" -> "GB"
       )
     )
   )
@@ -338,7 +338,7 @@ object UserAnswersTestData {
         "ukPostCode"   -> "YY2 2YY",
         "country"      -> Json.obj("code" -> "FR", "name" -> "France")
       ),
-      "qropsEstablishedOther" -> "Otherland"
+      "qropsEstablishedOther" -> Json.obj("code" -> "BR", "name" -> "Brazil")
     )
   )
 
@@ -354,7 +354,7 @@ object UserAnswersTestData {
         "country"      -> "FR"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablishedOther" -> "Otherland"
+        "qropsEstablishedOther" -> "BR"
       )
     )
   )

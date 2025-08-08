@@ -28,7 +28,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers wit
   "QropsEstablishedOtherTransformer" - {
 
     "must move qropsDetails.qropsEstablishedOther to aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther" in {
-      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> "CV"))
+      val inputJson = Json.obj("qropsDetails" -> Json.obj("qropsEstablishedOther" -> Json.obj("code" -> "CV", "name" -> "Cape Verde")))
       val expected  = Json.obj("aboutReceivingQROPS" ->
         Json.obj("receivingQropsEstablishedDetails" ->
           Json.obj("qropsEstablishedOther" -> "CV")))
@@ -38,13 +38,13 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers wit
 
     "must remove qropsEstablished if qropsEstablishedOther is being set" in {
       val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "DE")
+        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> Json.obj("code" -> "DE", "name" -> "Germany"))
       )
 
       val existingInternalJson = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR")
+            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
           )
         )
       )
@@ -70,7 +70,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers wit
       val existingInternalJson = Json.obj(
         "aboutReceivingQROPS" -> Json.obj(
           "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR")
+            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
           )
         )
       )
@@ -82,7 +82,7 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers wit
 
     "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther if value is already set" in {
       val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "ZZ")
+        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> Json.obj("code" -> "ZZ", "name" -> "Unknown Country"))
       )
 
       val existingInternalJson = Json.obj(
