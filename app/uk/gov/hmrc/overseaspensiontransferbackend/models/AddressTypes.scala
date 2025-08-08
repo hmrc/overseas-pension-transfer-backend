@@ -31,13 +31,13 @@ case class PrincipalResAddDetails(
   override def addressLine4: Option[String] = addressDetails.flatMap(_.addressLine4)
   override def addressLine5: Option[String] = addressDetails.flatMap(_.addressLine5)
   override def ukPostCode: Option[String]   = addressDetails.flatMap(_.ukPostCode)
-  override def country: Option[Country]     = addressDetails.flatMap(_.country)
+  override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
 object PrincipalResAddDetails {
 
   implicit val reads: Reads[PrincipalResAddDetails] = (
-    (__ \ "addressDetails").readNullable[Address] and
+    (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "poBoxNumber").readNullable[String]
   )(PrincipalResAddDetails.apply _)
 
@@ -55,13 +55,13 @@ case class LastPrincipalAddDetails(
   override def addressLine4: Option[String] = addressDetails.flatMap(_.addressLine4)
   override def addressLine5: Option[String] = addressDetails.flatMap(_.addressLine5)
   override def ukPostCode: Option[String]   = addressDetails.flatMap(_.ukPostCode)
-  override def country: Option[Country]     = addressDetails.flatMap(_.country)
+  override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
 object LastPrincipalAddDetails {
 
   implicit val reads: Reads[LastPrincipalAddDetails] = (
-    (__ \ "addressDetails").readNullable[Address] and
+    (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "dateMemberLeftUk").readNullable[LocalDate]
   )(LastPrincipalAddDetails.apply _)
 
@@ -76,7 +76,7 @@ case class PropertyAddress(
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: Option[Country]
+    country: Option[String]
   ) extends AddressBase
 
 object PropertyAddress {
@@ -92,7 +92,7 @@ case class ReceivingQropsAddress(
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: Option[Country]
+    country: Option[String]
   ) extends AddressBase
 
 object ReceivingQropsAddress {
@@ -108,7 +108,7 @@ case class SchemeManagerAddress(
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: Option[Country]
+    country: Option[String]
   ) extends AddressBase
 
 object SchemeManagerAddress {

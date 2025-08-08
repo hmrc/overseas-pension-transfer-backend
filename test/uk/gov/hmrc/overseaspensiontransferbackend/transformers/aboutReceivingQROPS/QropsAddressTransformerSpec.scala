@@ -20,10 +20,11 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with MockitoSugar {
+class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with MockitoSugar with SpecBase {
 
-  private val transformer = new QropsAddressTransformer
+  private val transformer = applicationBuilder().injector().instanceOf[QropsAddressTransformer]
 
   "QropsAddressTransformer" - {
 
@@ -47,7 +48,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )
@@ -64,7 +65,7 @@ class QropsAddressTransformerSpec extends AnyFreeSpec with Matchers with Mockito
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )

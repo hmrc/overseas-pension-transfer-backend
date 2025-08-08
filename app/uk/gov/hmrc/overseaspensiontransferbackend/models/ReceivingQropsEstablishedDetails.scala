@@ -20,14 +20,14 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 
 case class ReceivingQropsEstablishedDetails(
-    qropsEstablished: Option[Country],
+    qropsEstablished: Option[String],
     qropsEstablishedOther: Option[String]
   )
 
 object ReceivingQropsEstablishedDetails {
 
   implicit val reads: Reads[ReceivingQropsEstablishedDetails] = (
-    (__ \ "qropsEstablished").readNullable[Country] and
+    (__ \ "qropsEstablished").readNullable[String] and
       (__ \ "qropsEstablishedOther").readNullable[String]
   )(ReceivingQropsEstablishedDetails.apply _)
 

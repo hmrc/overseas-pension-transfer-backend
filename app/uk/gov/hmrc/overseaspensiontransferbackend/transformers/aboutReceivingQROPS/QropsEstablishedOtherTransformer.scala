@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
+import com.google.inject.Inject
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHelpers {
+class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCodeReader) extends PathAwareTransformer with EnumTransformerStep with JsonHelpers {
 
   val jsonKey = "qropsEstablishedOther"
 
@@ -36,6 +39,8 @@ class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHel
     * If the free-text "other" field is being set by the frontend, this removes any conflicting structured country value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: Country => JsValue = country => JsString(country.code)
+
     val steps: Seq[TransformerStep] = Seq(
       conditionalPruneStep(
         onlyIfSetAt = externalPath,
@@ -44,7 +49,8 @@ class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHel
       moveStep(
         from        = externalPath,
         to          = internalPath
-      )
+      ),
+      constructEnum[Country](internalPath, enumConversion)
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
@@ -52,7 +58,11 @@ class QropsEstablishedOtherTransformer extends PathAwareTransformer with JsonHel
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: String => JsValue = string =>
+      Json.toJson(countryCodeReader.readCountryCode(string))
+
     val steps: Seq[TransformerStep] = Seq(
+      constructEnum[String](internalPath, enumConversion),
       moveStep(
         from = internalPath,
         to   = externalPath

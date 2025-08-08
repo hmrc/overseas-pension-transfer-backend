@@ -57,6 +57,8 @@ case class TypeOfAssets(
 
 object TypeOfAssets {
 
+  implicit val propertyAssetsReads: Reads[PropertyAssets] = PropertyAssets.upstreamReads
+
   implicit val reads: Reads[TypeOfAssets] = (
     (__ \ "cashAssets").readNullable[String] and
       (__ \ "cashValue").readNullable[BigDecimal] and

@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json.{__, Json, Reads, Writes}
 
 case class PropertyAssets(
     propertyAddress: Address,
@@ -27,4 +28,10 @@ case class PropertyAssets(
 object PropertyAssets {
   implicit val reads: Reads[PropertyAssets]   = Json.reads[PropertyAssets]
   implicit val writes: Writes[PropertyAssets] = Json.writes[PropertyAssets]
+
+  val upstreamReads: Reads[PropertyAssets] = (
+    (__ \ "propertyAddress").read[Address](Address.upstreamReads) and
+      (__ \ "propValue").read[BigDecimal] and
+      (__ \ "propDescription").read[String]
+  )(PropertyAssets.apply _)
 }

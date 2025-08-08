@@ -33,11 +33,11 @@ object UserAnswersTestData {
         "addressLine2" -> "Test road",
         "addressLine3" -> "Testville",
         "addressLine4" -> "East Testerly",
-        "country"      -> Json.obj(
-          "code" -> "AE-AZ",
-          "name" -> "Abu Dhabi"
-        ),
         "ukPostCode"   -> "AB1 2CD",
+        "country"      -> Json.obj(
+          "code" -> "AE",
+          "name" -> "United Arab Emirates"
+        ),
         "poBoxNumber"  -> "PO321"
       ),
       "memUkResident"           -> false,
@@ -48,7 +48,7 @@ object UserAnswersTestData {
         "addressLine3" -> "Some District",
         "ukPostCode"   -> "ZZ1 1ZZ",
         "country"      -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
@@ -66,17 +66,17 @@ object UserAnswersTestData {
         "addressLine3" -> "QROPS District",
         "ukPostCode"   -> "ZZ1 1ZZ",
         "country"      -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
       "qropsEstablished"      -> Json.obj(
-        "code" -> "UK",
+        "code" -> "GB",
         "name" -> "United Kingdom"
       )
     )
   )
-  val schemeManagerDetails: JsObject = Json.obj(
+  val schemeManagerDetailsExternalJson: JsObject = Json.obj(
     "schemeManagerDetails" -> Json.obj(
       "schemeManagerType" -> "organisation",
       "schemeManagerAddress" -> Json.obj(
@@ -84,7 +84,7 @@ object UserAnswersTestData {
         "addressLine2" -> "Sesame Street",
         "ukPostCode" -> "ZZ1 1ZZ",
         "country" -> Json.obj(
-          "code" -> "UK",
+          "code" -> "GB",
           "name" -> "United Kingdom"
         )
       ),
@@ -97,7 +97,7 @@ object UserAnswersTestData {
     )
   )
 
-  val transferDetails: JsObject = Json.obj(
+  val transferDetailsExternalJson: JsObject = Json.obj(
     "transferDetails" -> Json.obj(
       "transferAmount" -> 12345.99,
       "allowanceBeforeTransfer" -> 54321.99,
@@ -110,8 +110,8 @@ object UserAnswersTestData {
       "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
       "moreQuoted" -> false,
       "moreUnquoted" -> true,
-      "moreAsset" -> false,
       "moreProp" -> false,
+      "moreAsset" -> false,
       "quotedShares" -> Seq(
         Json.obj(
           "valueOfShares" -> 1234.99,
@@ -135,7 +135,7 @@ object UserAnswersTestData {
             "addressLine2" -> "Test Town",
             "ukPostCode" -> "ZZ00 0ZZ",
             "country" -> Json.obj(
-              "code" -> "UK",
+              "code" -> "GB",
               "name" -> "United Kingdom"
             )
           ),
@@ -153,7 +153,7 @@ object UserAnswersTestData {
   )
 
   val fullUserAnswersExternalJson: JsObject =
-    memberDetailsExternalJson.deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetails).deepMerge(transferDetails)
+    transferDetailsExternalJson.deepMerge(memberDetailsExternalJson).deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetailsExternalJson)
 
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(
@@ -169,10 +169,7 @@ object UserAnswersTestData {
             "addressLine3" -> "Testville",
             "addressLine4" -> "East Testerly",
             "ukPostCode"   -> "AB1 2CD",
-            "country"      -> Json.obj(
-              "code" -> "AE-AZ",
-              "name" -> "Abu Dhabi"
-            )
+            "country"      -> "AE"
           ),
           "poBoxNumber"    -> "PO321"
         ),
@@ -185,10 +182,7 @@ object UserAnswersTestData {
               "addressLine2" -> "7 Other Place",
               "addressLine3" -> "Some District",
               "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> Json.obj(
-                "code" -> "UK",
-                "name" -> "United Kingdom"
-              )
+              "country"      -> "GB"
             ),
             "dateMemberLeftUk" -> "2011-06-06"
           )
@@ -206,16 +200,10 @@ object UserAnswersTestData {
         "addressLine2" -> "QROPS Place",
         "addressLine3" -> "QROPS District",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      -> Json.obj(
-          "code" -> "UK",
-          "name" -> "United Kingdom"
-        )
+        "country"      ->  "GB"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablished" -> Json.obj(
-          "code" -> "UK",
-          "name" -> "United Kingdom"
-        )
+        "qropsEstablished" -> "GB"
       ),
       "qropsSchemeManagerType" -> Json.obj(
         "schemeManagerType" -> "02",
@@ -223,10 +211,7 @@ object UserAnswersTestData {
           "addressLine1" -> "42",
           "addressLine2" -> "Sesame Street",
           "ukPostCode" -> "ZZ1 1ZZ",
-          "country" -> Json.obj(
-            "code" -> "UK",
-            "name" -> "United Kingdom"
-          )
+          "country" -> "GB"
         ),
         "schemeManagerEmail" -> "scheme.manager@email.com",
         "schemeManagerPhone" -> "07777777777",
@@ -282,10 +267,7 @@ object UserAnswersTestData {
               "addressLine1" -> "11 Test Street",
               "addressLine2" -> "Test Town",
               "ukPostCode" -> "ZZ00 0ZZ",
-              "country" -> Json.obj(
-                "code" -> "UK",
-                "name" -> "United Kingdom"
-              )
+              "country" -> "GB"
             ),
             "propValue" -> 650000.00,
             "propDescription" -> "Allotment in London"
@@ -322,9 +304,9 @@ object UserAnswersTestData {
         "addressLine2" -> "Some Street",
         "addressLine3" -> "Some City",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+        "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
       ),
-      "qropsEstablished"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+      "qropsEstablished"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
     )
   )
 
@@ -337,10 +319,10 @@ object UserAnswersTestData {
         "addressLine2" -> "Some Street",
         "addressLine3" -> "Some City",
         "ukPostCode"   -> "ZZ1 1ZZ",
-        "country"      -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+        "country"      -> "GB"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablished" -> Json.obj("code" -> "UK", "name" -> "United Kingdom")
+        "qropsEstablished" -> "GB"
       )
     )
   )
@@ -356,7 +338,7 @@ object UserAnswersTestData {
         "ukPostCode"   -> "YY2 2YY",
         "country"      -> Json.obj("code" -> "FR", "name" -> "France")
       ),
-      "qropsEstablishedOther" -> "Otherland"
+      "qropsEstablishedOther" -> Json.obj("code" -> "BR", "name" -> "Brazil")
     )
   )
 
@@ -369,10 +351,10 @@ object UserAnswersTestData {
         "addressLine2" -> "Other Street",
         "addressLine3" -> "Other City",
         "ukPostCode"   -> "YY2 2YY",
-        "country"      -> Json.obj("code" -> "FR", "name" -> "France")
+        "country"      -> "FR"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablishedOther" -> "Otherland"
+        "qropsEstablishedOther" -> "BR"
       )
     )
   )

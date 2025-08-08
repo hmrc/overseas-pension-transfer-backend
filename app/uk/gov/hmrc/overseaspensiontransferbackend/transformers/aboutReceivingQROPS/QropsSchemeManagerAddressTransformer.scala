@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
+import com.google.inject.Inject
 import play.api.libs.json.{JsError, JsObject, JsPath}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-class QropsSchemeManagerAddressTransformer extends PathAwareTransformer with AddressTransformerStep {
+class QropsSchemeManagerAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep {
 
   val jsonKey = "schemeManagerAddress"
 
@@ -38,8 +40,8 @@ class QropsSchemeManagerAddressTransformer extends PathAwareTransformer with Add
         to        = internalPath \ jsonKey
       ),
       constructAddressAt(
-        path      = internalPath,
-        nestedKey = jsonKey
+        path      = internalPath \ jsonKey,
+        nestedKey = None
       )
     )
 
