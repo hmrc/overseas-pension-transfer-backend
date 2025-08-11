@@ -36,8 +36,7 @@ object ParserHelpers {
 
       case UNPROCESSABLE_ENTITY =>
         Left(
-          resp.json
-            .validate[EtmpValidationError]
+          resp.json.validate[EtmpValidationError]
             .asOpt
             .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body.take(MaxSnippet)))
         )
