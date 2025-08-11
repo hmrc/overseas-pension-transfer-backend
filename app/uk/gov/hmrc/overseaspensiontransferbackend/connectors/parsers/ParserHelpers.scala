@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
 
 object ParserHelpers {
-  private val MaxSnippet = 512
+  private[parsers] val MaxSnippet = 512
 
   /** Central response dispatcher: status → JSON shape → ADT */
   def handleUpstreamResponse(resp: HttpResponse): Either[UpstreamError, UpstreamSuccess] =
@@ -64,9 +64,18 @@ object ParserHelpers {
         Left(Unexpected(other, resp.body.take(MaxSnippet)))
     }
 
-  /** HIP envelopes (400/500/503): try error-object, then failures-array */
+  /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */
   private def parseHipEnvelope(resp: HttpResponse): UpstreamError =
     resp.json.validate[HipBadRequest].asOpt
-      .orElse(resp.json.validate[HipOriginFailures].asOpt)
+      .map(hb => hb.copy(message = hb.message.take(MaxSnippet)))
+      .orElse {
+        resp.json.validate[HipOriginFailures].asOpt.map { hf =>
+          hf.copy(failures =
+            hf.failures.map(f =>
+              f.copy(reason = f.reason.take(MaxSnippet))
+            )
+          )
+        }
+      }
       .getOrElse(Unexpected(resp.status, resp.body.take(MaxSnippet)))
 }
