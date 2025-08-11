@@ -18,7 +18,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SubmissionResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 
 import scala.concurrent.Await

@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.upstream
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 
-case class SubmissionResponse(qtNumber: QtNumber)
+import java.time.Instant
 
-object SubmissionResponse {
-  implicit val format: OFormat[SubmissionResponse] = Json.format[SubmissionResponse]
+final case class UpstreamSuccess(qtNumber: QtNumber, processingDate: Instant, formBundleNumber: String)
+
+object UpstreamSuccess {
+
+  implicit val reads: Reads[UpstreamSuccess] = (
+    (__ \ "success" \ "qtReference").read[String].map(QtNumber.apply) and
+      (__ \ "success" \ "processingDate").read[Instant] and
+      (__ \ "success" \ "formBundleNumber").read[String]
+  )(UpstreamSuccess.apply _)
 }
-
-sealed trait SubmissionError
-
-case class SubmissionTransformationError(msg: String) extends SubmissionError
-case object SubmissionFailed                          extends SubmissionError

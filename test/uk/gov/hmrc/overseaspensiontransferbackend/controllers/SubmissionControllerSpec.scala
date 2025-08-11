@@ -25,7 +25,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{SubmissionFailed, SubmissionResponse, SubmissionTransformationError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService

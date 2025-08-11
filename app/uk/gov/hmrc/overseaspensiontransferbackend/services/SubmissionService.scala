@@ -17,8 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{NormalisedSubmission, QtNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
@@ -32,7 +33,8 @@ trait SubmissionService {
 @Singleton
 class SubmissionServiceImpl @Inject() (
     repository: SaveForLaterRepository,
-    validator: SubmissionValidator
+    validator: SubmissionValidator,
+    connector: SubmissionConnector
   )(implicit ec: ExecutionContext
   ) extends SubmissionService {
 
@@ -42,13 +44,35 @@ class SubmissionServiceImpl @Inject() (
         validator.validate(saved) match {
           case Left(err)        =>
             Future.successful(Left(SubmissionTransformationError(err.message)))
-          case Right(validated) => ???
+          case Right(validated) =>
+            connector.submit(validated).map {
+              case Right(success) => Right(SubmissionResponse(success.qtNumber))
+              case Left(e)        => Left(mapUpstream(e))
+            }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
         Future.successful(Left(SubmissionTransformationError(
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))
     }
+
+  // TODO: Confirm what we want to send to the frontend
+  private def mapUpstream(e: UpstreamError): SubmissionError = e match {
+    case EtmpValidationError(_, _, _) |
+        HipBadRequest(_, _, _, _) |
+        HipOriginFailures(_, _) |
+        UnsupportedMedia =>
+      SubmissionTransformationError("Submission failed validation")
+
+    case Unauthorized |
+        Forbidden |
+        NotFound |
+        ServerError |
+        ServiceUnavailable |
+        Unexpected(_, _) =>
+      SubmissionFailed
+
+  }
 }
 
 @Singleton

@@ -21,8 +21,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 import javax.inject.{Inject, Singleton}
 
 sealed trait ValidationResponse
-case class ValidatedSubmission(saved: SavedUserAnswers) extends ValidationResponse
-case class ValidationError(message: String)             extends ValidationResponse
+final case class ValidatedSubmission(saved: SavedUserAnswers) extends ValidationResponse
+final case class ValidationError(message: String)             extends ValidationResponse
 
 trait SubmissionValidator {
   def validate(prepared: SavedUserAnswers): Either[ValidationError, ValidatedSubmission]

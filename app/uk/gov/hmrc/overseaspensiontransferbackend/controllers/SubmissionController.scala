@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{SubmissionFailed, SubmissionTransformationError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{SubmissionFailed, SubmissionTransformationError}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
