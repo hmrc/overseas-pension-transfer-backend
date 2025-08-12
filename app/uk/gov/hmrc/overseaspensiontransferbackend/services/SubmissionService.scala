@@ -46,7 +46,11 @@ class SubmissionServiceImpl @Inject() (
             Future.successful(Left(SubmissionTransformationError(err.message)))
           case Right(validated) =>
             connector.submit(validated).map {
-              case Right(success) => Right(SubmissionResponse(success.qtNumber))
+              case Right(success) =>
+                // TODO: the session store for the dashboards should be updated for the newly
+                //  received QT Reference & QT status = submitted (when this repo is implemented)
+                repository.clear(referenceId = submission.referenceId)
+                Right(SubmissionResponse(success.qtNumber))
               case Left(e)        => Left(mapUpstream(e))
             }.recover { case _ => Left(SubmissionFailed) }
         }
