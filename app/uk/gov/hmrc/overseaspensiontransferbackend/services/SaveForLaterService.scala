@@ -19,11 +19,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -86,15 +85,19 @@ class SaveForLaterServiceImpl @Inject() (
   }
 
   private def constructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    userAnswersTransformer.construct(json).left.map(err =>
-      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
-    )
+    userAnswersTransformer.construct(json).left.map { err =>
+      val formatErr = Json.prettyPrint(JsError.toJson(err))
+      logger.warn(formatErr)
+      SaveForLaterError.TransformationError(formatErr)
+    }
   }
 
   private def deconstructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
-    userAnswersTransformer.deconstruct(json).left.map(err =>
-      SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err)))
-    )
+    userAnswersTransformer.deconstruct(json).left.map { err =>
+      val formatErr = Json.prettyPrint(JsError.toJson(err))
+      logger.warn(formatErr)
+      SaveForLaterError.TransformationError(formatErr)
+    }
   }
 
   // Note that this only validates if any of the json keys are malformed, it does not validate for
@@ -102,8 +105,13 @@ class SaveForLaterServiceImpl @Inject() (
   // cumbersome
   private def validate(json: JsObject): Either[SaveForLaterError, AnswersData] = {
     json.validate[AnswersData] match {
-      case JsSuccess(data, _) => Right(data)
-      case JsError(err)       => Left(SaveForLaterError.TransformationError(Json.prettyPrint(JsError.toJson(err))))
+      case JsSuccess(data, _) => {
+        Right(data)
+      }
+      case JsError(err)       =>
+        val formatErr = Json.prettyPrint(JsError.toJson(err))
+        logger.warn(formatErr)
+        Left(SaveForLaterError.TransformationError(formatErr))
     }
   }
 
