@@ -20,6 +20,8 @@ import com.google.inject.{AbstractModule, Provides, Singleton}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{DummySubmissionServiceImpl, SaveForLaterService, SaveForLaterServiceImpl, SubmissionService}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
+
 
 import java.time.{Clock, ZoneOffset}
 
@@ -36,6 +38,6 @@ class Module extends AbstractModule {
 
   @Provides
   @Singleton
-  def provideUserAnswersTransformer(): UserAnswersTransformer =
-    UserAnswersTransformerFactory().build()
+  def provideUserAnswersTransformer(countryCodeReader: CountryCodeReader): UserAnswersTransformer =
+    new UserAnswersTransformerFactory(countryCodeReader).build()
 }

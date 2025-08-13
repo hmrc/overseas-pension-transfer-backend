@@ -26,7 +26,7 @@ trait AddressBase {
   def addressLine4: Option[String]
   def addressLine5: Option[String]
   def ukPostCode: Option[String]
-  def country: Option[Country]
+  def country: Option[String]
 }
 
 case class Address(
@@ -36,7 +36,7 @@ case class Address(
     addressLine4: Option[String],
     addressLine5: Option[String],
     ukPostCode: Option[String],
-    country: Option[Country]
+    country: Option[String]
   )
 
 object Address {
@@ -48,23 +48,53 @@ object Address {
       (__ \ "addressLine4").readNullable[String] and
       (__ \ "addressLine5").readNullable[String] and
       (__ \ "ukPostCode").readNullable[String] and
-      (__ \ "country").readNullable[Country]
+      (__ \ "country" \ "code").readNullable[String]
   )(Address.apply _)
 
   implicit val writes: OWrites[Address] = Json.writes[Address]
 
+  implicit val upstreamReads: Reads[Address] = (
+    (__ \ "addressLine1").readNullable[String] and
+      (__ \ "addressLine2").readNullable[String] and
+      (__ \ "addressLine3").readNullable[String] and
+      (__ \ "addressLine4").readNullable[String] and
+      (__ \ "addressLine5").readNullable[String] and
+      (__ \ "ukPostCode").readNullable[String] and
+      (__ \ "country").readNullable[String]
+  )(Address.apply _)
+
+  implicit val upstreamWrites: OWrites[Address] = (
+    (__ \ "addressLine1").writeNullable[String] and
+      (__ \ "addressLine2").writeNullable[String] and
+      (__ \ "addressLine3").writeNullable[String] and
+      (__ \ "addressLine4").writeNullable[String] and
+      (__ \ "addressLine5").writeNullable[String] and
+      (__ \ "ukPostCode").writeNullable[String] and
+      (__ \ "country" \ "code").writeNullable[String]
+  )(address =>
+    (
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.addressLine5,
+      address.ukPostCode,
+      address.country
+    )
+  )
+
   implicit val format: OFormat[Address] = OFormat(reads, writes)
 }
 
-case class Country(code: String, name: String) {
-  override def toString: String = name
+case class Country(code: String, name: Option[String]) {
+  override def toString: String = name.getOrElse("")
 }
 
 object Country {
 
   implicit val reads: Reads[Country] = (
     (__ \ "code").read[String] and
-      (__ \ "name").read[String]
+      (__ \ "name").readNullable[String]
   )(Country.apply _)
 
   implicit val writes: OWrites[Country] = Json.writes[Country]
