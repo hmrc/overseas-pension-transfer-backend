@@ -19,8 +19,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep {
+class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressTransformerStep with SpecBase {
 
   "AddressTransformerStep" - {
     "must convert flat frontend-style address to backend-style nested structure" in {
@@ -42,13 +44,13 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           ),
           "poBoxNumber"    -> "PO123"
         )
       )
 
-      constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(expected)
+      constructAddressAt(__ \ "principalResAddRetails", nestedKey = Some("addressDetails"))(input) mustBe Right(expected)
     }
 
     "must convert nested backend-style address back to flat frontend-style structure" in {
@@ -59,7 +61,7 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
             "addressLine2" -> "Testville",
             "addressLine3" -> "Testshire",
             "ukPostCode"   -> "TE5 7ST",
-            "country"      -> Json.obj("code" -> "GB", "name" -> "United Kingdom")
+            "country"      -> "GB"
           )
         )
       )
@@ -84,7 +86,8 @@ class AddressTransformerStepSpec extends AnyFreeSpec with Matchers with AddressT
         "principalResAddRetails" -> Json.obj()
       )
 
-      constructAddressAt(__ \ "principalResAddRetails", nestedKey = "addressDetails")(input) mustBe Right(input)
+      constructAddressAt(__ \ "principalResAddRetails", nestedKey = Some("addressDetails"))(input) mustBe Right(input)
     }
   }
+  override val countryCodeReader: CountryCodeReader = applicationBuilder().injector().instanceOf[CountryCodeReader]
 }
