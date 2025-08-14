@@ -25,7 +25,7 @@ trait Shares {
   val company: String
   val shareClass: String
 
-  def toUpstreamJson: JsValue = Json.toJson[Shares](this)
+  def toDownstreamJson: JsValue = Json.toJson[Shares](this)
 }
 
 object Shares {

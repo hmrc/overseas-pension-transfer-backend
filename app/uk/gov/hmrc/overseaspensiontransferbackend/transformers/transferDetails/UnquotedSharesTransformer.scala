@@ -48,7 +48,7 @@ class UnquotedSharesTransformer extends PathAwareTransformer with EnumTransforme
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
     val enumConversion: List[UnquotedShares] => JsArray = unquotedShares =>
-      JsArray(unquotedShares.map(_.toUpstreamJson))
+      JsArray(unquotedShares.map(_.toDownstreamJson))
 
     val steps: Seq[TransformerStep] = Seq(
       constructEnum[List[UnquotedShares]](internalPath, enumConversion),

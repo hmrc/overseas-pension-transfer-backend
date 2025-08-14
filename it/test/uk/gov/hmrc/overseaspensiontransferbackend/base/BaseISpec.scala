@@ -20,7 +20,7 @@ import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.libs.json._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,13 +48,16 @@ trait BaseISpec
     "microservice.services.overseas-pension-transfer-stubs.host" -> WireMockHelper.wireMockHost,
     "microservice.services.overseas-pension-transfer-stubs.port" -> WireMockHelper.wireMockPort.toString,
     "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
-    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString,
+    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
   )
+
+  protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty
 
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder()
       .in(Environment.simple(mode = Mode.Test))
       .configure(servicesConfig)
+      .overrides(moduleOverrides: _*)
       .build()
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

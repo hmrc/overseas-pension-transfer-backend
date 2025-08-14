@@ -29,6 +29,7 @@ final case class SavedUserAnswers(
   )
 
 final case class AnswersData(
+    reportDetails: Option[ReportDetails],
     transferringMember: Option[TransferringMember],
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
     transferDetails: Option[TransferDetails]
@@ -40,7 +41,8 @@ object AnswersData {
   // A custom reads with readNullable will need to be written for every key we save to mongo.
   // This is due to the way that play handles nullable values.
   implicit val reads: Reads[AnswersData] = (
-    (__ \ "transferringMember").readNullable[TransferringMember] and
+    (__ \ "reportDetails").readNullable[ReportDetails] and
+      (__ \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "transferDetails").readNullable[TransferDetails]
   )(AnswersData.apply _)
