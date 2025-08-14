@@ -22,7 +22,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTrans
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-
 import java.time.{Clock, ZoneOffset}
 
 class Module extends AbstractModule {
