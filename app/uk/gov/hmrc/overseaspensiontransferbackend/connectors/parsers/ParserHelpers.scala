@@ -18,16 +18,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers
 
 import play.api.http.Status._
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 
 object ParserHelpers {
   private[parsers] val MaxSnippet = 512
 
   /** Central response dispatcher: status → JSON shape → ADT */
-  def handleUpstreamResponse(resp: HttpResponse): Either[UpstreamError, UpstreamSuccess] =
+  def handleDownstreamResponse(resp: HttpResponse): Either[DownstreamError, DownstreamSuccess] =
     resp.status match {
       case CREATED =>
-        resp.json.validate[UpstreamSuccess]
+        resp.json.validate[DownstreamSuccess]
           .asEither
           .left.map(_ => Unexpected(CREATED, resp.body.take(MaxSnippet)))
 
@@ -64,7 +64,7 @@ object ParserHelpers {
     }
 
   /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */
-  private def parseHipEnvelope(resp: HttpResponse): UpstreamError =
+  private def parseHipEnvelope(resp: HttpResponse): DownstreamError =
     resp.json.validate[HipBadRequest].asOpt
       .map(hb => hb.copy(message = hb.message.take(MaxSnippet)))
       .orElse {

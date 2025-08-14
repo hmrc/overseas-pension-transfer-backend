@@ -21,9 +21,9 @@ import play.api.libs.json._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleUpstreamResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleDownstreamResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream.{UpstreamError, UpstreamSuccess}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.net.URL
@@ -33,7 +33,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionConnector {
-  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[UpstreamError, UpstreamSuccess]]
+  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 }
 
 @Singleton
@@ -43,7 +43,7 @@ class SubmissionConnectorImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends SubmissionConnector {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[UpstreamError, UpstreamSuccess]] = {
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = new URL(s"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer")
 
@@ -67,14 +67,14 @@ class SubmissionConnectorImpl @Inject() (
       )
       .withBody(payload)
       .execute[HttpResponse]
-      .map(handleUpstreamResponse)
+      .map(handleDownstreamResponse)
   }
 }
 
 @Singleton
 class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) extends SubmissionConnector {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[UpstreamError, UpstreamSuccess]] = {
-    Future.successful(Right(UpstreamSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+    Future.successful(Right(DownstreamSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
   }
 }

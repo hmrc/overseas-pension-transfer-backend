@@ -93,7 +93,7 @@ class SubmissionServiceISpec extends BaseISpec {
       // result mustBe Left(SubmissionTransformationError("..."))
     }
 
-    "returns SubmissionFailed when there is an upstream error" ignore {
+    "returns SubmissionFailed when there is an downstream error" ignore {
       // TODO: Fix when implemented:
       // result mustBe Left(SubmissionFailed("..."))
     }

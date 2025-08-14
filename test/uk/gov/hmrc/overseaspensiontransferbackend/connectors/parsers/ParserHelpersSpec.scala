@@ -22,13 +22,13 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpResponse
 import play.api.http.Status._
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.MaxSnippet
-import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 
 class ParserHelpersSpec extends AnyFreeSpec with Matchers {
 
-  "handleUpstreamResponse" - {
+  "handleDownstreamResponse" - {
 
-    "maps 201 Created to UpstreamSuccess" in {
+    "maps 201 Created to DownstreamSuccess" in {
       val json = Json.parse(
         """
           |{
@@ -42,7 +42,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
       )
 
       val expected = HttpResponse(CREATED, json, Map.empty)
-      val actual   = ParserHelpers.handleUpstreamResponse(expected)
+      val actual   = ParserHelpers.handleDownstreamResponse(expected)
 
       actual                             mustBe a[Right[_, _]]
       actual.toOption.get.qtNumber.value mustBe "QT123456"
@@ -67,7 +67,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
            |""".stripMargin.replace("\"A\"*32", "\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"")
       )
       val expected = HttpResponse(BAD_REQUEST, json, Map.empty)
-      val actual   = ParserHelpers.handleUpstreamResponse(expected)
+      val actual   = ParserHelpers.handleDownstreamResponse(expected)
 
       actual                                                       mustBe a[Left[_, _]]
       actual.left.toOption.get                                     mustBe a[HipBadRequest]
@@ -86,7 +86,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
           |""".stripMargin
       )
       val expected = HttpResponse(BAD_REQUEST, json, Map.empty)
-      val actual   = ParserHelpers.handleUpstreamResponse(expected)
+      val actual   = ParserHelpers.handleDownstreamResponse(expected)
 
       actual.left.toOption.get mustBe a[HipOriginFailures]
     }
@@ -104,19 +104,19 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
           |""".stripMargin
       )
       val expected = HttpResponse(UNPROCESSABLE_ENTITY, json, Map.empty)
-      val actual   = ParserHelpers.handleUpstreamResponse(expected)
+      val actual   = ParserHelpers.handleDownstreamResponse(expected)
 
       actual.left.toOption.get mustBe a[EtmpValidationError]
     }
 
     "maps 415 to UnsupportedMedia" in {
       val expected = HttpResponse(UNSUPPORTED_MEDIA_TYPE, "")
-      ParserHelpers.handleUpstreamResponse(expected).left.toOption.get mustBe UnsupportedMedia
+      ParserHelpers.handleDownstreamResponse(expected).left.toOption.get mustBe UnsupportedMedia
     }
 
     "maps unknown status to Unexpected" in {
       val expected = HttpResponse(IM_A_TEAPOT, "I'm a teapot")
-      ParserHelpers.handleUpstreamResponse(expected).left.toOption.get mustBe Unexpected(IM_A_TEAPOT, "I'm a teapot")
+      ParserHelpers.handleDownstreamResponse(expected).left.toOption.get mustBe Unexpected(IM_A_TEAPOT, "I'm a teapot")
     }
   }
 }

@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
@@ -51,7 +51,7 @@ class SubmissionServiceImpl @Inject() (
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
-              case Left(e)        => Left(mapUpstream(e))
+              case Left(e)        => Left(mapDownstream(e))
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
@@ -61,7 +61,7 @@ class SubmissionServiceImpl @Inject() (
     }
 
   // TODO: Confirm what we want to send to the frontend
-  private def mapUpstream(e: UpstreamError): SubmissionError = e match {
+  private def mapDownstream(e: DownstreamError): SubmissionError = e match {
     case EtmpValidationError(_, _, _) |
         HipBadRequest(_, _, _, _) |
         HipOriginFailures(_, _) |

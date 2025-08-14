@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.upstream
+package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class UpstreamParsingSpec extends AnyFreeSpec with SpecBase {
+class DownstreamParsingSpec extends AnyFreeSpec with SpecBase {
 
-  "Upstream parsing" - {
+  "Downstream parsing" - {
 
     "must parse HIP bad request (responseSystemErrorType)" in {
       val json = Json.parse(

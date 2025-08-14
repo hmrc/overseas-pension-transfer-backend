@@ -21,7 +21,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.upstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
@@ -43,7 +43,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val saved: SavedUserAnswers = simpleSavedUserAnswers
 
-  private val upstreamSuccess = UpstreamSuccess(
+  private val downstreamSuccess = DownstreamSuccess(
     qtNumber         = QtNumber("QT123456"),
     processingDate   = now,
     formBundleNumber = "119000004320"
@@ -55,7 +55,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
       when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
       when(mockConnector.submit(eqTo(ValidatedSubmission(saved)))(any))
-        .thenReturn(Future.successful(Right(upstreamSuccess)))
+        .thenReturn(Future.successful(Right(downstreamSuccess)))
 
       val result = service.submitAnswers(normalisedSubmission).futureValue
       result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
@@ -80,8 +80,8 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       result mustBe Left(SubmissionTransformationError("boom"))
     }
 
-    "must map validation-type upstream errors to SubmissionTransformationError" in {
-      val upstreamErrors: List[UpstreamError] = List(
+    "must map validation-type downstream errors to SubmissionTransformationError" in {
+      val downstreamErrors: List[DownstreamError] = List(
         EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
         HipBadRequest(origin               = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
         HipOriginFailures(origin           = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
@@ -91,7 +91,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
       when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
 
-      upstreamErrors.foreach { ue =>
+      downstreamErrors.foreach { ue =>
         when(mockConnector.submit(eqTo(ValidatedSubmission(saved)))(any))
           .thenReturn(Future.successful(Left(ue)))
 
@@ -105,8 +105,8 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       }
     }
 
-    "must map infrastructural upstream errors to SubmissionFailed" in {
-      val infra: List[UpstreamError] = List(
+    "must map infrastructural downstream errors to SubmissionFailed" in {
+      val infra: List[DownstreamError] = List(
         Unauthorized,
         Forbidden,
         NotFound,

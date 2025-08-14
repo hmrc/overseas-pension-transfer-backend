@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.upstream
+package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-sealed trait UpstreamError
+sealed trait DownstreamError
 
 // ---------- 400/500: HIP responseSystemErrorType ----------
 /** Example: { "origin": "HoD|HIP", "response": { "error": { "code": "400|500", "logID": "...", "message": "..." } } }
   */
-final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String]) extends UpstreamError
+final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String]) extends DownstreamError
 
 object HipBadRequest {
 
@@ -38,7 +38,7 @@ object HipBadRequest {
 
 // ---------- 400/500: HIP-originResponse (failures array) ----------
 /** { "origin": "HIP|HoD", "response": { "failures": [ { "type": "...", "reason": "..." }, ... ] } } */
-final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure]) extends UpstreamError
+final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure]) extends DownstreamError
 
 object HipOriginFailures {
   case class Failure(`type`: String, reason: String)
@@ -53,7 +53,7 @@ object HipOriginFailures {
 
 // ---------- 422: ETMP Business Validation ----------
 /** { "errors": { "processingDate": "...", "code": "001|003|...", "text": "..." } } */
-final case class EtmpValidationError(processingDate: String, code: String, text: String) extends UpstreamError
+final case class EtmpValidationError(processingDate: String, code: String, text: String) extends DownstreamError
 
 object EtmpValidationError {
   private case class Errors(processingDate: String, code: String, text: String)
@@ -70,12 +70,12 @@ object EtmpValidationError {
 }
 
 // -------- Other status families --------
-case object Unauthorized       extends UpstreamError // 401
-case object Forbidden          extends UpstreamError // 403
-case object NotFound           extends UpstreamError // 404
-case object UnsupportedMedia   extends UpstreamError // 415
-case object ServerError        extends UpstreamError // 500 (fallback if body doesn’t match HIP shapes)
-case object ServiceUnavailable extends UpstreamError // 503
+case object Unauthorized       extends DownstreamError // 401
+case object Forbidden          extends DownstreamError // 403
+case object NotFound           extends DownstreamError // 404
+case object UnsupportedMedia   extends DownstreamError // 415
+case object ServerError        extends DownstreamError // 500 (fallback if body doesn’t match HIP shapes)
+case object ServiceUnavailable extends DownstreamError // 503
 
 // ---------- Fallback ----------
-final case class Unexpected(status: Int, bodySnippet: String) extends UpstreamError
+final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamError
