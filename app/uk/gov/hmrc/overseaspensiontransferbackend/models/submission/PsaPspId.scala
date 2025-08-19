@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.config
+package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import play.api.libs.json._
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+final case class PsaId(value: String)
 
-  val appName: String = config.get[String]("appName")
+object PsaId {
+  implicit val format: OFormat[PsaId] = Json.format[PsaId]
+}
 
-  val etmpBaseUrl: String = "etmpBaseUrl"
+final case class PspId(value: String)
 
-  val stubStoreAnswers: String =
-    s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/overseas-pension-transfer-stubs/store-answers"
-
-  val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
+object PspId {
+  implicit val format: OFormat[PspId] = Json.format[PspId]
 }
