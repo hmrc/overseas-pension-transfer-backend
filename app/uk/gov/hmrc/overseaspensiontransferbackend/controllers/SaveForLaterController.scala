@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
+import org.apache.pekko.Done
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -70,4 +71,14 @@ class SaveForLaterController @Inject() (
           InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
+
+  def deleteAnswers(referenceId: String): Action[AnyContent] = Action.async {
+    implicit request =>
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+
+      saveForLaterService.deleteAnswers(referenceId).map {
+        case Right(Done) => NoContent
+        case Left(error) => InternalServerError(Json.obj("error" -> s"Error while performing delete: $error"))
+      }
+  }
 }

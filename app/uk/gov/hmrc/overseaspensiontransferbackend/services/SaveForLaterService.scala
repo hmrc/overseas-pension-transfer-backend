@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import org.apache.pekko.Done
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -33,11 +34,13 @@ object SaveForLaterError {
   final case class TransformationError(msg: String) extends SaveForLaterError
   final case object NotFound                        extends SaveForLaterError
   final case object SaveFailed                      extends SaveForLaterError
+  final case object DeleteFailed                    extends SaveForLaterError
 }
 
 trait SaveForLaterService {
   def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
   def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]]
+  def deleteAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]]
 }
 
 @Singleton
@@ -121,4 +124,10 @@ class SaveForLaterServiceImpl @Inject() (
       case None               => update
     }
   }
+
+  override def deleteAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]] =
+    repository.clear(id) map {
+      case true  => Right(Done)
+      case false => Left(SaveForLaterError.DeleteFailed)
+    }
 }

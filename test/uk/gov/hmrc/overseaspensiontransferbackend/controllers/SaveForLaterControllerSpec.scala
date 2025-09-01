@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
+import org.apache.pekko.Done
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.Application
 import play.api.inject.bind
@@ -23,6 +24,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.DeleteFailed
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 
 import scala.concurrent.Future
@@ -134,6 +136,50 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val result = route(app, request).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "deleteAnswers" - {
+      "Return No Content when a Right is returned from the service layer" in {
+        val mockService = mock[SaveForLaterService]
+
+        when(mockService.deleteAnswers(any)(any)).thenReturn(Future.successful(Right(Done)))
+
+        val app: Application =
+          applicationBuilder()
+            .overrides(
+              bind[SaveForLaterService].toInstance(mockService)
+            )
+            .build()
+
+        running(app) {
+          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/$testId")
+
+          val result = route(app, request).value
+
+          status(result) mustBe NO_CONTENT
+        }
+      }
+
+      "Return Internal Server Error when a Left is returned from the service layer" in {
+        val mockService = mock[SaveForLaterService]
+
+        when(mockService.deleteAnswers(any)(any)).thenReturn(Future.successful(Left(DeleteFailed)))
+
+        val app: Application =
+          applicationBuilder()
+            .overrides(
+              bind[SaveForLaterService].toInstance(mockService)
+            )
+            .build()
+
+        running(app) {
+          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/$testId")
+
+          val result = route(app, request).value
+
+          status(result) mustBe INTERNAL_SERVER_ERROR
+        }
       }
     }
   }
