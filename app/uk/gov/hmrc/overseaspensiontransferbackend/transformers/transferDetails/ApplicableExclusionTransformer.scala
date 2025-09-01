@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
+import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.ApplicableExclusion
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTransformerStep {
 
@@ -33,14 +33,20 @@ class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTrans
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: ApplicableExclusion => JsString = applicableExclusion => JsString(applicableExclusion.downstreamValue)
+    val enumConversion: Seq[ApplicableExclusion] => JsArray = applicableExclusions =>
+      JsArray(
+        applicableExclusions.map {
+          applicableExclusion =>
+            JsString(applicableExclusion.downstreamValue)
+        }
+      )
 
     val steps: Seq[TransformerStep] = Seq(
       moveStep(
         externalPath,
         internalPath
       ),
-      constructEnum[ApplicableExclusion](
+      constructEnum[Seq[ApplicableExclusion]](
         internalPath,
         enumConversion
       )
@@ -52,13 +58,16 @@ class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTrans
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: String => ApplicableExclusion = str => ApplicableExclusion(str)
+    val enumConversion: Seq[ApplicableExclusion] => JsArray = applicableExclusions =>
+      JsArray(
+        applicableExclusions.map {
+          applicableExclusion =>
+            JsString(applicableExclusion.toString)
+        }
+      )
 
     val steps: Seq[TransformerStep] = Seq(
-      deconstructEnum[ApplicableExclusion](
-        internalPath,
-        enumConversion
-      ),
+      constructEnum[Seq[ApplicableExclusion]](internalPath, enumConversion),
       moveStep(
         internalPath,
         externalPath

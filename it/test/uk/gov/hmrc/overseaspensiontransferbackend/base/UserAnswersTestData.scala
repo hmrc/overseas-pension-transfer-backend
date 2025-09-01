@@ -104,7 +104,7 @@ object UserAnswersTestData {
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
-      "applicableExclusion" -> "occupational",
+      "applicableExclusion" -> Seq("occupational", "resident"),
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
       "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
@@ -246,7 +246,7 @@ object UserAnswersTestData {
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
       "taxableOverseasTransferDetails" -> Json.obj(
-        "applicableExclusion" -> "01",
+        "applicableExclusion" -> Seq("01", "04"),
         "amountTaxDeducted" -> 9876543.21,
         "transferMinusTax" -> 123456.99
       ),

@@ -26,15 +26,15 @@ class ApplicableExclusionTransformerSpec extends AnyFreeSpec with Matchers {
 
   "ApplicableExclusionTransfromerSpec" - {
     "must move transferDetails.applicableExclusion to transferDetails.taxableOverseasTransferDetails.applicableExclusion" in {
-      val inputJson = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> "publicService"))
-      val expected  = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> "02")))
+      val inputJson = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> Seq("publicService")))
+      val expected  = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> Seq("02"))))
 
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
     "must move transferDetails.taxableOverseasTransferDetails.applicableExclusion to transferDetails.applicableExclusion" in {
-      val inputJson = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> "04")))
-      val expected  = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> "resident"))
+      val inputJson = Json.obj("transferDetails" -> Json.obj("taxableOverseasTransferDetails" -> Json.obj("applicableExclusion" -> Seq("01", "04"))))
+      val expected  = Json.obj("transferDetails" -> Json.obj("applicableExclusion" -> Seq("occupational", "resident")))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }
