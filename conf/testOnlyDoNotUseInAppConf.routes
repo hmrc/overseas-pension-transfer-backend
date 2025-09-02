@@ -12,5 +12,4 @@
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
 
-
-DELETE      /reset-test-data          uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyController.resetDatabase
+DELETE      /test-only/reset-test-data          uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyController.resetDatabase

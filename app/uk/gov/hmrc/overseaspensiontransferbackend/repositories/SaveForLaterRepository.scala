@@ -93,7 +93,7 @@ class SaveForLaterRepository @Inject() (
       .map(_ => true)
   }
 
-  def clear = Mdc.preservingMdc {
-    collection.drop().toFuture().map( _ => Done)
+  def clear: Future[Done] = Mdc.preservingMdc {
+    collection.drop().toFuture().map(_ => Done)
   }
 }
