@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import org.apache.pekko.Done
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.DeleteFailed
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
@@ -140,6 +142,24 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
       result.futureValue match {
         case Left(SaveForLaterError.TransformationError(msg)) => msg.toLowerCase must include("nino")
         case other                                            => fail(s"Expected TransformationError due to malformed field, got: $other")
+      }
+    }
+
+    "deleteAnswers" - {
+      "Return a Right(Done) when repository returns true" in {
+        when(mockRepository.clear(*)).thenReturn(Future.successful(true))
+
+        val result = service.deleteAnswers(testId)
+
+        result.futureValue mustBe Right(Done)
+      }
+
+      "Return a Left(DeleteFailed) when repository returns false" in {
+        when(mockRepository.clear(*)).thenReturn(Future.successful(false))
+
+        val result = service.deleteAnswers(testId)
+
+        result.futureValue mustBe Left(DeleteFailed)
       }
     }
   }
