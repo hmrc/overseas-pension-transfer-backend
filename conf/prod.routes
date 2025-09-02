@@ -1,3 +1,4 @@
 # Add all the application routes to the app.routes file
 ->         /overseas-pension-transfer-backend              app.Routes
 ->         /                                               health.Routes
+->         /test-only                                      testOnlyDoNotUseInAppConf.routes
