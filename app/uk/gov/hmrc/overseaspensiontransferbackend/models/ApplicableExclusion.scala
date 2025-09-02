@@ -38,7 +38,7 @@ object ApplicableExclusion {
       case JsString("publicService") | JsString("02")    => JsSuccess(PublicService)
       case JsString("internationalOrg") | JsString("03") => JsSuccess(InternationalOrg)
       case JsString("resident") | JsString("04")         => JsSuccess(Resident)
-      case _                                             => JsError("Invalid value provided for SchemeManagerType")
+      case _                                             => JsError("Invalid value provided for ApplicableExclusion")
     }
 
   implicit val writes: Writes[ApplicableExclusion] =
