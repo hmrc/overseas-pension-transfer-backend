@@ -22,8 +22,8 @@ import org.scalatest.matchers.must.Matchers
 import play.api.Application
 import play.api.http.Status.NO_CONTENT
 import play.api.inject.bind
+import play.api.test.Helpers.{defaultAwaitTimeout, status, DELETE}
 import play.api.test.{FakeRequest, Injecting}
-import play.api.test.Helpers.{defaultAwaitTimeout, route, running, status, writeableOf_AnyContentAsEmpty, DELETE}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
