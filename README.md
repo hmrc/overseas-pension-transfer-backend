@@ -14,7 +14,7 @@ This is the backend microservice application that is part of the Managing Pensio
 
    > `sm2 --stop OVERSEAS_PENSION_TRANSFER_BACKEND`
 
-   > `sbt run`
+   > `sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes`
 
 The service runs on port `15600` by default.
 
