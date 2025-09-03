@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 
+import org.apache.pekko.Done
 import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
@@ -90,5 +91,9 @@ class SaveForLaterRepository @Inject() (
       .deleteOne(byReferenceId(referenceId))
       .toFuture()
       .map(_ => true)
+  }
+
+  def clear: Future[Done] = Mdc.preservingMdc {
+    collection.drop().toFuture().map(_ => Done)
   }
 }
