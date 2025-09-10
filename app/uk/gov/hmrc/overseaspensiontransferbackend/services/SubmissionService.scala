@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import com.google.inject.ImplementedBy
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
@@ -26,6 +27,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[SubmissionServiceImpl])
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 }
@@ -50,7 +52,7 @@ class SubmissionServiceImpl @Inject() (
                 // TODO: the session store for the dashboards should be updated for the newly
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
-                Right(SubmissionResponse(success.qtNumber))
+                Right(SubmissionResponse(success.qtNumber, success.processingDate))
               case Left(e)        => Left(mapDownstream(e))
             }.recover { case _ => Left(SubmissionFailed) }
         }
@@ -77,14 +79,13 @@ class SubmissionServiceImpl @Inject() (
       SubmissionFailed
 
   }
-}
 
-@Singleton
-class DummySubmissionServiceImpl @Inject() (
-    implicit ec: ExecutionContext
-  ) extends SubmissionService {
-
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
-    Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
-  }
+//@Singleton
+//class DummySubmissionServiceImpl @Inject() (
+//    implicit ec: ExecutionContext
+//  ) extends SubmissionService {
+//
+//  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
+//    Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
+//  }
 }
