@@ -27,11 +27,10 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamE
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[SubmissionConnectorImpl])
 trait SubmissionConnector {
   def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 }
@@ -77,10 +76,10 @@ class SubmissionConnectorImpl @Inject() (
   }
 }
 
-//@Singleton
-//class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) extends SubmissionConnector {
-//
-//  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
-//    Future.successful(Right(DownstreamSuccess(QtNumber("QT123456"), LocalDateTime.now(), "formBundleNumber")))
-//  }
-//}
+@Singleton
+class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) extends SubmissionConnector {
+
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+    Future.successful(Right(DownstreamSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
+  }
+}
