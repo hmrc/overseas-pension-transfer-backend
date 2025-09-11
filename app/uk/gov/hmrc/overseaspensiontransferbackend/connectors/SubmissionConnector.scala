@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.Singleton
 import play.api.Logging
 import play.api.libs.json._
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig

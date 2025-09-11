@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AppConfig @Inject() (config: Configuration) {
@@ -26,9 +26,6 @@ class AppConfig @Inject() (config: Configuration) {
   val appName: String = config.get[String]("appName")
 
   val etmpBaseUrl: String = config.get[Service]("microservice.services.hip").baseUrl
-
-  val stubStoreAnswers: String =
-    s"$etmpBaseUrl/overseas-pension-transfer-stubs/store-answers"
 
   val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 }

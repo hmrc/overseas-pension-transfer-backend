@@ -45,8 +45,8 @@ trait BaseISpec
 
   def servicesConfig: Map[String, String] = Map(
     "play.filters.csrf.header.bypassHeaders.Csrf-Token"          -> "nocheck",
-    "microservice.services.overseas-pension-transfer-stubs.host" -> WireMockHelper.wireMockHost,
-    "microservice.services.overseas-pension-transfer-stubs.port" -> WireMockHelper.wireMockPort.toString,
+    "microservice.services.hip.host"                             -> WireMockHelper.wireMockHost,
+    "microservice.services.hip.port"                             -> WireMockHelper.wireMockPort.toString,
     "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
     "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
   )
