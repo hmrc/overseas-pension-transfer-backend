@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
-import javax.inject.{Inject, Singleton}
 import play.api.Configuration
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AppConfig @Inject() (config: Configuration) {
 
   val appName: String = config.get[String]("appName")
 
-  val etmpBaseUrl: String = "etmpBaseUrl"
-
-  val stubStoreAnswers: String =
-    s"${config.get[Service]("microservice.services.overseas-pension-transfer-stubs").baseUrl}/overseas-pension-transfer-stubs/store-answers"
+  val etmpBaseUrl: String = config.get[Service]("microservice.services.hip").baseUrl
 
   val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 }
