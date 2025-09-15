@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
@@ -80,7 +80,25 @@ class SubmissionServiceImpl @Inject() (
 
   }
 
-  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] = ???
+  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
+    connector.getAllSubmissions(pstrNumber).map {
+      // TODO: This will need to be filled out more when the downstream errors are made clear in OAOTC-1349
+      case Left(_)           => Left(SubmissionGetAllError())
+      case Right(downstream) =>
+        val items = downstream.success.qropsTransferOverview.map { r =>
+          SubmissionGetAllItem(
+            transferReference = None,
+            qtReference       = Some(QtNumber(r.qtReference)),
+            nino              = Some(r.nino),
+            memberFirstName   = Some(r.firstName),
+            memberSurname     = Some(r.lastName),
+            submissionDate    = Some(r.qtDate),
+            qtStatus          = Some(QtStatus(r.qtStatus)),
+            schemeId          = Some(pstrNumber)
+          )
+        }
+        Right(SubmissionGetAllResponse(items))
+    }
 }
 
 @Singleton
@@ -93,5 +111,5 @@ class DummySubmissionServiceImpl @Inject() (
   }
 
   override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
-    Future.successful(Right(SubmissionGetAllResponse()))
+    Future.successful(Right(SubmissionGetAllResponse(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None)))))
 }

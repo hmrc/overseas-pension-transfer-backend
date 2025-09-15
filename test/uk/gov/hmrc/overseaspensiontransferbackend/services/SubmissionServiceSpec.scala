@@ -17,14 +17,16 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import org.scalatest.freespec.AnyFreeSpec
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
@@ -49,7 +51,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     formBundleNumber = "119000004320"
   )
 
-  "SubmissionServiceImpl" - {
+  "submitAnswers" - {
 
     "must return Right(SubmissionResponse) on happy path" in {
       when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
@@ -82,8 +84,13 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
     "must map validation-type downstream errors to SubmissionTransformationError" in {
       val downstreamErrors: List[DownstreamSubmittedError] = List(
-        EtmpValidationSubmittedError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
-        HipBadRequest(origin                        = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
+        EtmpValidationSubmittedError(processingDate = "2025-07-01T09:30:00Z", code = "003", text = "Request could not be processed"),
+        HipBadRequest(
+          origin                                    = "HoD",
+          code                                      = "400",
+          message                                   = "Invalid JSON",
+          logId                                     = Some("ABCDEF0123456789ABCDEF0123456789")
+        ),
         HipOriginFailures(origin                    = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
         UnsupportedMedia
       )
@@ -127,22 +134,115 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       }
     }
   }
+  "getAllSubmissions" - {
+    "must map downstream overview rows into SubmissionGetAllItem and wrap in Right" in {
+      val pstr = PstrNumber("24000001AA")
 
-  "DummySubmissionServiceImpl" - {
+      val ds = DownstreamGetAllSuccess(
+        DownstreamGetAllSuccess.Payload(
+          qropsTransferOverview = List(
+            DownstreamGetAllSuccess.OverviewItem(
+              fbNumber                  = "123456000023",
+              qtReference               = "QT564321",
+              qtVersion                 = "001",
+              qtStatus                  = "Compiled",
+              qtDigitalStatus           = "Complied",
+              nino                      = "AA000000A",
+              firstName                 = "David",
+              lastName                  = "Warne",
+              qtDate                    = LocalDate.parse("2025-03-14"),
+              qropsReference            = "QROPS654321",
+              submissionCompilationDate = now
+            ),
+            DownstreamGetAllSuccess.OverviewItem(
+              fbNumber                  = "123456000024",
+              qtReference               = "QT564322",
+              qtVersion                 = "003",
+              qtStatus                  = "Submitted",
+              qtDigitalStatus           = "Submitted",
+              nino                      = "AA000001A",
+              firstName                 = "Edith",
+              lastName                  = "Ennis-Hill",
+              qtDate                    = LocalDate.parse("2025-01-01"),
+              qropsReference            = "QROPS654322",
+              submissionCompilationDate = now
+            )
+          )
+        )
+      )
+
+      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Right(ds)))
+
+      val result = service.getAllSubmissions(pstr).futureValue
+
+      result match {
+        case Right(SubmissionGetAllResponse(items)) =>
+          items must have size 2
+
+          val first = items.head
+          first.transferReference mustBe None
+          first.qtReference       mustBe Some(QtNumber("QT564321"))
+          first.nino              mustBe Some("AA000000A")
+          first.memberFirstName   mustBe Some("David")
+          first.memberSurname     mustBe Some("Warne")
+          first.submissionDate    mustBe Some(LocalDate.parse("2025-03-14"))
+          first.qtStatus          mustBe Some(QtStatus("Compiled"))
+          first.schemeId          mustBe Some(pstr)
+
+          val second = items(1)
+          second.qtReference     mustBe Some(QtNumber("QT564322"))
+          second.memberFirstName mustBe Some("Edith")
+          second.memberSurname   mustBe Some("Ennis-Hill")
+
+        case other =>
+          fail(s"Unexpected: $other")
+      }
+    }
+
+    "must return Left(SubmissionGetAllError()) when connector returns an error" in {
+      val pstr = PstrNumber("24000001AA")
+
+      val dsError = mock[DownstreamGetAllError]
+      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Left(dsError)))
+
+      val result = service.getAllSubmissions(pstr).futureValue
+      result mustBe Left(SubmissionGetAllError())
+    }
+
+    "must handle empty downstream overview list by returning an empty submissions list" in {
+      val pstr = PstrNumber("24000001AA")
+
+      val ds = DownstreamGetAllSuccess(
+        DownstreamGetAllSuccess.Payload(Nil)
+      )
+
+      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Right(ds)))
+
+      val result = service.getAllSubmissions(pstr).futureValue
+      result mustBe Right(SubmissionGetAllResponse(Nil))
+    }
+
+  }
+
+  "Dummy submitAnswers" - {
     "must always return QT123456 (temporary stub)" in {
       val dummy = new DummySubmissionServiceImpl()
       val out   = dummy.submitAnswers(normalisedSubmission).futureValue
       out mustBe Right(SubmissionResponse(QtNumber("QT123456")))
     }
-
-    "must return Right(SubmissionGetAllResponse()) for any PSTR" in {
+  }
+  "Dummy getAllSubmissions" - {
+    "must return Right(SubmissionGetAllResponse(...)) for any PSTR" in {
       val dummy = new DummySubmissionServiceImpl()
 
       val pstr = "24000001AA"
 
       val result = dummy.getAllSubmissions(PstrNumber(pstr)).futureValue
 
-      result mustBe Right(SubmissionGetAllResponse())
+      result mustBe Right(SubmissionGetAllResponse(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None))))
     }
   }
 }

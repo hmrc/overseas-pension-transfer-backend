@@ -16,4 +16,25 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
-case class DownstreamGetAllSuccess()
+import java.time.{Instant, LocalDate}
+
+final case class DownstreamGetAllSuccess(success: DownstreamGetAllSuccess.Payload)
+
+object DownstreamGetAllSuccess {
+
+  final case class Payload(qropsTransferOverview: List[OverviewItem])
+
+  final case class OverviewItem(
+      fbNumber: String,
+      qtReference: String,
+      qtVersion: String,
+      qtStatus: String,
+      qtDigitalStatus: String,
+      nino: String,
+      firstName: String,
+      lastName: String,
+      qtDate: LocalDate,
+      qropsReference: String,
+      submissionCompilationDate: Instant
+    )
+}

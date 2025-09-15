@@ -16,4 +16,30 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-case class SubmissionGetAllResponse() {}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
+
+import java.time.LocalDate
+
+case class SubmissionGetAllResponse(
+    submissions: Seq[SubmissionGetAllItem]
+  )
+
+object SubmissionGetAllResponse {
+  implicit val format: OFormat[SubmissionGetAllResponse] = Json.format
+}
+
+case class SubmissionGetAllItem(
+    transferReference: Option[String],
+    qtReference: Option[QtNumber],
+    nino: Option[String],
+    memberFirstName: Option[String],
+    memberSurname: Option[String],
+    submissionDate: Option[LocalDate],
+    qtStatus: Option[QtStatus],
+    schemeId: Option[PstrNumber]
+  )
+
+object SubmissionGetAllItem {
+  implicit val format: OFormat[SubmissionGetAllItem] = Json.format
+}

@@ -19,13 +19,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class GetAllSubmissionsController @Inject() (
-    cc: ControllerComponents
+    cc: ControllerComponents,
+    submissionConnector: SubmissionConnector
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 

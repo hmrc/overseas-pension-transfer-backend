@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleDownstreamResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.DownstreamGetAllSuccess.{OverviewItem, Payload}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{
   DownstreamGetAllError,
   DownstreamGetAllSuccess,
@@ -34,7 +35,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -94,6 +95,52 @@ class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) e
   }
 
   override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hs: HeaderCarrier): Future[Either[DownstreamGetAllError, DownstreamGetAllSuccess]] = {
-    Future.successful(Right(DownstreamGetAllSuccess()))
+
+    val payload = DownstreamGetAllSuccess(
+      success = Payload(
+        qropsTransferOverview = List(
+          OverviewItem(
+            fbNumber                  = "123456000023",
+            qtReference               = "QT564321",
+            qtVersion                 = "001",
+            qtStatus                  = "Compiled",
+            qtDigitalStatus           = "Complied",
+            nino                      = "AA000000A",
+            firstName                 = "David",
+            lastName                  = "Warne",
+            qtDate                    = LocalDate.parse("2025-03-14"),
+            qropsReference            = "QROPS654321",
+            submissionCompilationDate = Instant.parse("2025-05-09T19:10:12Z")
+          ),
+          OverviewItem(
+            fbNumber                  = "123456000024",
+            qtReference               = "QT564322",
+            qtVersion                 = "003",
+            qtStatus                  = "Submitted",
+            qtDigitalStatus           = "Submitted",
+            nino                      = "AA000001A",
+            firstName                 = "Edith",
+            lastName                  = "Ennis-Hill",
+            qtDate                    = LocalDate.parse("2025-01-01"),
+            qropsReference            = "QROPS654322",
+            submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
+          ),
+          OverviewItem(
+            fbNumber                  = "123456000025",
+            qtReference               = "QT564323",
+            qtVersion                 = "001",
+            qtStatus                  = "Submitted",
+            qtDigitalStatus           = "Complied",
+            nino                      = "AA000003A",
+            firstName                 = "Reginald",
+            lastName                  = "Rooney",
+            qtDate                    = LocalDate.parse("2025-04-02"),
+            qropsReference            = "QROPS654323",
+            submissionCompilationDate = Instant.parse("2025-05-09T07:10:12Z")
+          )
+        )
+      )
+    )
+    Future.successful(Right(payload))
   }
 }
