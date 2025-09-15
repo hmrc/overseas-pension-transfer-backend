@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, QtStatus, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
@@ -28,6 +29,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
+
+  def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
+                 (implicit hc: HeaderCarrier): Future[Either[Unit, SavedUserAnswers]]
 }
 
 @Singleton
@@ -77,14 +81,17 @@ class SubmissionServiceImpl @Inject() (
       SubmissionFailed
 
   }
-}
 
-@Singleton
-class DummySubmissionServiceImpl @Inject() (
-    implicit ec: ExecutionContext
-  ) extends SubmissionService {
-
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
-    Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
+  def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
+                 (implicit hc: HeaderCarrier): Future[Either[Unit, SavedUserAnswers]] = {
+    qtStatus match {
+        case InProgress => repository.get(fbNumber.get) map {
+          case Some(userAnswers) => Right(userAnswers)
+          case None => Left()
+        }
+        case Submitted | Compiled => connector.getTransfer(pstr, fbNumber, qtRef, version) map {
+          case Right(value) =>
+        }
+      }
   }
 }
