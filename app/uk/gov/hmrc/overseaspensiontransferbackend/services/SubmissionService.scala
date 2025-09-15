@@ -61,8 +61,8 @@ class SubmissionServiceImpl @Inject() (
     }
 
   // TODO: Confirm what we want to send to the frontend
-  private def mapDownstream(e: DownstreamError): SubmissionError = e match {
-    case EtmpValidationError(_, _, _) |
+  private def mapDownstream(e: DownstreamSubmittedError): SubmissionError = e match {
+    case EtmpValidationSubmittedError(_, _, _) |
         HipBadRequest(_, _, _, _) |
         HipOriginFailures(_, _) |
         UnsupportedMedia =>
@@ -71,7 +71,7 @@ class SubmissionServiceImpl @Inject() (
     case Unauthorized |
         Forbidden |
         NotFound |
-        ServerError |
+        ServerSubmittedError$ |
         ServiceUnavailable |
         Unexpected(_, _) =>
       SubmissionFailed

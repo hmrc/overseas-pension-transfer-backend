@@ -17,14 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 
 import java.time.Instant
 
-class DownstreamSuccessSpec extends AnyFreeSpec with SpecBase {
+class DownstreamSubmittedSuccessSpec extends AnyFreeSpec with SpecBase {
 
   "DownstreamSuccess reads" - {
 
@@ -40,10 +39,10 @@ class DownstreamSuccessSpec extends AnyFreeSpec with SpecBase {
           }
         """)
 
-      val result = json.validate[DownstreamSuccess]
+      val result = json.validate[DownstreamSubmittedSuccess]
 
       result mustBe JsSuccess(
-        DownstreamSuccess(
+        DownstreamSubmittedSuccess(
           qtNumber         = QtNumber("QT123456"),
           processingDate   = Instant.parse("2022-01-31T09:26:17Z"),
           formBundleNumber = "119000004320"
@@ -53,7 +52,7 @@ class DownstreamSuccessSpec extends AnyFreeSpec with SpecBase {
 
     "must fail to read when required fields are missing" in {
       val json   = Json.parse("""{ "success": { "processingDate": "2022-01-31T09:26:17Z" } }""")
-      val result = json.validate[DownstreamSuccess]
+      val result = json.validate[DownstreamSubmittedSuccess]
       result.isError mustBe true
     }
   }

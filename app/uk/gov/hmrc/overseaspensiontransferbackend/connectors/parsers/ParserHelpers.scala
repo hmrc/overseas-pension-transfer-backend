@@ -24,10 +24,10 @@ object ParserHelpers {
   private[parsers] val MaxSnippet = 512
 
   /** Central response dispatcher: status → JSON shape → ADT */
-  def handleDownstreamResponse(resp: HttpResponse): Either[DownstreamError, DownstreamSuccess] =
+  def handleDownstreamResponse(resp: HttpResponse): Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] =
     resp.status match {
       case CREATED =>
-        resp.json.validate[DownstreamSuccess]
+        resp.json.validate[DownstreamSubmittedSuccess]
           .asEither
           .left.map(_ => Unexpected(CREATED, resp.body.take(MaxSnippet)))
 
@@ -36,7 +36,7 @@ object ParserHelpers {
 
       case UNPROCESSABLE_ENTITY =>
         Left(
-          resp.json.validate[EtmpValidationError]
+          resp.json.validate[EtmpValidationSubmittedError]
             .asOpt
             .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body.take(MaxSnippet)))
         )
@@ -64,7 +64,7 @@ object ParserHelpers {
     }
 
   /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */
-  private def parseHipEnvelope(resp: HttpResponse): DownstreamError =
+  private def parseHipEnvelope(resp: HttpResponse): DownstreamSubmittedError =
     resp.json.validate[HipBadRequest].asOpt
       .map(hb => hb.copy(message = hb.message.take(MaxSnippet)))
       .orElse {

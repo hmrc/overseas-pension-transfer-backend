@@ -91,13 +91,13 @@ class DownstreamParsingSpec extends AnyFreeSpec with SpecBase {
           |""".stripMargin
       )
 
-      val expected = EtmpValidationError(
+      val expected = EtmpValidationSubmittedError(
         processingDate = "2025-07-01T09:30:00Z",
         code           = "003",
         text           = "Request could not be processed"
       )
 
-      val result = json.validate[EtmpValidationError]
+      val result = json.validate[EtmpValidationSubmittedError]
       result mustBe JsSuccess(expected)
     }
   }

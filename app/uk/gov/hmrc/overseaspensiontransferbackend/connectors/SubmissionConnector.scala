@@ -24,7 +24,13 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleDownstreamResponse
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{
+  DownstreamGetAllError,
+  DownstreamGetAllSuccess,
+  DownstreamSubmittedError,
+  DownstreamSubmittedSuccess
+}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
@@ -33,7 +39,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionConnector {
-  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
+  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]]
+  def getAllSubmissions(pstrNumber: PstrNumber)(implicit hs: HeaderCarrier): Future[Either[DownstreamGetAllError, DownstreamGetAllSuccess]]
 }
 
 @Singleton
@@ -43,7 +50,7 @@ class SubmissionConnectorImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends SubmissionConnector with Logging {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer"
 
@@ -75,12 +82,18 @@ class SubmissionConnectorImpl @Inject() (
       .execute[HttpResponse]
       .map(handleDownstreamResponse)
   }
+
+  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hs: HeaderCarrier): Future[Either[DownstreamGetAllError, DownstreamGetAllSuccess]] = ???
 }
 
 @Singleton
 class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) extends SubmissionConnector {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
-    Future.successful(Right(DownstreamSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]] = {
+    Future.successful(Right(DownstreamSubmittedSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
+  }
+
+  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hs: HeaderCarrier): Future[Either[DownstreamGetAllError, DownstreamGetAllSuccess]] = {
+    Future.successful(Right(DownstreamGetAllSuccess()))
   }
 }

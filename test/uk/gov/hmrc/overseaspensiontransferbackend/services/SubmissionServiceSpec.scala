@@ -43,7 +43,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val saved: SavedUserAnswers = simpleSavedUserAnswers
 
-  private val downstreamSuccess = DownstreamSuccess(
+  private val downstreamSuccess = DownstreamSubmittedSuccess(
     qtNumber         = QtNumber("QT123456"),
     processingDate   = now,
     formBundleNumber = "119000004320"
@@ -81,10 +81,10 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must map validation-type downstream errors to SubmissionTransformationError" in {
-      val downstreamErrors: List[DownstreamError] = List(
-        EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
-        HipBadRequest(origin               = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
-        HipOriginFailures(origin           = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
+      val downstreamErrors: List[DownstreamSubmittedError] = List(
+        EtmpValidationSubmittedError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
+        HipBadRequest(origin                        = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
+        HipOriginFailures(origin                    = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
         UnsupportedMedia
       )
 
@@ -106,11 +106,11 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must map infrastructural downstream errors to SubmissionFailed" in {
-      val infra: List[DownstreamError] = List(
+      val infra: List[DownstreamSubmittedError] = List(
         Unauthorized,
         Forbidden,
         NotFound,
-        ServerError,
+        ServerSubmittedError$,
         ServiceUnavailable,
         Unexpected(777, "<body>")
       )
