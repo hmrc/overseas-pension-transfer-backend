@@ -6,4 +6,4 @@ DELETE      /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontrans
 
 POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitAnswers(referenceId)
 
-GET         /get-transfer/:referenceId          uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetTransferDataController.getTransfer(pstr: String, formBundleNumber: Option[String], qtRef: Option[String], version: Option[String])
+GET         /get-transfer/:referenceId          uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetTransferDataController.getTransfer(pstr: String, qtStatus: QtStatus, formBundleNumber: Option[String], qtRef: Option[String], version: Option[String])

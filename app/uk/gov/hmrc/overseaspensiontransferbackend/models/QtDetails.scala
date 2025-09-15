@@ -18,13 +18,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class ReportDetails(
-    pstr: Option[String],
+import java.time.Instant
+
+case class QtDetails(
+    qtVersion: Option[String],
+    receiptDate: Option[Instant],
     qtStatus: Option[QtStatus],
     qtReference: Option[String],
     qtDigitalStatus: Option[String]
   )
 
-object ReportDetails {
-  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
+object QtDetails {
+  implicit val format: OFormat[QtDetails] = Json.format[QtDetails]
 }
