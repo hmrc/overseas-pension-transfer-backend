@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
@@ -133,6 +133,16 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       val dummy = new DummySubmissionServiceImpl()
       val out   = dummy.submitAnswers(normalisedSubmission).futureValue
       out mustBe Right(SubmissionResponse(QtNumber("QT123456")))
+    }
+
+    "must return Right(SubmissionGetAllResponse()) for any PSTR" in {
+      val dummy = new DummySubmissionServiceImpl()
+
+      val pstr = "24000001AA"
+
+      val result = dummy.getAllSubmissions(PstrNumber(pstr)).futureValue
+
+      result mustBe Right(SubmissionGetAllResponse())
     }
   }
 }

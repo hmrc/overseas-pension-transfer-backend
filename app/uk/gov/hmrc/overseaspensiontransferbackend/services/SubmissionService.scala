@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
@@ -28,6 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
+  def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]]
 }
 
 @Singleton
@@ -77,6 +79,8 @@ class SubmissionServiceImpl @Inject() (
       SubmissionFailed
 
   }
+
+  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] = ???
 }
 
 @Singleton
@@ -87,4 +91,7 @@ class DummySubmissionServiceImpl @Inject() (
   override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
     Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
   }
+
+  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
+    Future.successful(Right(SubmissionGetAllResponse()))
 }
