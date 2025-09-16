@@ -22,7 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import java.time.LocalDate
 
 case class SubmissionGetAllResponse(
-    submissions: Seq[SubmissionGetAllItem]
+    submissions: Option[Seq[SubmissionGetAllItem]]
   )
 
 object SubmissionGetAllResponse {

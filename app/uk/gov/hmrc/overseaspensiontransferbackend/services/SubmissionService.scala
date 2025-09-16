@@ -85,7 +85,7 @@ class SubmissionServiceImpl @Inject() (
       // TODO: This will need to be filled out more when the downstream errors are made clear in OAOTC-1349
       case Left(_)           => Left(SubmissionGetAllError())
       case Right(downstream) =>
-        val items = downstream.success.qropsTransferOverview.map { r =>
+        val items      = downstream.success.qropsTransferOverview.map { r =>
           SubmissionGetAllItem(
             transferReference = None,
             qtReference       = Some(QtNumber(r.qtReference)),
@@ -97,7 +97,9 @@ class SubmissionServiceImpl @Inject() (
             schemeId          = Some(pstrNumber)
           )
         }
-        Right(SubmissionGetAllResponse(items))
+        val maybeItems = Option.when(items.nonEmpty)(items)
+
+        Right(SubmissionGetAllResponse(maybeItems))
     }
 }
 
@@ -111,5 +113,5 @@ class DummySubmissionServiceImpl @Inject() (
   }
 
   override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
-    Future.successful(Right(SubmissionGetAllResponse(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None)))))
+    Future.successful(Right(SubmissionGetAllResponse(Some(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None))))))
 }

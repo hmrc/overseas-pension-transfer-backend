@@ -177,7 +177,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       val result = service.getAllSubmissions(pstr).futureValue
 
       result match {
-        case Right(SubmissionGetAllResponse(items)) =>
+        case Right(SubmissionGetAllResponse(Some(items))) =>
           items must have size 2
 
           val first = items.head
@@ -222,7 +222,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         .thenReturn(Future.successful(Right(ds)))
 
       val result = service.getAllSubmissions(pstr).futureValue
-      result mustBe Right(SubmissionGetAllResponse(Nil))
+      result mustBe Right(SubmissionGetAllResponse(None))
     }
 
   }
@@ -242,7 +242,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
       val result = dummy.getAllSubmissions(PstrNumber(pstr)).futureValue
 
-      result mustBe Right(SubmissionGetAllResponse(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None))))
+      result mustBe Right(SubmissionGetAllResponse(Some(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None)))))
     }
   }
 }
