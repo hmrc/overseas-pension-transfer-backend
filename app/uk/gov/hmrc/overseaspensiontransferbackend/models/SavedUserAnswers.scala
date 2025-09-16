@@ -29,10 +29,10 @@ final case class SavedUserAnswers(
   )
 
 final case class AnswersData(
-                              reportDetails: Option[QtDetails],
-                              transferringMember: Option[TransferringMember],
-                              aboutReceivingQROPS: Option[AboutReceivingQROPS],
-                              transferDetails: Option[TransferDetails]
+    reportDetails: Option[QtDetails],
+    transferringMember: Option[TransferringMember],
+    aboutReceivingQROPS: Option[AboutReceivingQROPS],
+    transferDetails: Option[TransferDetails]
   )
 
 object AnswersData {

@@ -34,8 +34,14 @@ import scala.concurrent.{ExecutionContext, Future}
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 
-  def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
-                 (implicit hc: HeaderCarrier): Future[Either[TransferRetrievalError, UserAnswersDTO]]
+  def getTransfer(
+      pstr: String,
+      qtStatus: QtStatus,
+      fbNumber: Option[String],
+      qtRef: Option[String],
+      version: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
 
 @Singleton
@@ -87,29 +93,35 @@ class SubmissionServiceImpl @Inject() (
 
   }
 
-  def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
-                 (implicit hc: HeaderCarrier): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
+  def getTransfer(
+      pstr: String,
+      qtStatus: QtStatus,
+      fbNumber: Option[String],
+      qtRef: Option[String],
+      version: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     qtStatus match {
-        case InProgress => repository.get(fbNumber.get) map {
+      case InProgress           => repository.get(fbNumber.get) map {
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
-          case None =>
+          case None              =>
             logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from save-for-later")
             Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from save-for-later"))
         }
-        case Submitted | Compiled => connector.getTransfer(pstr, fbNumber, qtRef, version) map {
+      case Submitted | Compiled => connector.getTransfer(pstr, fbNumber, qtRef, version) map {
           case Right(value) => deconstructSavedAnswers(value)
-          case Left(_) =>
+          case Left(_)      =>
             logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from HoD")
             Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from HoD"))
         }
-      }
+    }
   }
 
   private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
       case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, jsObject, savedUserAnswers.lastUpdated))
-      case Left(jsError) =>
+      case Left(jsError)   =>
         logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }

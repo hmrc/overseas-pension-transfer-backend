@@ -38,8 +38,13 @@ import scala.concurrent.{ExecutionContext, Future}
 trait SubmissionConnector {
   def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
-  def getTransfer(pstr: String, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
-                 (implicit hc: HeaderCarrier): Future[Either[DownstreamError, SavedUserAnswers]]
+  def getTransfer(
+      pstr: String,
+      fbNumber: Option[String],
+      qtRef: Option[String],
+      version: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[DownstreamError, SavedUserAnswers]]
 }
 
 @Singleton
@@ -79,10 +84,16 @@ class SubmissionConnectorImpl @Inject() (
       )
       .withBody(payload)
       .execute[HttpResponse]
-      .map(resp => handleDownstreamResponse(resp, CREATED))
+      .map(resp => handleDownstreamResponse[DownstreamSuccess](resp, CREATED))
   }
 
-  override def getTransfer(pstr: String, fbNumber: Option[String], qtRef: Option[String], version: Option[String])(implicit hc: HeaderCarrier): Future[Either[DownstreamError, SavedUserAnswers]] = {
+  override def getTransfer(
+      pstr: String,
+      fbNumber: Option[String],
+      qtRef: Option[String],
+      version: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[DownstreamError, SavedUserAnswers]] = {
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val correlationId = hc.requestId.fold {
@@ -105,6 +116,6 @@ class SubmissionConnectorImpl @Inject() (
         "X-Transmitting-System" -> "HIP"
       )
       .execute
-      .map(resp => handleDownstreamResponse(resp))
+      .map(resp => handleDownstreamResponse[SavedUserAnswers](resp))
   }
 }
