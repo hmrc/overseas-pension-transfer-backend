@@ -19,7 +19,7 @@ class GetTransferDataController @Inject()(cc: ControllerComponents, submissionSe
 
       submissionService.getTransfer(pstr, qtStatus, formBundleNumber, qtRef, version) map {
         case Right(value) => Ok(Json.toJson(value))
-        case Left(error) => InternalServerError
+        case Left(_) => InternalServerError
       }
   }
 

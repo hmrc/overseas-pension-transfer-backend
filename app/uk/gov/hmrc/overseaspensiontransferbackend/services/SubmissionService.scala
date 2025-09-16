@@ -16,12 +16,16 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import play.api.Logging
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, QtStatus, SavedUserAnswers, Submitted}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
 import javax.inject.{Inject, Singleton}
@@ -31,16 +35,17 @@ trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 
   def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
-                 (implicit hc: HeaderCarrier): Future[Either[Unit, SavedUserAnswers]]
+                 (implicit hc: HeaderCarrier): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
 
 @Singleton
 class SubmissionServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
+    transformer: UserAnswersTransformer,
     connector: SubmissionConnector
   )(implicit ec: ExecutionContext
-  ) extends SubmissionService {
+  ) extends SubmissionService with Logging {
 
   override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId).flatMap {
@@ -83,15 +88,30 @@ class SubmissionServiceImpl @Inject() (
   }
 
   def getTransfer(pstr: String, qtStatus: QtStatus, fbNumber: Option[String], qtRef: Option[String], version: Option[String])
-                 (implicit hc: HeaderCarrier): Future[Either[Unit, SavedUserAnswers]] = {
+                 (implicit hc: HeaderCarrier): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     qtStatus match {
         case InProgress => repository.get(fbNumber.get) map {
-          case Some(userAnswers) => Right(userAnswers)
-          case None => Left()
+          case Some(userAnswers) =>
+            deconstructSavedAnswers(userAnswers)
+          case None =>
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from save-for-later")
+            Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from save-for-later"))
         }
         case Submitted | Compiled => connector.getTransfer(pstr, fbNumber, qtRef, version) map {
-          case Right(value) =>
+          case Right(value) => deconstructSavedAnswers(value)
+          case Left(_) =>
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from HoD")
+            Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from HoD"))
         }
       }
+  }
+
+  private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
+    transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
+      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, jsObject, savedUserAnswers.lastUpdated))
+      case Left(jsError) =>
+        logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
+        Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
+    }
   }
 }
