@@ -25,12 +25,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllSubmissionsDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 
-import java.time.{Clock, Instant, ZoneOffset}
+import java.time.{Clock, Instant, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class GetAllSubmissionsControllerSpec
@@ -63,7 +64,8 @@ class GetAllSubmissionsControllerSpec
 
       when(
         mockSubmissionService.getAllSubmissions(eqTo(pstr))(
-          any[HeaderCarrier]
+          any[HeaderCarrier],
+          any[AppConfig]
         )
       ).thenReturn(Future.successful(Right(SubmissionGetAllResponse(Some(items)))))
 
@@ -91,7 +93,7 @@ class GetAllSubmissionsControllerSpec
       val pstrStr                                  = "24000001AA"
       val pstr                                     = PstrNumber(pstrStr)
 
-      when(mockSubmissionService.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+      when(mockSubmissionService.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
         .thenReturn(Future.successful(Right(SubmissionGetAllResponse(None))))
 
       val app: Application =

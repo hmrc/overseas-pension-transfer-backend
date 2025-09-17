@@ -20,13 +20,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus, SavedUserAnswers}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
@@ -171,8 +171,13 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         )
       )
 
-      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+      val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+      val fromDate: LocalDate = toDate.minusYears(10)
+
+      when(mockConnector.getAllSubmissions(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(ds)))
+
+      when(mockAppConfig.getAllSubmissionsYearsOffset).thenReturn(10)
 
       val result = service.getAllSubmissions(pstr).futureValue
 
@@ -203,9 +208,14 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     "must return Left(SubmissionGetAllError()) when connector returns an error" in {
       val pstr = PstrNumber("24000001AA")
 
-      val dsError = mock[DownstreamGetAllError]
-      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+      val dsError             = mock[DownstreamGetAllError]
+      val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+      val fromDate: LocalDate = toDate.minusYears(10)
+
+      when(mockConnector.getAllSubmissions(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(dsError)))
+
+      when(mockAppConfig.getAllSubmissionsYearsOffset).thenReturn(10)
 
       val result = service.getAllSubmissions(pstr).futureValue
       result mustBe Left(SubmissionGetAllError())
@@ -218,8 +228,13 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         DownstreamGetAllSuccess.Payload(Nil)
       )
 
-      when(mockConnector.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier]))
+      val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+      val fromDate: LocalDate = toDate.minusYears(10)
+
+      when(mockConnector.getAllSubmissions(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(ds)))
+
+      when(mockAppConfig.getAllSubmissionsYearsOffset).thenReturn(10)
 
       val result = service.getAllSubmissions(pstr).futureValue
       result mustBe Right(SubmissionGetAllResponse(None))

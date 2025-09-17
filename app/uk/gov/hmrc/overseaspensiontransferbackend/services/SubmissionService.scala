@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
@@ -24,12 +25,13 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
+import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
-  def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]]
+  def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]]
 }
 
 @Singleton
@@ -80,9 +82,18 @@ class SubmissionServiceImpl @Inject() (
 
   }
 
-  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
-    connector.getAllSubmissions(pstrNumber).map {
-      // TODO: This will need to be filled out more when the downstream errors are made clear in OAOTC-1349
+  override def getAllSubmissions(
+      pstrNumber: PstrNumber
+    )(implicit hc: HeaderCarrier,
+      config: AppConfig
+    ): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] = {
+    val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+    val fromDate: LocalDate = toDate.minusYears(config.getAllSubmissionsYearsOffset)
+
+    /* This is a simplified version of the get all submissions service layer that just returns the last 10 years of submissions,
+    It will need to be updated with in progress submissions (when we've indexed the mongo by scheme id) and perhaps later with
+    from and to dates and utilising the qt reference functionality. */
+    connector.getAllSubmissions(pstrNumber = pstrNumber, fromDate = fromDate, toDate = toDate, qtRef = None).map {
       case Left(_)           => Left(SubmissionGetAllError())
       case Right(downstream) =>
         val items      = downstream.success.qropsTransferOverview.map { r =>
@@ -101,6 +112,7 @@ class SubmissionServiceImpl @Inject() (
 
         Right(SubmissionGetAllResponse(maybeItems))
     }
+  }
 }
 
 @Singleton
@@ -112,6 +124,10 @@ class DummySubmissionServiceImpl @Inject() (
     Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
   }
 
-  override def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
+  override def getAllSubmissions(
+      pstrNumber: PstrNumber
+    )(implicit hc: HeaderCarrier,
+      config: AppConfig
+    ): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] =
     Future.successful(Right(SubmissionGetAllResponse(Some(Seq(SubmissionGetAllItem(None, None, None, None, None, None, None, None))))))
 }

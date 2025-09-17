@@ -51,6 +51,14 @@ class PstrNumberSpec extends AnyFreeSpec with Matchers {
       PstrNumber("1234 5678 A1").isValid mustBe false // last char not a letter
     }
   }
+  "PstrNumber.normalised" - {
+    "must return a normalised string irregardless of input formatting" in {
+      PstrNumber("12\t34\n56 78 AB").normalised      mustBe "12345678AB"
+      PstrNumber("1234 5678 AB").normalised          mustBe "12345678AB"
+      PstrNumber("12 34 56 78 a b").normalised       mustBe "12345678AB"
+      PstrNumber("    1234 5678 a B    ").normalised mustBe "12345678AB"
+    }
+  }
 
   "PstrNumber.from" - {
     "must return Right preserving ORIGINAL string (with spaces)" in {

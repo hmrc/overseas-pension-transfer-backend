@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
+import play.api.libs.json._
+
 import java.time.{Instant, LocalDate}
 
 final case class DownstreamGetAllSuccess(success: DownstreamGetAllSuccess.Payload)
@@ -37,4 +39,8 @@ object DownstreamGetAllSuccess {
       qropsReference: String,
       submissionCompilationDate: Instant
     )
+
+  implicit val overviewItemFormat: OFormat[OverviewItem] = Json.format[OverviewItem]
+  implicit val payloadFormat: OFormat[Payload]           = Json.format[Payload]
+  implicit val format: OFormat[DownstreamGetAllSuccess]  = Json.format[DownstreamGetAllSuccess]
 }

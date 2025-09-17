@@ -27,10 +27,10 @@ case class PstrNumber(value: String) {
 
 object PstrNumber {
 
-  val regex: Regex = "^[0-9]{8}[A-Za-z]{2}$".r
+  val regex: Regex = "^[0-9]{8}[A-Z]{2}$".r
 
   def normalise(s: String): String =
-    s.replaceAll("\\s+", "")
+    s.replaceAll("\\s+", "").toUpperCase
 
   def from(s: String): Either[String, PstrNumber] =
     if (regex.matches(normalise(s))) {

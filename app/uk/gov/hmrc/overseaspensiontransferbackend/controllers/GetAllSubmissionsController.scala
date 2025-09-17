@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllSubmissionsDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.SubmissionGetAllResponse
@@ -34,7 +35,8 @@ class GetAllSubmissionsController @Inject() (
     cc: ControllerComponents,
     submissionService: SubmissionService,
     clock: Clock
-  )(implicit ec: ExecutionContext
+  )(implicit ec: ExecutionContext,
+    appConfig: AppConfig
   ) extends AbstractController(cc) {
 
   def getAllSubmissions(pstrNumber: String): Action[AnyContent] = Action.async { implicit request =>

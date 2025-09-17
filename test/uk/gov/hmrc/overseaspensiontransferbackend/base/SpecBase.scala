@@ -42,7 +42,7 @@ trait SpecBase
 
   implicit lazy val hc: HeaderCarrier    = HeaderCarrier()
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-  val mockAppConfig: AppConfig           = mock[AppConfig]
+  implicit val mockAppConfig: AppConfig  = mock[AppConfig]
 
   val testId: String = "test-id"
   val now: Instant   = Instant.parse("2025-04-11T12:00:00Z")
