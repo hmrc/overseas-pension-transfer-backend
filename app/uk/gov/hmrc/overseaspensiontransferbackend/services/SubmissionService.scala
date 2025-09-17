@@ -112,7 +112,7 @@ class SubmissionServiceImpl @Inject() (
             Left(TransferNotFound(s"Unable to find transferId: $referenceId from save-for-later"))
         }
       case Submitted | Compiled => connector.getTransfer(pstr, qtNumber, versionNumber) map {
-          case Right(value) => deconstructSavedAnswers(value)
+          case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
           case Left(_)      =>
             logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.get} from HoD"))

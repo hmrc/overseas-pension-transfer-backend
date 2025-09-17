@@ -20,11 +20,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, postRequestedFo
 import play.api.http.Status._
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsArray, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, EtmpValidationError, HipBadRequest, HipOriginFailures}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission

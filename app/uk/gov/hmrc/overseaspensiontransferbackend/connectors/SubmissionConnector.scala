@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
@@ -43,7 +43,7 @@ trait SubmissionConnector {
       qtNumber: Option[String],
       versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
-    ): Future[Either[DownstreamError, SavedUserAnswers]]
+    ): Future[Either[DownstreamError, DownstreamTransferData]]
 }
 
 @Singleton
@@ -89,7 +89,7 @@ class SubmissionConnectorImpl @Inject() (
       qtNumber: Option[String],
       versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
-    ): Future[Either[DownstreamError, SavedUserAnswers]] = {
+    ): Future[Either[DownstreamError, DownstreamTransferData]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=$pstr&qtNumber=${qtNumber.get}&versionNumber=${versionNumber.get}"
 
@@ -113,6 +113,6 @@ class SubmissionConnectorImpl @Inject() (
         "X-Transmitting-System" -> "HIP"
       )
       .execute
-      .map(resp => handleResponse[SavedUserAnswers](resp))
+      .map(resp => handleResponse[DownstreamTransferData](resp))
   }
 }

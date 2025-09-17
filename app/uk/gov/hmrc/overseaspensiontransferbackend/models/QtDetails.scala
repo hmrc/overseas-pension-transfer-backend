@@ -16,18 +16,29 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json.{__, Reads}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 
-import java.time.Instant
+import java.time.{LocalDate, LocalDateTime}
 
 case class QtDetails(
     qtVersion: String,
-    receiptDate: Instant,
     qtStatus: QtStatus,
-    qtReference: String,
+    receiptDate: LocalDateTime,
+    qtReference: QtNumber,
+    qtTransferDate: Option[LocalDate],
     qtDigitalStatus: Option[String]
   )
 
 object QtDetails {
-  implicit val format: OFormat[QtDetails] = Json.format[QtDetails]
+
+  implicit val reads: Reads[QtDetails] = (
+    (__ \ "qtVersion").read[String] and
+      (__ \ "qtStatus").read[String].map(QtStatus.apply) and
+      (__ \ "receiptDate").read[LocalDateTime] and
+      (__ \ "qtReference").read[String].map(QtNumber.apply) and
+      (__ \ "qtTransferDate").readNullable[LocalDate] and
+      (__ \ "qtDigitalStatus").readNullable[String]
+  )(QtDetails.apply _)
 }

@@ -24,11 +24,12 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
+import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.Future
 
 class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
@@ -147,6 +148,12 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
         List(Submitted, Compiled) foreach { qtStatus =>
           s"qtStatus is ${qtStatus.downstreamValue} and transformer deconstructs correctly" in {
+            val saved       = DownstreamTransferData(
+              QtDetails("001", Submitted, LocalDateTime.ofEpochSecond(now.toEpochMilli, 0, ZoneOffset.UTC), QtNumber("QT123456"), None, None),
+              None,
+              None,
+              None
+            )
             val userAnswers = UserAnswersDTO(testId, Json.obj(), now)
 
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
@@ -190,6 +197,13 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         }
 
         "qtStatus is Compiled and deconstruct returns an error" in {
+          val saved = DownstreamTransferData(
+            QtDetails("001", Submitted, LocalDateTime.ofEpochSecond(now.toEpochMilli, 0, ZoneOffset.UTC), QtNumber("QT123456"), None, None),
+            None,
+            None,
+            None
+          )
+
           when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
