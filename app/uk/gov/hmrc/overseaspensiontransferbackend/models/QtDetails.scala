@@ -18,11 +18,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.{Instant, LocalDateTime}
+import java.time.Instant
 
 case class QtDetails(
     qtVersion: String,
-    receiptDate: LocalDateTime,
+    receiptDate: Instant,
     qtStatus: QtStatus,
     qtReference: String,
     qtDigitalStatus: Option[String]

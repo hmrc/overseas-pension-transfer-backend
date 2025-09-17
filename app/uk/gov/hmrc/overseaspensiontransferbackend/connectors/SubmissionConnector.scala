@@ -113,6 +113,6 @@ class SubmissionConnectorImpl @Inject() (
         "X-Transmitting-System" -> "HIP"
       )
       .execute
-      .map(resp => handleResponse[SavedUserAnswers](resp)(SavedUserAnswers.downstreamReads))
+      .map(resp => handleResponse[SavedUserAnswers](resp))
   }
 }
