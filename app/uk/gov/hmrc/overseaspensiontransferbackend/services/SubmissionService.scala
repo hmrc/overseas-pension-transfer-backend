@@ -35,11 +35,12 @@ trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 
   def getTransfer(
+      referenceId: String,
       pstr: String,
       qtStatus: QtStatus,
       fbNumber: Option[String],
-      qtRef: Option[String],
-      version: Option[String]
+      qtNumber: Option[String],
+      versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
@@ -94,26 +95,27 @@ class SubmissionServiceImpl @Inject() (
   }
 
   def getTransfer(
+      referenceId: String,
       pstr: String,
       qtStatus: QtStatus,
       fbNumber: Option[String],
-      qtRef: Option[String],
-      version: Option[String]
+      qtNumber: Option[String],
+      versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     qtStatus match {
-      case InProgress           => repository.get(fbNumber.get) map {
+      case InProgress           => repository.get(referenceId) map {
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
           case None              =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from save-for-later")
-            Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from save-for-later"))
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $referenceId from save-for-later")
+            Left(TransferNotFound(s"Unable to find transferId: $referenceId from save-for-later"))
         }
-      case Submitted | Compiled => connector.getTransfer(pstr, fbNumber, qtRef, version) map {
+      case Submitted | Compiled => connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value)
           case Left(_)      =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${fbNumber.get} from HoD")
-            Left(TransferNotFound(s"Unable to find transferId: ${fbNumber.get} from HoD"))
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD")
+            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.get} from HoD"))
         }
     }
   }

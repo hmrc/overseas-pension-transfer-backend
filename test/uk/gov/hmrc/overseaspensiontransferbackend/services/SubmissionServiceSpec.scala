@@ -140,7 +140,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-          val result = await(service.getTransfer("pstr", InProgress, Some(testId), None, None))
+          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
 
           result mustBe Right(userAnswers)
         }
@@ -149,10 +149,10 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           s"qtStatus is ${qtStatus.downstreamValue} and transformer deconstructs correctly" in {
             val userAnswers = UserAnswersDTO(testId, Json.obj(), now)
 
-            when(mockConnector.getTransfer(any, any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
+            when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-            val result = await(service.getTransfer("pstr", qtStatus, Some(testId), None, None))
+            val result = await(service.getTransfer(testId, "pstr", qtStatus, None, None, None))
 
             result mustBe Right(userAnswers)
           }
@@ -163,15 +163,15 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         "qtStatus is InProgress and Repo returns None" in {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
 
-          val result = await(service.getTransfer("pstr", InProgress, Some(testId), None, None))
+          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: $testId from save-for-later"))
         }
 
         "qtStatus is Submitted and Repo returns None" in {
-          when(mockConnector.getTransfer(any, any, any, any)(any)).thenReturn(Future.successful(Left(HipOriginFailures("Failed", List()))))
+          when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(HipOriginFailures("Failed", List()))))
 
-          val result = await(service.getTransfer("pstr", Submitted, Some(testId), None, None))
+          val result = await(service.getTransfer(testId, "pstr", Submitted, None, None, None))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: $testId from HoD"))
         }
@@ -182,7 +182,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer("pstr", InProgress, Some(testId), None, None))
+          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")
@@ -190,10 +190,10 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         }
 
         "qtStatus is Compiled and deconstruct returns an error" in {
-          when(mockConnector.getTransfer(any, any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
+          when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer("pstr", Compiled, Some(testId), None, None))
+          val result = await(service.getTransfer(testId, "pstr", Compiled, None, None, None))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")

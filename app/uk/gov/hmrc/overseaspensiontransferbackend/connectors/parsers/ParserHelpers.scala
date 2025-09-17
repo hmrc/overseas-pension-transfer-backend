@@ -25,7 +25,7 @@ object ParserHelpers {
   private[parsers] val MaxSnippet = 512
 
   /** Central response dispatcher: status → JSON shape → ADT */
-  def handleDownstreamResponse[A](resp: HttpResponse, successStatus: Int = OK)(implicit reads: Reads[A]): Either[DownstreamError, A] =
+  def handleResponse[A](resp: HttpResponse, successStatus: Int = OK)(implicit reads: Reads[A]): Either[DownstreamError, A] =
     resp.status match {
       case status if status == successStatus =>
         resp.json.validate[A]

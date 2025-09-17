@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleDownstreamResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
@@ -40,9 +40,8 @@ trait SubmissionConnector {
 
   def getTransfer(
       pstr: String,
-      fbNumber: Option[String],
-      qtRef: Option[String],
-      version: Option[String]
+      qtNumber: Option[String],
+      versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, SavedUserAnswers]]
 }
@@ -59,8 +58,6 @@ class SubmissionConnectorImpl @Inject() (
     val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer"
 
     val payload: JsValue = Json.toJson(validated.saved.data)
-
-    // TODO: These headers are a first pass and should be discussed and clarified with HIP
 
     // Required headers from the spec
     val correlationId = hc.requestId.fold {
@@ -84,17 +81,17 @@ class SubmissionConnectorImpl @Inject() (
       )
       .withBody(payload)
       .execute[HttpResponse]
-      .map(resp => handleDownstreamResponse[DownstreamSuccess](resp, CREATED))
+      .map(resp => handleResponse[DownstreamSuccess](resp, CREATED))
   }
 
   override def getTransfer(
       pstr: String,
-      fbNumber: Option[String],
-      qtRef: Option[String],
-      version: Option[String]
+      qtNumber: Option[String],
+      versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, SavedUserAnswers]] = {
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
+
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=$pstr&qtNumber=${qtNumber.get}&versionNumber=${versionNumber.get}"
 
     val correlationId = hc.requestId.fold {
       logger.error("[SubmissionConnector][getTransfer]: Request is missing X-Request-ID header")
@@ -116,6 +113,6 @@ class SubmissionConnectorImpl @Inject() (
         "X-Transmitting-System" -> "HIP"
       )
       .execute
-      .map(resp => handleDownstreamResponse[SavedUserAnswers](resp))
+      .map(resp => handleResponse[SavedUserAnswers](resp)(SavedUserAnswers.downstreamReads))
   }
 }

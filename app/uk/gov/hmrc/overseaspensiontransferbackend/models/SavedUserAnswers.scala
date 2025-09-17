@@ -20,12 +20,12 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.Instant
+import java.time.{Instant, LocalDateTime}
 
 final case class SavedUserAnswers(
     referenceId: String,
     data: AnswersData,
-    lastUpdated: Instant
+    lastUpdated: LocalDateTime
   )
 
 final case class AnswersData(
@@ -58,7 +58,15 @@ object SavedUserAnswers {
     (
       (__ \ "referenceId").read[String] and
         (__ \ "data").read[AnswersData] and
-        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
+        (__ \ "lastUpdated").read[LocalDateTime]
+    )(SavedUserAnswers.apply _)
+  }
+
+  val downstreamReads: Reads[SavedUserAnswers] = {
+    (
+      (__ \ "success" \ "qtDetails" \ "qtReference").read[String] and
+        (__ \ "success").read[AnswersData] and
+        (__ \ "success" \ "processingDate").read[LocalDateTime]
     )(SavedUserAnswers.apply _)
   }
 
@@ -66,7 +74,7 @@ object SavedUserAnswers {
     (
       (__ \ "referenceId").write[String] and
         (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
+        (__ \ "lastUpdated").write[LocalDateTime]
     )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 
