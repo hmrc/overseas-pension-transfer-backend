@@ -18,10 +18,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.inject
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{DummySubmissionConnectorImpl, SubmissionConnector}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{SubmissionConnector, SubmissionConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
@@ -30,7 +30,7 @@ class SubmissionServiceISpec extends BaseISpec {
   override protected def moduleOverrides = Seq(
     inject.bind[SubmissionService].to[SubmissionServiceImpl],
     inject.bind[SubmissionValidator].to[DummySubmissionValidatorImpl],
-    inject.bind[SubmissionConnector].to[DummySubmissionConnectorImpl]
+    inject.bind[SubmissionConnector].to[SubmissionConnectorImpl]
   )
 
   private lazy val repository: SaveForLaterRepository = app.injector.instanceOf[SaveForLaterRepository]

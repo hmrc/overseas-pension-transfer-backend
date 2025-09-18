@@ -16,13 +16,17 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
-import com.google.inject.Singleton
+import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logging
+import play.api.http.Status.{CREATED, OK}
 import play.api.libs.json._
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleDownstreamResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.DownstreamGetAllSuccess.{OverviewItem, Payload}
@@ -35,8 +39,16 @@ import java.time.{Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[SubmissionConnectorImpl])
 trait SubmissionConnector {
-  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]]
+  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
+
+  def getTransfer(
+      pstr: String,
+      qtNumber: Option[String],
+      versionNumber: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[DownstreamError, DownstreamTransferData]]
 
   def getAllSubmissions(
       pstrNumber: PstrNumber,
@@ -54,12 +66,13 @@ class SubmissionConnectorImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends SubmissionConnector with Logging {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]] = {
+  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer"
 
     val payload: JsValue = Json.toJson(validated.saved.data)
 
+    // Required headers from the spec
     val correlationId = hc.requestId.fold {
       logger.error("[SubmissionConnector][submit]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
@@ -81,7 +94,7 @@ class SubmissionConnectorImpl @Inject() (
       )
       .withBody(payload)
       .execute[HttpResponse]
-      .map(handleDownstreamResponse)
+      .map(resp => handleResponse[DownstreamSuccess](resp, CREATED))
   }
 
   override def getAllSubmissions(
@@ -126,53 +139,34 @@ class SubmissionConnectorImpl @Inject() (
   }
 }
 
-@Singleton
-class DummySubmissionConnectorImpl @Inject() ()(implicit ec: ExecutionContext) extends SubmissionConnector {
+  override def getTransfer(
+      pstr: String,
+      qtNumber: Option[String],
+      versionNumber: Option[String]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[DownstreamError, DownstreamTransferData]] = {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamSubmittedError, DownstreamSubmittedSuccess]] = {
-    Future.successful(Right(DownstreamSubmittedSuccess(QtNumber("QT123456"), Instant.now(), "formBundleNumber")))
-  }
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=$pstr&qtNumber=${qtNumber.get}&versionNumber=${versionNumber.get}"
 
-  override def getAllSubmissions(
-      pstrNumber: PstrNumber,
-      fromDate: LocalDate,
-      toDate: LocalDate,
-      qtRef: Option[QtNumber]
-    )(implicit hs: HeaderCarrier
-    ): Future[Either[DownstreamGetAllError, DownstreamGetAllSuccess]] = {
+    val correlationId = hc.requestId.fold {
+      logger.error("[SubmissionConnector][getTransfer]: Request is missing X-Request-ID header")
+      throw new Exception("Header X-Request-ID missing")
+    } {
+      requestId =>
+        requestId.value
+    }
+    val receiptDate   = Instant.now().toString
 
-    val payload = DownstreamGetAllSuccess(
-      success = Payload(
-        qropsTransferOverview = List(
-          OverviewItem(
-            fbNumber                  = "123456000023",
-            qtReference               = "QT564321",
-            qtVersion                 = "001",
-            qtStatus                  = "Compiled",
-            qtDigitalStatus           = "Complied",
-            nino                      = "AA000000A",
-            firstName                 = "David",
-            lastName                  = "Warne",
-            qtDate                    = LocalDate.parse("2025-03-14"),
-            qropsReference            = "QROPS654321",
-            submissionCompilationDate = Instant.parse("2025-05-09T19:10:12Z")
-          ),
-          OverviewItem(
-            fbNumber                  = "123456000024",
-            qtReference               = "QT564322",
-            qtVersion                 = "003",
-            qtStatus                  = "Submitted",
-            qtDigitalStatus           = "Submitted",
-            nino                      = "AA000001A",
-            firstName                 = "Edith",
-            lastName                  = "Ennis-Hill",
-            qtDate                    = LocalDate.parse("2025-01-01"),
-            qropsReference            = "QROPS654322",
-            submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
-          )
-        )
+    httpClientV2
+      .get(url)
+      .setHeader(
+        "correlationid"         -> correlationId,
+        "X-Message-Type"        -> "GetQROPSTransfer",
+        "X-Originating-System"  -> "MDTP",
+        "X-Receipt-Date"        -> receiptDate,
+        "X-Regime-Type"         -> "PODS",
+        "X-Transmitting-System" -> "HIP"
       )
-    )
-    Future.successful(Right(payload))
-  }
+      .execute
+      .map(resp => handleResponse[DownstreamTransferData](resp))
 }

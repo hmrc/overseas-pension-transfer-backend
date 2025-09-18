@@ -20,11 +20,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, postRequestedFo
 import play.api.http.Status._
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsArray, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamSubmittedError, DownstreamSubmittedSuccess, EtmpValidationSubmittedError, HipBadRequest, HipOriginFailures}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
@@ -73,9 +73,9 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result: Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
-      result mustBe Right(DownstreamSubmittedSuccess(QtNumber("QT123456"), now, "123"))
+      result mustBe Right(DownstreamSuccess(QtNumber("QT123456"), now, "123"))
     }
 
     "return HipBadRequest when 400 is returned with valid payload" in {
@@ -94,7 +94,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -112,9 +112,9 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
-      result mustBe Left(EtmpValidationSubmittedError(now.toString, "003", "Request could not be processed"))
+      result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
 
     "return HipBadRequest when 500 is returned with valid payload" in {
@@ -133,7 +133,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -155,7 +155,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }

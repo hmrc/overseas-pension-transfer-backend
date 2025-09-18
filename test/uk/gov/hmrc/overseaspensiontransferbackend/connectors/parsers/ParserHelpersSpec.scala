@@ -42,7 +42,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
       )
 
       val expected = HttpResponse(CREATED, json, Map.empty)
-      val actual   = ParserHelpers.handleDownstreamResponse(expected)
+      val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected, CREATED)
 
       actual                             mustBe a[Right[_, _]]
       actual.toOption.get.qtNumber.value mustBe "QT123456"
@@ -67,7 +67,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
            |""".stripMargin.replace("\"A\"*32", "\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"")
       )
       val expected = HttpResponse(BAD_REQUEST, json, Map.empty)
-      val actual   = ParserHelpers.handleDownstreamResponse(expected)
+      val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected)
 
       actual                                                       mustBe a[Left[_, _]]
       actual.left.toOption.get                                     mustBe a[HipBadRequest]
@@ -86,7 +86,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
           |""".stripMargin
       )
       val expected = HttpResponse(BAD_REQUEST, json, Map.empty)
-      val actual   = ParserHelpers.handleDownstreamResponse(expected)
+      val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected)
 
       actual.left.toOption.get mustBe a[HipOriginFailures]
     }
@@ -104,19 +104,19 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
           |""".stripMargin
       )
       val expected = HttpResponse(UNPROCESSABLE_ENTITY, json, Map.empty)
-      val actual   = ParserHelpers.handleDownstreamResponse(expected)
+      val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected)
 
       actual.left.toOption.get mustBe a[EtmpValidationSubmittedError]
     }
 
     "maps 415 to UnsupportedMedia" in {
       val expected = HttpResponse(UNSUPPORTED_MEDIA_TYPE, "")
-      ParserHelpers.handleDownstreamResponse(expected).left.toOption.get mustBe UnsupportedMedia
+      ParserHelpers.handleResponse[DownstreamSuccess](expected).left.toOption.get mustBe UnsupportedMedia
     }
 
     "maps unknown status to Unexpected" in {
       val expected = HttpResponse(IM_A_TEAPOT, "I'm a teapot")
-      ParserHelpers.handleDownstreamResponse(expected).left.toOption.get mustBe Unexpected(IM_A_TEAPOT, "I'm a teapot")
+      ParserHelpers.handleResponse[DownstreamSuccess](expected).left.toOption.get mustBe Unexpected(IM_A_TEAPOT, "I'm a teapot")
     }
   }
 }

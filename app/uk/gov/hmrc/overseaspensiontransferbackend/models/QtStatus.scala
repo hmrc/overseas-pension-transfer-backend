@@ -26,8 +26,9 @@ object QtStatus {
 
   def apply(input: String): QtStatus =
     input match {
-      case Compiled.downstreamValue  => Compiled
-      case Submitted.downstreamValue => Submitted
+      case Compiled.downstreamValue   => Compiled
+      case Submitted.downstreamValue  => Submitted
+      case InProgress.downstreamValue => InProgress
     }
 
   implicit val reads: Reads[QtStatus] =
@@ -53,5 +54,10 @@ case object Compiled extends QtStatus {
 
 case object Submitted extends QtStatus {
   override def toString: String        = "Submitted"
+  override val downstreamValue: String = toString
+}
+
+case object InProgress extends QtStatus {
+  override def toString: String        = "In Progress"
   override val downstreamValue: String = toString
 }

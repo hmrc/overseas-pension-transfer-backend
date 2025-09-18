@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers
 
 import play.api.http.Status._
+import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 
@@ -24,19 +25,19 @@ object ParserHelpers {
   private[parsers] val MaxSnippet = 512
 
   /** Central response dispatcher: status → JSON shape → ADT */
-  def handleDownstreamResponse(resp: HttpResponse): Either[DownstreamSubmittedError, DownstreamSubmittedSuccess] =
+  def handleResponse[A](resp: HttpResponse, successStatus: Int = OK)(implicit reads: Reads[A]): Either[DownstreamError, A] =
     resp.status match {
-      case CREATED =>
-        resp.json.validate[DownstreamSubmittedSuccess]
+      case status if status == successStatus =>
+        resp.json.validate[A]
           .asEither
-          .left.map(_ => Unexpected(CREATED, resp.body.take(MaxSnippet)))
+          .left.map(_ => Unexpected(successStatus, resp.body.take(MaxSnippet)))
 
       case BAD_REQUEST =>
         Left(parseHipEnvelope(resp))
 
       case UNPROCESSABLE_ENTITY =>
         Left(
-          resp.json.validate[EtmpValidationSubmittedError]
+          resp.json.validate[EtmpValidationError]
             .asOpt
             .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body.take(MaxSnippet)))
         )
@@ -64,7 +65,7 @@ object ParserHelpers {
     }
 
   /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */
-  private def parseHipEnvelope(resp: HttpResponse): DownstreamSubmittedError =
+  private def parseHipEnvelope(resp: HttpResponse): DownstreamError =
     resp.json.validate[HipBadRequest].asOpt
       .map(hb => hb.copy(message = hb.message.take(MaxSnippet)))
       .orElse {

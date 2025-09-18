@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-import play.api.libs.json.{Json, OFormat}
+trait TransferRetrievalError
 
-case class ReportDetails(
-    qtVersion: Option[String],
-    qtStatus: Option[QtStatus],
-    qtReference: Option[String],
-    qtDigitalStatus: Option[String]
-  )
-
-object ReportDetails {
-  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
-}
+case class TransferNotFound(msg: String)                                     extends TransferRetrievalError
+case class TransferDeconstructionError(msg: String)                          extends TransferRetrievalError
+case class TransferMissingQtDetails(msg: String = "Error QTDetails missing") extends TransferRetrievalError
