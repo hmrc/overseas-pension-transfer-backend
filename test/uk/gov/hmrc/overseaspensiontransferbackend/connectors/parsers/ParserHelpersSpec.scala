@@ -106,7 +106,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
       val expected = HttpResponse(UNPROCESSABLE_ENTITY, json, Map.empty)
       val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected)
 
-      actual.left.toOption.get mustBe a[EtmpValidationSubmittedError]
+      actual.left.toOption.get mustBe a[EtmpValidationError]
     }
 
     "maps 415 to UnsupportedMedia" in {

@@ -29,5 +29,5 @@ class AppConfig @Inject() (config: Configuration) {
 
   val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 
-  val getAllSubmissionsYearsOffset: Int = config.get[Int]("getAllSubmissions.yearsOffset")
+  val getAllTransfersYearsOffset: Int = config.get[Int]("getAllTransfers.yearsOffset")
 }

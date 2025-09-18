@@ -21,8 +21,8 @@ import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllSubmissionsDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.SubmissionGetAllResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -31,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class GetAllSubmissionsController @Inject() (
+class GetAllTransfersController @Inject() (
     cc: ControllerComponents,
     submissionService: SubmissionService,
     clock: Clock
@@ -39,21 +39,21 @@ class GetAllSubmissionsController @Inject() (
     appConfig: AppConfig
   ) extends AbstractController(cc) {
 
-  def getAllSubmissions(pstrNumber: String): Action[AnyContent] = Action.async { implicit request =>
+  def getAllTransfers(pstrNumber: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
     val maybePstr                  = PstrNumber.from(pstrNumber)
 
     maybePstr match {
       case Right(validatedPstr) =>
-        submissionService.getAllSubmissions(validatedPstr).flatMap {
-          case Right(SubmissionGetAllResponse(maybeSubmissions)) =>
-            maybeSubmissions match {
-              case Some(submissions) =>
-                val dto = GetAllSubmissionsDTO.from(validatedPstr, submissions)(clock)
+        submissionService.getAllTransfers(validatedPstr).flatMap {
+          case Right(AllTransfersResponse(maybeTransfers)) =>
+            maybeTransfers match {
+              case Some(transfers) =>
+                val dto = GetAllTransfersDTO.from(validatedPstr, transfers)(clock)
                 Future.successful(Ok(Json.toJson(dto)))
-              case None              => Future.successful(NotFound)
+              case None            => Future.successful(NotFound)
             }
-          case Left(_)                                           => ???
+          case Left(_)                                     => ???
         }
       case Left(m)              => Future.successful(BadRequest(m))
     }

@@ -27,31 +27,31 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllSubmissionsDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 
 import java.time.{Clock, Instant, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
-class GetAllSubmissionsControllerSpec
+class GetAllTransfersControllerSpec
     extends AnyFreeSpec
     with Matchers
     with SpecBase {
 
-  private val endpoint     = "/overseas-pension-transfer-backend/get-all-submissions"
+  private val endpoint     = "/overseas-pension-transfer-backend/get-all-transfers"
   private val fixedInstant = Instant.parse("2025-09-16T12:00:00Z")
   private val fixedClock   = Clock.fixed(fixedInstant, ZoneOffset.UTC)
 
-  "GetAllSubmissionsController.getAllSubmissions" - {
+  "GetAllTransfersController.getAllTransfers" - {
 
-    "must return 200 with DTO JSON when PSTR is valid and submissions exist" in {
+    "must return 200 with DTO JSON when PSTR is valid and transfers exist" in {
       val mockSubmissionService: SubmissionService = mock[SubmissionService]
       val pstrStr                                  = "24000001AA"
       val pstr                                     = PstrNumber(pstrStr)
 
-      val items: Seq[SubmissionGetAllItem] =
-        Seq(SubmissionGetAllItem(
+      val items: Seq[AllTransfersItem] =
+        Seq(AllTransfersItem(
           transferReference = None,
           qtReference       = None,
           nino              = None,
@@ -63,11 +63,11 @@ class GetAllSubmissionsControllerSpec
         ))
 
       when(
-        mockSubmissionService.getAllSubmissions(eqTo(pstr))(
+        mockSubmissionService.getAllTransfers(eqTo(pstr))(
           any[HeaderCarrier],
           any[AppConfig]
         )
-      ).thenReturn(Future.successful(Right(SubmissionGetAllResponse(Some(items)))))
+      ).thenReturn(Future.successful(Right(AllTransfersResponse(Some(items)))))
 
       val app: Application =
         applicationBuilder()
@@ -83,18 +83,18 @@ class GetAllSubmissionsControllerSpec
 
         status(result) mustBe OK
 
-        val expectedDto = GetAllSubmissionsDTO.from(pstr, items)(fixedClock)
+        val expectedDto = GetAllTransfersDTO.from(pstr, items)(fixedClock)
         contentAsJson(result) mustBe Json.toJson(expectedDto)
       }
     }
 
-    "must return 404 when PSTR is valid but there are no submissions (None from upstream)" in {
+    "must return 404 when PSTR is valid but there are no transfers (None from upstream)" in {
       val mockSubmissionService: SubmissionService = mock[SubmissionService]
       val pstrStr                                  = "24000001AA"
       val pstr                                     = PstrNumber(pstrStr)
 
-      when(mockSubmissionService.getAllSubmissions(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
-        .thenReturn(Future.successful(Right(SubmissionGetAllResponse(None))))
+      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
+        .thenReturn(Future.successful(Right(AllTransfersResponse(None))))
 
       val app: Application =
         applicationBuilder()

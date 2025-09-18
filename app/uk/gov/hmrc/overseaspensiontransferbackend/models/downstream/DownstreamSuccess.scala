@@ -16,4 +16,19 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
-case class DownstreamGetAllError()
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+
+import java.time.Instant
+
+final case class DownstreamSuccess(qtNumber: QtNumber, processingDate: Instant, formBundleNumber: String)
+
+object DownstreamSuccess {
+
+  implicit val reads: Reads[DownstreamSuccess] = (
+    (__ \ "success" \ "qtReference").read[String].map(QtNumber.apply) and
+      (__ \ "success" \ "processingDate").read[Instant] and
+      (__ \ "success" \ "formBundleNumber").read[String]
+  )(DownstreamSuccess.apply _)
+}

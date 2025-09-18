@@ -23,7 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 
 import java.time.Instant
 
-class DownstreamSubmittedSuccessSpec extends AnyFreeSpec with SpecBase {
+class DownstreamSuccessSpec extends AnyFreeSpec with SpecBase {
 
   "DownstreamSuccess reads" - {
 
@@ -39,10 +39,10 @@ class DownstreamSubmittedSuccessSpec extends AnyFreeSpec with SpecBase {
           }
         """)
 
-      val result = json.validate[DownstreamSubmittedSuccess]
+      val result = json.validate[DownstreamSuccess]
 
       result mustBe JsSuccess(
-        DownstreamSubmittedSuccess(
+        DownstreamSuccess(
           qtNumber         = QtNumber("QT123456"),
           processingDate   = Instant.parse("2022-01-31T09:26:17Z"),
           formBundleNumber = "119000004320"
@@ -52,7 +52,7 @@ class DownstreamSubmittedSuccessSpec extends AnyFreeSpec with SpecBase {
 
     "must fail to read when required fields are missing" in {
       val json   = Json.parse("""{ "success": { "processingDate": "2022-01-31T09:26:17Z" } }""")
-      val result = json.validate[DownstreamSubmittedSuccess]
+      val result = json.validate[DownstreamSuccess]
       result.isError mustBe true
     }
   }

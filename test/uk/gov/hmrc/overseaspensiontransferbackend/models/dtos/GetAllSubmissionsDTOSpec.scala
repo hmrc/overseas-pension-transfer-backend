@@ -20,11 +20,11 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.SubmissionGetAllItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
 
 import java.time.{Clock, Instant, ZoneOffset}
 
-class GetAllSubmissionsDTOSpec extends AnyFreeSpec with Matchers {
+class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
 
   private val fixedInstant = Instant.parse("2025-09-16T12:00:00Z")
   private val fixedClock   = Clock.fixed(fixedInstant, ZoneOffset.UTC)
@@ -33,7 +33,7 @@ class GetAllSubmissionsDTOSpec extends AnyFreeSpec with Matchers {
   private val pstr       = PstrNumber(pstrAsSent)
 
   private val itemForPstr =
-    SubmissionGetAllItem(
+    AllTransfersItem(
       transferReference = None,
       qtReference       = None,
       nino              = None,
@@ -44,44 +44,44 @@ class GetAllSubmissionsDTOSpec extends AnyFreeSpec with Matchers {
       schemeId          = Some(pstr)
     )
 
-  "GetAllSubmissionsDTO.from" - {
-    "must set pstr, submissions, and lastUpdated from the provided Clock" in {
-      val dto = GetAllSubmissionsDTO.from(pstr, Seq(itemForPstr))(fixedClock)
+  "GetAllTransfersDTO.from" - {
+    "must set pstr, transfers, and lastUpdated from the provided Clock" in {
+      val dto = GetAllTransfersDTO.from(pstr, Seq(itemForPstr))(fixedClock)
 
       dto.pstr        mustBe pstr
-      dto.submissions mustBe Seq(itemForPstr)
+      dto.transfers   mustBe Seq(itemForPstr)
       dto.lastUpdated mustBe fixedInstant
     }
 
-    "must throw when submissions is empty" in {
+    "must throw when transfers is empty" in {
       val ex = the[IllegalArgumentException] thrownBy {
-        GetAllSubmissionsDTO.from(pstr, Nil)(fixedClock)
+        GetAllTransfersDTO.from(pstr, Nil)(fixedClock)
       }
-      ex.getMessage must include("submissions must be non-empty")
+      ex.getMessage must include("transfers must be non-empty")
     }
   }
 
-  "GetAllSubmissionsDTO.format" - {
+  "GetAllTransfersDTO.format" - {
     "must round-trip (serialize/deserialize) preserving values" in {
-      val dto    = GetAllSubmissionsDTO.from(pstr, Seq(itemForPstr))(fixedClock)
+      val dto    = GetAllTransfersDTO.from(pstr, Seq(itemForPstr))(fixedClock)
       val json   = Json.toJson(dto)
-      val parsed = json.validate[GetAllSubmissionsDTO]
+      val parsed = json.validate[GetAllTransfersDTO]
 
       parsed mustBe JsSuccess(dto)
     }
 
     "must write pstr as a JSON string exactly as stored (no normalisation)" in {
-      val dto  = GetAllSubmissionsDTO.from(pstr, Seq(itemForPstr))(fixedClock)
+      val dto  = GetAllTransfersDTO.from(pstr, Seq(itemForPstr))(fixedClock)
       val json = Json.toJson(dto)
 
       (json \ "pstr") mustBe JsDefined(JsString(pstrAsSent))
     }
 
-    "must include submissions as an array" in {
-      val dto  = GetAllSubmissionsDTO.from(pstr, Seq(itemForPstr))(fixedClock)
+    "must include transfers as an array" in {
+      val dto  = GetAllTransfersDTO.from(pstr, Seq(itemForPstr))(fixedClock)
       val json = Json.toJson(dto)
 
-      (json \ "submissions").as[JsArray].value.size mustBe 1
+      (json \ "transfers").as[JsArray].value.size mustBe 1
     }
   }
 }

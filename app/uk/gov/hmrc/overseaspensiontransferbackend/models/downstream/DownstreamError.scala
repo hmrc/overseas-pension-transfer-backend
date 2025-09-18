@@ -19,12 +19,12 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-sealed trait DownstreamSubmittedError
+sealed trait DownstreamError
 
 // ---------- 400/500: HIP responseSystemErrorType ----------
 /** Example: { "origin": "HoD|HIP", "response": { "error": { "code": "400|500", "logID": "...", "message": "..." } } }
   */
-final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String]) extends DownstreamSubmittedError
+final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String]) extends DownstreamError
 
 object HipBadRequest {
 
@@ -38,7 +38,7 @@ object HipBadRequest {
 
 // ---------- 400/500: HIP-originResponse (failures array) ----------
 /** { "origin": "HIP|HoD", "response": { "failures": [ { "type": "...", "reason": "..." }, ... ] } } */
-final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure]) extends DownstreamSubmittedError
+final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure]) extends DownstreamError
 
 object HipOriginFailures {
   case class Failure(`type`: String, reason: String)
@@ -53,9 +53,9 @@ object HipOriginFailures {
 
 // ---------- 422: ETMP Business Validation ----------
 /** { "errors": { "processingDate": "...", "code": "001|003|...", "text": "..." } } */
-final case class EtmpValidationSubmittedError(processingDate: String, code: String, text: String) extends DownstreamSubmittedError
+final case class EtmpValidationError(processingDate: String, code: String, text: String) extends DownstreamError
 
-object EtmpValidationSubmittedError {
+object EtmpValidationError {
   private case class Errors(processingDate: String, code: String, text: String)
 
   implicit private val errorsReads: Reads[Errors] =
@@ -65,17 +65,17 @@ object EtmpValidationSubmittedError {
         (__ \ "errors" \ "text").read[String]
     )(Errors.apply _)
 
-  implicit val reads: Reads[EtmpValidationSubmittedError] =
-    implicitly[Reads[Errors]].map(e => EtmpValidationSubmittedError(e.processingDate, e.code, e.text))
+  implicit val reads: Reads[EtmpValidationError] =
+    implicitly[Reads[Errors]].map(e => EtmpValidationError(e.processingDate, e.code, e.text))
 }
 
 // -------- Other status families --------
-case object Unauthorized          extends DownstreamSubmittedError // 401
-case object Forbidden             extends DownstreamSubmittedError // 403
-case object NotFound              extends DownstreamSubmittedError // 404
-case object UnsupportedMedia      extends DownstreamSubmittedError // 415
-case object ServerSubmittedError$ extends DownstreamSubmittedError // 500 (fallback if body doesn’t match HIP shapes)
-case object ServiceUnavailable    extends DownstreamSubmittedError // 503
+case object Unauthorized       extends DownstreamError // 401
+case object Forbidden          extends DownstreamError // 403
+case object NotFound           extends DownstreamError // 404
+case object UnsupportedMedia   extends DownstreamError // 415
+case object ServerError        extends DownstreamError // 500 (fallback if body doesn’t match HIP shapes)
+case object ServiceUnavailable extends DownstreamError // 503
 
 // ---------- Fallback ----------
-final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamSubmittedError
+final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamError

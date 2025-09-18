@@ -20,9 +20,9 @@ import play.api.libs.json._
 
 import java.time.{Instant, LocalDate}
 
-final case class DownstreamGetAllSuccess(success: DownstreamGetAllSuccess.Payload)
+final case class DownstreamAllTransfersData(success: DownstreamAllTransfersData.Payload)
 
-object DownstreamGetAllSuccess {
+object DownstreamAllTransfersData {
 
   final case class Payload(qropsTransferOverview: List[OverviewItem])
 
@@ -40,7 +40,7 @@ object DownstreamGetAllSuccess {
       submissionCompilationDate: Instant
     )
 
-  implicit val overviewItemFormat: OFormat[OverviewItem] = Json.format[OverviewItem]
-  implicit val payloadFormat: OFormat[Payload]           = Json.format[Payload]
-  implicit val format: OFormat[DownstreamGetAllSuccess]  = Json.format[DownstreamGetAllSuccess]
+  implicit val overviewItemFormat: OFormat[OverviewItem]   = Json.format[OverviewItem]
+  implicit val payloadFormat: OFormat[Payload]             = Json.format[Payload]
+  implicit val format: OFormat[DownstreamAllTransfersData] = Json.format[DownstreamAllTransfersData]
 }

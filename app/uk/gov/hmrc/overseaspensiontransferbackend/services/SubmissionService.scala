@@ -37,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
-  def getAllSubmissions(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]]
+  def getAllTransfers(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
 
   def getTransfer(
       referenceId: String,
@@ -99,38 +99,6 @@ class SubmissionServiceImpl @Inject() (
 
   }
 
-  override def getAllSubmissions(
-      pstrNumber: PstrNumber
-    )(implicit hc: HeaderCarrier,
-      config: AppConfig
-    ): Future[Either[SubmissionGetAllError, SubmissionGetAllResponse]] = {
-    val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
-    val fromDate: LocalDate = toDate.minusYears(config.getAllSubmissionsYearsOffset)
-
-    /* This is a simplified version of the get all submissions service layer that just returns the last 10 years of submissions,
-    It will need to be updated with in progress submissions (when we've indexed the mongo by scheme id) and perhaps later with
-    from and to dates and utilising the qt reference functionality. */
-    connector.getAllSubmissions(pstrNumber = pstrNumber, fromDate = fromDate, toDate = toDate, qtRef = None).map {
-      case Left(_)           => Left(SubmissionGetAllError())
-      case Right(downstream) =>
-        val items      = downstream.success.qropsTransferOverview.map { r =>
-          SubmissionGetAllItem(
-            transferReference = None,
-            qtReference       = Some(QtNumber(r.qtReference)),
-            nino              = Some(r.nino),
-            memberFirstName   = Some(r.firstName),
-            memberSurname     = Some(r.lastName),
-            submissionDate    = Some(r.qtDate),
-            qtStatus          = Some(QtStatus(r.qtStatus)),
-            schemeId          = Some(pstrNumber)
-          )
-        }
-        val maybeItems = Option.when(items.nonEmpty)(items)
-
-        Right(SubmissionGetAllResponse(maybeItems))
-    }
-  }
-
   def getTransfer(
       referenceId: String,
       pstr: String,
@@ -163,6 +131,38 @@ class SubmissionServiceImpl @Inject() (
       case Left(jsError)   =>
         logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
+    }
+  }
+
+  override def getAllTransfers(
+      pstrNumber: PstrNumber
+    )(implicit hc: HeaderCarrier,
+      config: AppConfig
+    ): Future[Either[AllTransfersResponseError, AllTransfersResponse]] = {
+    val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+    val fromDate: LocalDate = toDate.minusYears(config.getAllTransfersYearsOffset)
+
+    /* This is a simplified version of the get all transfers service layer that just returns the last 10 years of transfers,
+    It will need to be updated with in progress transfers (when we've indexed the mongo by scheme id) and perhaps later with
+    from and to dates and utilising the qt reference functionality. */
+    connector.getAllTransfers(pstrNumber = pstrNumber, fromDate = fromDate, toDate = toDate, qtRef = None).map {
+      case Left(_)           => Left(AllTransfersResponseError())
+      case Right(downstream) =>
+        val items      = downstream.success.qropsTransferOverview.map { r =>
+          AllTransfersItem(
+            transferReference = None,
+            qtReference       = Some(QtNumber(r.qtReference)),
+            nino              = Some(r.nino),
+            memberFirstName   = Some(r.firstName),
+            memberSurname     = Some(r.lastName),
+            submissionDate    = Some(r.qtDate),
+            qtStatus          = Some(QtStatus(r.qtStatus)),
+            schemeId          = Some(pstrNumber)
+          )
+        }
+        val maybeItems = Option.when(items.nonEmpty)(items)
+
+        Right(AllTransfersResponse(maybeItems))
     }
   }
 }

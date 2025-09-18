@@ -21,15 +21,15 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 
 import java.time.LocalDate
 
-case class SubmissionGetAllResponse(
-    submissions: Option[Seq[SubmissionGetAllItem]]
+case class AllTransfersResponse(
+    transfers: Option[Seq[AllTransfersItem]]
   )
 
-object SubmissionGetAllResponse {
-  implicit val format: OFormat[SubmissionGetAllResponse] = Json.format
+object AllTransfersResponse {
+  implicit val format: OFormat[AllTransfersResponse] = Json.format
 }
 
-case class SubmissionGetAllItem(
+case class AllTransfersItem(
     transferReference: Option[String],
     qtReference: Option[QtNumber],
     nino: Option[String],
@@ -40,6 +40,6 @@ case class SubmissionGetAllItem(
     schemeId: Option[PstrNumber]
   )
 
-object SubmissionGetAllItem {
-  implicit val format: OFormat[SubmissionGetAllItem] = Json.format
+object AllTransfersItem {
+  implicit val format: OFormat[AllTransfersItem] = Json.format
 }

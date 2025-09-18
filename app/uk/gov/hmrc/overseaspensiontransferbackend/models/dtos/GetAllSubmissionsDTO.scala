@@ -18,30 +18,30 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.SubmissionGetAllItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
 
 import java.time.{Clock, Instant}
 
-final case class GetAllSubmissionsDTO(
+final case class GetAllTransfersDTO(
     pstr: PstrNumber,
     lastUpdated: Instant,
-    submissions: Seq[SubmissionGetAllItem]
+    transfers: Seq[AllTransfersItem]
   )
 
-object GetAllSubmissionsDTO {
+object GetAllTransfersDTO {
 
   def from(
       pstr: PstrNumber,
-      items: Seq[SubmissionGetAllItem]
+      items: Seq[AllTransfersItem]
     )(implicit clock: Clock
-    ): GetAllSubmissionsDTO = {
-    require(items.nonEmpty, "submissions must be non-empty")
-    GetAllSubmissionsDTO(
+    ): GetAllTransfersDTO = {
+    require(items.nonEmpty, "transfers must be non-empty")
+    GetAllTransfersDTO(
       pstr        = pstr,
       lastUpdated = Instant.now(clock),
-      submissions = items
+      transfers   = items
     )
   }
 
-  implicit val format: OFormat[GetAllSubmissionsDTO] = Json.format[GetAllSubmissionsDTO]
+  implicit val format: OFormat[GetAllTransfersDTO] = Json.format[GetAllTransfersDTO]
 }

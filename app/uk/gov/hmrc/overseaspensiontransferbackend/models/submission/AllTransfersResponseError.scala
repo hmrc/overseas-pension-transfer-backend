@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-case class SubmissionGetAllError() {}
+case class AllTransfersResponseError() {}
