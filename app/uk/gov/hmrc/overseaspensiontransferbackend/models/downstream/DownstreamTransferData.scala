@@ -18,7 +18,15 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, AnswersData, QtDetails, SavedUserAnswers, TransferDetails, TransferringMember}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{
+  AboutReceivingQROPS,
+  AnswersData,
+  QtDetails,
+  ReportDetails,
+  SavedUserAnswers,
+  TransferDetails,
+  TransferringMember
+}
 
 import java.time.{ZoneId, ZoneOffset}
 
@@ -32,8 +40,13 @@ case class DownstreamTransferData(
   def toSavedUserAnswers: SavedUserAnswers =
     SavedUserAnswers(
       qtDetails.qtReference.value,
-      AnswersData(None, transferringMember, aboutReceivingQROPS, transferDetails),
-      qtDetails.receiptDate.toInstant(ZoneOffset.UTC)
+      AnswersData(
+        Some(ReportDetails(Some(qtDetails.qtVersion), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),
+        transferringMember,
+        aboutReceivingQROPS,
+        transferDetails
+      ),
+      qtDetails.receiptDate
     )
 }
 

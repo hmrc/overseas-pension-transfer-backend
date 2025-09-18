@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, postRequestedFor, urlEqualTo, verify}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.Status._
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
@@ -26,7 +26,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.Instant
@@ -56,7 +56,7 @@ class SubmissionConnectorISpec extends BaseISpec {
       connector.submit(ValidatedSubmission(savedUserAnswers))
 
       verify(postRequestedFor(urlEqualTo("/RESTAdapter/pods/reports/qrops-transfer"))
-        .withHeader("correlationId", equalTo("id"))
+        .withHeader("correlationid", equalTo("id"))
       )
     }
 
@@ -156,6 +156,125 @@ class SubmissionConnectorISpec extends BaseISpec {
       stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+
+      result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
+    }
+  }
+
+  "getTransfer" - {
+    "return Right DownstreamTransferData when 200 and valid data is returned from downstream" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val downstreamPayload = Json.obj(
+        "success" -> Json.obj(
+          "qtDetails" -> Json.obj(
+            "qtVersion" -> "001",
+            "qtStatus" -> "Submitted",
+            "receiptDate" -> now,
+            "qtReference" -> "QT123456"
+          )
+        )
+      ).toString()
+
+      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload)
+
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+
+      result mustBe Right(
+        DownstreamTransferData(
+          QtDetails(
+            "001",
+            Submitted,
+            now,
+            QtNumber("QT123456"),
+            None,
+            None
+          ),
+          None,
+          None,
+          None
+        )
+      )
+    }
+
+    "return HipBadRequest when 400 is returned with valid payload" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val downstreamPayload = Json.obj(
+        "origin" -> "HIP",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, BAD_REQUEST)
+
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+
+      result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
+    }
+
+    "return EtmpValidationError when 422 is returned with valid payload" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val downstreamPayload = Json.obj(
+        "errors" -> Json.obj(
+          "processingDate" -> now,
+          "code" -> "003",
+          "text" -> "Request could not be processed"
+        )
+      ).toString()
+
+      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, UNPROCESSABLE_ENTITY)
+
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+
+      result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
+    }
+
+    "return HipBadRequest when 500 is returned with valid payload" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val downstreamPayload = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, INTERNAL_SERVER_ERROR)
+
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+
+      result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
+    }
+
+    "return HipOriginFailures when 503 is returned with valid payload" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val downstreamPayload = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "failures" -> Seq(
+            Json.obj(
+              "type" -> "type",
+              "reason" -> "reason"
+            )
+          )
+        )
+      ).toString()
+
+      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, SERVICE_UNAVAILABLE)
+
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }
