@@ -19,12 +19,19 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-sealed trait DownstreamError
+sealed trait DownstreamError {
+  def log: String
+}
 
 // ---------- 400/500: HIP responseSystemErrorType ----------
 /** Example: { "origin": "HoD|HIP", "response": { "error": { "code": "400|500", "logID": "...", "message": "..." } } }
   */
-final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String]) extends DownstreamError
+final case class HipBadRequest(origin: String, code: String, message: String, logId: Option[String])
+    extends DownstreamError {
+
+  override def log: String =
+    s"HIP error $code origin=$origin logId=${logId.getOrElse("-")} msg='$message'"
+}
 
 object HipBadRequest {
 
@@ -38,7 +45,14 @@ object HipBadRequest {
 
 // ---------- 400/500: HIP-originResponse (failures array) ----------
 /** { "origin": "HIP|HoD", "response": { "failures": [ { "type": "...", "reason": "..." }, ... ] } } */
-final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure]) extends DownstreamError
+final case class HipOriginFailures(origin: String, failures: List[HipOriginFailures.Failure])
+    extends DownstreamError {
+
+  override def log: String = {
+    val sample = failures.take(3).map(f => s"${f.`type`}:${f.reason}").mkString("; ")
+    s"HIP failures origin=$origin count=${failures.size} sample=[$sample]"
+  }
+}
 
 object HipOriginFailures {
   case class Failure(`type`: String, reason: String)
@@ -53,7 +67,10 @@ object HipOriginFailures {
 
 // ---------- 422: ETMP Business Validation ----------
 /** { "errors": { "processingDate": "...", "code": "001|003|...", "text": "..." } } */
-final case class EtmpValidationError(processingDate: String, code: String, text: String) extends DownstreamError
+final case class EtmpValidationError(processingDate: String, code: String, text: String)
+    extends DownstreamError {
+  override def log: String = s"422 ETMP(code=$code, text='$text')"
+}
 
 object EtmpValidationError {
   private case class Errors(processingDate: String, code: String, text: String)
@@ -70,12 +87,14 @@ object EtmpValidationError {
 }
 
 // -------- Other status families --------
-case object Unauthorized       extends DownstreamError // 401
-case object Forbidden          extends DownstreamError // 403
-case object NotFound           extends DownstreamError // 404
-case object UnsupportedMedia   extends DownstreamError // 415
-case object ServerError        extends DownstreamError // 500 (fallback if body doesn’t match HIP shapes)
-case object ServiceUnavailable extends DownstreamError // 503
+case object Unauthorized       extends DownstreamError { override def log: String = "401 Unauthorized" }
+case object Forbidden          extends DownstreamError { override def log: String = "403 Forbidden" }
+case object NotFound           extends DownstreamError { override def log: String = "404 NotFound" }
+case object UnsupportedMedia   extends DownstreamError { override def log: String = "415 UnsupportedMedia" }
+case object ServerError        extends DownstreamError { override def log: String = "500 InternalServerError" } // (fallback if body doesn’t match HIP shapes)
+case object ServiceUnavailable extends DownstreamError { override def log: String = "503 ServiceUnavailable" }
 
 // ---------- Fallback ----------
-final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamError
+final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamError {
+  override def log: String = s"$status Unexpected body='$bodySnippet'"
+}

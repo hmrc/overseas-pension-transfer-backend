@@ -21,8 +21,6 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
@@ -81,7 +79,6 @@ class SubmissionServiceImpl @Inject() (
         )))
     }
 
-  // TODO: Confirm what we want to send to the frontend
   private def mapDownstream(e: DownstreamError): SubmissionError = e match {
     case EtmpValidationError(_, _, _) |
         HipBadRequest(_, _, _, _) |
@@ -96,7 +93,6 @@ class SubmissionServiceImpl @Inject() (
         ServiceUnavailable |
         Unexpected(_, _) =>
       SubmissionFailed
-
   }
 
   def getTransfer(
@@ -146,23 +142,34 @@ class SubmissionServiceImpl @Inject() (
     It will need to be updated with in progress transfers (when we've indexed the mongo by scheme id) and perhaps later with
     from and to dates and utilising the qt reference functionality. */
     connector.getAllTransfers(pstrNumber = pstrNumber, fromDate = fromDate, toDate = toDate, qtRef = None).map {
-      case Left(_)           => Left(AllTransfersResponseError())
       case Right(downstream) =>
-        val items      = downstream.success.qropsTransferOverview.map { r =>
+        val items = downstream.success.qropsTransferOverview.map { r =>
           AllTransfersItem(
             transferReference = None,
             qtReference       = Some(QtNumber(r.qtReference)),
+            qtVersion         = Some(r.qtVersion),
             nino              = Some(r.nino),
             memberFirstName   = Some(r.firstName),
             memberSurname     = Some(r.lastName),
             submissionDate    = Some(r.qtDate),
             qtStatus          = Some(QtStatus(r.qtStatus)),
-            schemeId          = Some(pstrNumber)
+            pstrNumber        = Some(pstrNumber)
           )
         }
-        val maybeItems = Option.when(items.nonEmpty)(items)
 
-        Right(AllTransfersResponse(maybeItems))
+        // defensively account for if api sends an empty list instead of a 404
+        if (items.nonEmpty) {
+          Right(AllTransfersResponse(Some(items)))
+        } else {
+          Left(NoTransfersFound)
+        }
+      case Left(err)         =>
+        logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${err.log}")
+
+        err match {
+          case NotFound => Left(NoTransfersFound)
+          case _        => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
+        }
     }
   }
 }

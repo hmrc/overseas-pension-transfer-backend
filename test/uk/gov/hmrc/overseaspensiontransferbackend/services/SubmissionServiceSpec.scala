@@ -217,7 +217,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
       }
     }
     "getAllTransfers" - {
-      "must map downstream overview rows into SubmissionGetAllItem and wrap in Right" in {
+      "must map downstream overview rows into AllTransfersItem and wrap in Right" in {
         val pstr = PstrNumber("24000001AA")
 
         val ds = DownstreamAllTransfersData(
@@ -270,12 +270,13 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
             val first = items.head
             first.transferReference mustBe None
             first.qtReference       mustBe Some(QtNumber("QT564321"))
+            first.qtVersion         mustBe Some("001")
             first.nino              mustBe Some("AA000000A")
             first.memberFirstName   mustBe Some("David")
             first.memberSurname     mustBe Some("Warne")
             first.submissionDate    mustBe Some(LocalDate.parse("2025-03-14"))
             first.qtStatus          mustBe Some(QtStatus("Compiled"))
-            first.schemeId          mustBe Some(pstr)
+            first.pstrNumber        mustBe Some(pstr)
 
             val second = items(1)
             second.qtReference     mustBe Some(QtNumber("QT564322"))
@@ -287,23 +288,38 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         }
       }
 
-      "must return Left(SubmissionGetAllError()) when connector returns an error" in {
+      "returns Left(NoTransfersFound) when connector returns NotFound" in {
         val pstr = PstrNumber("24000001AA")
 
-        val dsError             = mock[DownstreamError]
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
         val fromDate: LocalDate = toDate.minusYears(10)
 
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Left(dsError)))
+          .thenReturn(Future.successful(Left(NotFound)))
 
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
-        result mustBe Left(AllTransfersResponseError())
+        result mustBe Left(NoTransfersFound)
       }
 
-      "must handle empty downstream overview list by returning an empty submissions list" in {
+      "returns Left(UnexpectedError) when connector returns any other error" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        // pick a concrete non-404 error
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(Forbidden)))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+        result mustBe Left(UnexpectedError(s"Unable to get all transfers for ${pstr.value}"))
+      }
+
+      "treats empty downstream overview list as NoTransfersFound" in {
         val pstr = PstrNumber("24000001AA")
 
         val ds = DownstreamAllTransfersData(
@@ -319,7 +335,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
-        result mustBe Right(AllTransfersResponse(None))
+        result mustBe Left(NoTransfersFound)
       }
     }
   }

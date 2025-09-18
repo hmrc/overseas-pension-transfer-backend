@@ -32,12 +32,13 @@ object AllTransfersResponse {
 case class AllTransfersItem(
     transferReference: Option[String],
     qtReference: Option[QtNumber],
+    qtVersion: Option[String],
     nino: Option[String],
     memberFirstName: Option[String],
     memberSurname: Option[String],
     submissionDate: Option[LocalDate],
     qtStatus: Option[QtStatus],
-    schemeId: Option[PstrNumber]
+    pstrNumber: Option[PstrNumber]
   )
 
 object AllTransfersItem {

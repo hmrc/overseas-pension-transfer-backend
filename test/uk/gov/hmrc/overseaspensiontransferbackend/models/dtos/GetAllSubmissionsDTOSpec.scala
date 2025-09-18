@@ -36,12 +36,13 @@ class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
     AllTransfersItem(
       transferReference = None,
       qtReference       = None,
+      qtVersion         = None,
       nino              = None,
       memberFirstName   = None,
       memberSurname     = None,
       submissionDate    = None,
       qtStatus          = None,
-      schemeId          = Some(pstr)
+      pstrNumber        = Some(pstr)
     )
 
   "GetAllTransfersDTO.from" - {

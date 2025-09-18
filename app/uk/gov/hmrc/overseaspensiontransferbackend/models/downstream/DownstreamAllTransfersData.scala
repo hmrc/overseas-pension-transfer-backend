@@ -20,11 +20,13 @@ import play.api.libs.json._
 
 import java.time.{Instant, LocalDate}
 
-final case class DownstreamAllTransfersData(success: DownstreamAllTransfersData.Payload)
+final case class DownstreamAllTransfersData(success: DownstreamAllTransfersData.Payload) {
+  def nonEmpty: Boolean = success.qropsTransferOverview.nonEmpty
+}
 
 object DownstreamAllTransfersData {
 
-  final case class Payload(qropsTransferOverview: List[OverviewItem])
+  final case class Payload(qropsTransferOverview: List[OverviewItem] = Nil)
 
   final case class OverviewItem(
       fbNumber: String,
@@ -40,7 +42,15 @@ object DownstreamAllTransfersData {
       submissionCompilationDate: Instant
     )
 
-  implicit val overviewItemFormat: OFormat[OverviewItem]   = Json.format[OverviewItem]
-  implicit val payloadFormat: OFormat[Payload]             = Json.format[Payload]
-  implicit val format: OFormat[DownstreamAllTransfersData] = Json.format[DownstreamAllTransfersData]
+  implicit val overviewItemFormat: OFormat[OverviewItem] = Json.format[OverviewItem]
+
+  // account for possible missing payload - return an empty list
+  implicit val payloadReads: Reads[Payload]    =
+    (__ \ "qropsTransferOverview").readWithDefault[List[OverviewItem]](Nil).map(Payload.apply)
+  implicit val payloadWrites: OWrites[Payload] = Json.writes[Payload]
+
+  // account for possible missing success key - return an empty list
+  implicit val dataReads: Reads[DownstreamAllTransfersData]    =
+    (__ \ "success").readWithDefault[Payload](Payload()).map(DownstreamAllTransfersData.apply)
+  implicit val dataWrites: OWrites[DownstreamAllTransfersData] = Json.writes[DownstreamAllTransfersData]
 }

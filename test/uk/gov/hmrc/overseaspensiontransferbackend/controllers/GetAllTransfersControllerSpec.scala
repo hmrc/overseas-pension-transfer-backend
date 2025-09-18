@@ -31,7 +31,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 
-import java.time.{Clock, Instant, LocalDate, ZoneOffset}
+import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.Future
 
 class GetAllTransfersControllerSpec
@@ -54,12 +54,13 @@ class GetAllTransfersControllerSpec
         Seq(AllTransfersItem(
           transferReference = None,
           qtReference       = None,
+          qtVersion         = None,
           nino              = None,
           memberFirstName   = None,
           memberSurname     = None,
           submissionDate    = None,
           qtStatus          = None,
-          schemeId          = Some(pstr)
+          pstrNumber        = None
         ))
 
       when(
