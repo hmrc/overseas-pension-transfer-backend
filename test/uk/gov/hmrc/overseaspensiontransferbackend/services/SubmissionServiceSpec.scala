@@ -25,12 +25,12 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{downstream, Compiled, InProgress, PstrNumber, QtDetails, QtStatus, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
-import java.time.{LocalDate, LocalDateTime, ZoneOffset}
+import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
@@ -150,17 +150,17 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         List(Submitted, Compiled) foreach { qtStatus =>
           s"qtStatus is ${qtStatus.downstreamValue} and transformer deconstructs correctly" in {
             val saved       = DownstreamTransferData(
-              QtDetails("001", Submitted, LocalDateTime.ofEpochSecond(now.toEpochMilli, 0, ZoneOffset.UTC), QtNumber("QT123456"), None, None),
+              QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
               None,
               None,
               None
             )
-            val userAnswers = UserAnswersDTO(testId, Json.obj(), now)
+            val userAnswers = UserAnswersDTO("QT123456", Json.obj(), now)
 
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-            val result = await(service.getTransfer(testId, "pstr", qtStatus, None, None, None))
+            val result = await(service.getTransfer(testId, "pstr", qtStatus, None, Some("QT123456"), None))
 
             result mustBe Right(userAnswers)
           }
@@ -199,7 +199,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
         "qtStatus is Compiled and deconstruct returns an error" in {
           val saved = DownstreamTransferData(
-            QtDetails("001", Submitted, LocalDateTime.ofEpochSecond(now.toEpochMilli, 0, ZoneOffset.UTC), QtNumber("QT123456"), None, None),
+            QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
             None,
             None,
             None

@@ -16,7 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY}
 import play.api.inject
+import play.api.inject.guice.GuiceableModule
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{SubmissionConnector, SubmissionConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
@@ -27,7 +31,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionVal
 
 class SubmissionServiceISpec extends BaseISpec {
 
-  override protected def moduleOverrides = Seq(
+  implicit override val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+  override protected def moduleOverrides: Seq[GuiceableModule] = Seq(
     inject.bind[SubmissionService].to[SubmissionServiceImpl],
     inject.bind[SubmissionValidator].to[DummySubmissionValidatorImpl],
     inject.bind[SubmissionConnector].to[SubmissionConnectorImpl]
@@ -57,6 +63,16 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
 
+      val downstreamPayload = Json.obj(
+        "success" -> Json.obj(
+          "qtReference" -> "QT123456",
+          "processingDate" -> now.toString,
+          "formBundleNumber" -> "123"
+        )
+      ).toString()
+
+      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+
       val result = await(service.submitAnswers(normalised))
 
       result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
@@ -82,20 +98,93 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
 
+      val downstreamPayload = Json.obj(
+        "success" -> Json.obj(
+          "qtReference" -> "QT123456",
+          "processingDate" -> now.toString,
+          "formBundleNumber" -> "123"
+        )
+      ).toString()
+
+      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+
       val result = await(service.submitAnswers(normalised))
 
       result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
     }
 
 
-    "returns SubmissionTransformationError when there is no prepared submission saved for ref" ignore {
-      // TODO: Fix when implemented:
-      // result mustBe Left(SubmissionTransformationError("..."))
+    "returns SubmissionTransformationError when there is no prepared submission saved for ref" in {
+      val id  = freshId()
+      val now = frozenNow()
+
+      val saved = SavedUserAnswers(
+        referenceId = id,
+        data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
+        lastUpdated = now
+      )
+      await(repository.set(saved)) mustBe true
+
+      val dto: SubmissionDTO = PsaSubmissionDTO(
+        referenceId = id,
+        userId      = PsaId("A1234567"),
+        lastUpdated = now
+      )
+
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+
+      val downstreamPayload = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
+
+      val result = await(service.submitAnswers(normalised))
+     result mustBe Left(SubmissionTransformationError("Submission failed validation"))
     }
 
-    "returns SubmissionFailed when there is an downstream error" ignore {
-      // TODO: Fix when implemented:
-      // result mustBe Left(SubmissionFailed("..."))
+    "returns SubmissionFailed when there is an downstream error" in {
+      val id  = freshId()
+      val now = frozenNow()
+
+      val saved = SavedUserAnswers(
+        referenceId = id,
+        data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
+        lastUpdated = now
+      )
+      await(repository.set(saved)) mustBe true
+
+      val dto: SubmissionDTO = PsaSubmissionDTO(
+        referenceId = id,
+        userId      = PsaId("A1234567"),
+        lastUpdated = now
+      )
+
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+
+      val downstreamPayload = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+
+      val result = await(service.submitAnswers(normalised))
+
+     result mustBe Left(SubmissionFailed)
     }
   }
 }

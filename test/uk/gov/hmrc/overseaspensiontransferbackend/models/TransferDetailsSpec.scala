@@ -34,6 +34,7 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
         Some(LocalDate.of(2012, 12, 12)),
         Some("No"),
         Some("Yes"),
+        Some(Seq(PublicService)),
         Some(TaxableOverseasTransferDetails(Some(Seq(Occupational, PublicService)), Some(12345.99), Some(54321.99))),
         Some(typeOfAssets)
       )
@@ -47,7 +48,7 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
       val json   = Json.obj()
       val result = json.validate[TransferDetails]
 
-      result mustBe JsSuccess(TransferDetails(None, None, None, None, None, None, None))
+      result mustBe JsSuccess(TransferDetails(None, None, None, None, None, None, None, None))
     }
   }
 }

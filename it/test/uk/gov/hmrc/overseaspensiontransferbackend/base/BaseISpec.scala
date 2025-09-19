@@ -77,6 +77,7 @@ trait BaseISpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+//    WireMockHelper.wireMockServer.resetAll()
     clearMongoData()
   }
 
