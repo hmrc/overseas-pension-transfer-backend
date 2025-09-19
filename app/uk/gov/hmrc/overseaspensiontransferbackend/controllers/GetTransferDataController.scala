@@ -18,9 +18,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import com.google.inject.Inject
 import play.api.libs.json.Json
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.TransferNotFound
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -37,14 +38,15 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
       formBundleNumber: Option[String] = None,
       qtNumber: Option[String]         = None,
       versionNumber: Option[String]    = None
-    ) =
+    ): Action[AnyContent] =
     Action.async {
       implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
         submissionService.getTransfer(referenceId, pstr, QtStatus(qtStatus), formBundleNumber, qtNumber, versionNumber) map {
-          case Right(value) => Ok(Json.toJson(value))
-          case Left(_)      => InternalServerError
+          case Right(value)              => Ok(Json.toJson(value))
+          case Left(TransferNotFound(_)) => NotFound
+          case Left(_)                   => InternalServerError
         }
     }
 

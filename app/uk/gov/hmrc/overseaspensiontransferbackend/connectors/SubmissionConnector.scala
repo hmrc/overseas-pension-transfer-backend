@@ -89,16 +89,17 @@ class SubmissionConnectorImpl @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]] = {
 
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=$pstr&qtNumber=${qtNumber.get}&versionNumber=${versionNumber.get}"
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
-    val correlationId = hc.requestId.fold {
+    val correlationId     = hc.requestId.fold {
       logger.error("[SubmissionConnector][getTransfer]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
     } {
       requestId =>
         requestId.value
     }
-    val receiptDate   = Instant.now().toString
+    val receiptDate       = Instant.now().toString
+    val queryStringParams = Seq("pstr" -> pstr, "qtNumber" -> qtNumber.get, "versionNumber" -> versionNumber.get)
 
     httpClientV2
       .get(url)
@@ -110,6 +111,7 @@ class SubmissionConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
+      .transform(_.addQueryStringParameters(queryStringParams: _*))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }

@@ -58,6 +58,6 @@ case object Submitted extends QtStatus {
 }
 
 case object InProgress extends QtStatus {
-  override def toString: String        = "In Progress"
+  override def toString: String        = "InProgress"
   override val downstreamValue: String = toString
 }
