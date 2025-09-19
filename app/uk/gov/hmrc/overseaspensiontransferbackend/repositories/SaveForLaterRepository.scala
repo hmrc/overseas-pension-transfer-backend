@@ -17,16 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 
 import org.apache.pekko.Done
-import org.mongodb.scala.SingleObservableFuture
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
 import play.api.libs.json.Format
+import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
-import uk.gov.hmrc.play.http.logging.Mdc
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -58,16 +57,6 @@ class SaveForLaterRepository @Inject() (
   private def byId(id: String): Bson = Filters.equal("_id", id)
 
   private def byReferenceId(referenceId: String): Bson = Filters.equal("referenceId", referenceId)
-
-  def keepAlive(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
-    collection
-      .updateOne(
-        filter = byReferenceId(referenceId),
-        update = Updates.set("lastUpdated", Instant.now(clock))
-      )
-      .toFuture()
-      .map(_ => true)
-  }
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
     collection

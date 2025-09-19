@@ -17,8 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{__, JsArray, JsString, Json, Reads, Writes}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.UnquotedShares.reads
+import play.api.libs.json._
 
 case class TypeOfAssets(
     cashAssets: Option[String],

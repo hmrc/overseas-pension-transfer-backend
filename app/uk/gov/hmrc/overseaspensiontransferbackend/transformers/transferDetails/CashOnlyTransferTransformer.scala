@@ -17,9 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.BooleanTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class CashOnlyTransferTransformer extends PathAwareTransformer with BooleanTransformerStep {
 

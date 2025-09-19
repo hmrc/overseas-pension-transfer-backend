@@ -20,16 +20,17 @@ import play.api.Logging
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
@@ -38,8 +39,6 @@ trait SubmissionService {
       referenceId: String,
       pstr: String,
       qtStatus: QtStatus,
-      fbNumber: Option[String],
-      qtNumber: Option[String],
       versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
@@ -98,12 +97,11 @@ class SubmissionServiceImpl @Inject() (
       referenceId: String,
       pstr: String,
       qtStatus: QtStatus,
-      fbNumber: Option[String],
-      qtNumber: Option[String],
       versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     qtStatus match {
+      // TODO validate referenceId as a type of TransferId when format is agreed and implemented
       case InProgress           => repository.get(referenceId) map {
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
@@ -111,11 +109,22 @@ class SubmissionServiceImpl @Inject() (
             logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $referenceId from save-for-later")
             Left(TransferNotFound(s"Unable to find transferId: $referenceId from save-for-later"))
         }
-      case Submitted | Compiled => connector.getTransfer(pstr, qtNumber, versionNumber) map {
-          case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
-          case Left(_)      =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD")
-            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.get} from HoD"))
+      case Submitted | Compiled =>
+        versionNumber match {
+          case Some(version) =>
+            Try(QtNumber(referenceId)) match {
+              case Success(qtNumber) => connector.getTransfer(pstr, qtNumber, version) map {
+                  case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
+                  case Left(_)      =>
+                    logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $referenceId from HoD")
+                    Left(TransferNotFound(s"Unable to find transferId: $referenceId from HoD"))
+                }
+              case Failure(_)        => Future.successful(Left(TransferIdentifierInvalid("referenceId is not a valid QtNumber")))
+            }
+
+          case None =>
+            logger.error("[SubmissionService][getTransfer] versionNumber is missing")
+            Future.successful(Left(TransferIdentifierInvalid("Missing version number")))
         }
     }
   }

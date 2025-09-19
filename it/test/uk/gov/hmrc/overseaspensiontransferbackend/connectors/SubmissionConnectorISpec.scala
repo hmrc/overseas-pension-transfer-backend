@@ -26,7 +26,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Pstr, QtDetails, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.Instant
@@ -179,7 +179,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", QtNumber("QT123456"), "001"))
 
       result mustBe Right(
         DownstreamTransferData(
@@ -215,7 +215,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -233,7 +233,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", QtNumber("QT123456"), "001"))
 
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
@@ -254,7 +254,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -276,7 +276,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", Some("QT123456"), Some("001")))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer("12345678AB", QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }

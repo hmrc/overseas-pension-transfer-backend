@@ -44,7 +44,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     "Return 200 with Json when service returns Right UserAnswersDTO" in {
       val json = Json.obj("key" -> "value")
 
-      when(mockSubmissionService.getTransfer(any, any, any, any, any, any)(any))
+      when(mockSubmissionService.getTransfer(any, any, any, any)(any))
         .thenReturn(Future.successful(Right(UserAnswersDTO("id", json, now))))
 
       running(application) {
@@ -62,7 +62,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 404 when service returns Left TransferNotFound" in {
-      when(mockSubmissionService.getTransfer(any, any, any, any, any, any)(any))
+      when(mockSubmissionService.getTransfer(any, any, any, any)(any))
         .thenReturn(Future.successful(Left(TransferNotFound("No Transfer found"))))
 
       running(application) {
@@ -75,7 +75,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 500 when service returns Left TransferDeconstructionError" in {
-      when(mockSubmissionService.getTransfer(any, any, any, any, any, any)(any))
+      when(mockSubmissionService.getTransfer(any, any, any, any)(any))
         .thenReturn(Future.successful(Left(TransferDeconstructionError("Error"))))
 
       running(application) {

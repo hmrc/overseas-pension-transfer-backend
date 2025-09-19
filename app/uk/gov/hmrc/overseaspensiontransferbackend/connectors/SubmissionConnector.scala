@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.Instant
@@ -38,8 +39,8 @@ trait SubmissionConnector {
 
   def getTransfer(
       pstr: String,
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      qtNumber: QtNumber,
+      versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]]
 }
@@ -84,8 +85,8 @@ class SubmissionConnectorImpl @Inject() (
 
   override def getTransfer(
       pstr: String,
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      qtNumber: QtNumber,
+      versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]] = {
 
@@ -99,7 +100,7 @@ class SubmissionConnectorImpl @Inject() (
         requestId.value
     }
     val receiptDate       = Instant.now().toString
-    val queryStringParams = Seq("pstr" -> pstr, "qtNumber" -> qtNumber.get, "versionNumber" -> versionNumber.get)
+    val queryStringParams = Seq("pstr" -> pstr, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
 
     httpClientV2
       .get(url)

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-import play.api.libs.json._
-
 import java.time.Instant
 
 sealed trait Submitter

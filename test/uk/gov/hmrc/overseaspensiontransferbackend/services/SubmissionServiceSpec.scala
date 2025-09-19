@@ -24,12 +24,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, Pstr, QtDetails, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
-import java.time.{LocalDateTime, ZoneOffset}
 import scala.concurrent.Future
 
 class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
@@ -141,7 +140,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
+          val result = await(service.getTransfer(testId, "12345678AB", InProgress, None))
 
           result mustBe Right(userAnswers)
         }
@@ -160,7 +159,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-            val result = await(service.getTransfer(testId, "pstr", qtStatus, None, Some("QT123456"), None))
+            val result = await(service.getTransfer("QT123456", "12345678AB", qtStatus, Some("001")))
 
             result mustBe Right(userAnswers)
           }
@@ -171,7 +170,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         "qtStatus is InProgress and Repo returns None" in {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
 
-          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
+          val result = await(service.getTransfer(testId, "12345678AB", InProgress, None))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: $testId from save-for-later"))
         }
@@ -179,7 +178,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         "qtStatus is Submitted and Repo returns None" in {
           when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(HipOriginFailures("Failed", List()))))
 
-          val result = await(service.getTransfer(testId, "pstr", Submitted, None, Some("QT123456"), None))
+          val result = await(service.getTransfer("QT123456", "12345678AB", Submitted, Some("001")))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: QT123456 from HoD"))
         }
@@ -190,7 +189,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer(testId, "pstr", InProgress, None, None, None))
+          val result = await(service.getTransfer(testId, "12345678AB", InProgress, None))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")
@@ -209,10 +208,28 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer(testId, "pstr", Compiled, None, Some("QT123456"), None))
+          val result = await(service.getTransfer("QT123456", "12345678AB", Compiled, Some("001")))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")
+          )
+        }
+      }
+
+      "return Left TransferIdentifierInvalid" - {
+        "qtStatus is Submitted and versionNumber is None" in {
+          val result = await(service.getTransfer("QT123456", "12345678AB", Compiled, None))
+
+          result mustBe Left(
+            TransferIdentifierInvalid("Missing version number")
+          )
+        }
+
+        "qtStatus is Submitted and referenceId is invalid QtNumber" in {
+          val result = await(service.getTransfer("QT12345", "12345678AB", Submitted, Some("001")))
+
+          result mustBe Left(
+            TransferIdentifierInvalid("referenceId is not a valid QtNumber")
           )
         }
       }

@@ -35,15 +35,13 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
       referenceId: String,
       pstr: String,
       qtStatus: String,
-      formBundleNumber: Option[String] = None,
-      qtNumber: Option[String]         = None,
-      versionNumber: Option[String]    = None
+      versionNumber: Option[String]
     ): Action[AnyContent] =
     Action.async {
       implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-        submissionService.getTransfer(referenceId, pstr, QtStatus(qtStatus), formBundleNumber, qtNumber, versionNumber) map {
+        submissionService.getTransfer(referenceId, pstr, QtStatus(qtStatus), versionNumber) map {
           case Right(value)              => Ok(Json.toJson(value))
           case Left(TransferNotFound(_)) => NotFound
           case Left(_)                   => InternalServerError

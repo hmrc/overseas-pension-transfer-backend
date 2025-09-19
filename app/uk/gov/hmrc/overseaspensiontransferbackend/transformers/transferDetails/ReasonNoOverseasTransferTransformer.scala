@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.ApplicableExclusion
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
