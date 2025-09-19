@@ -16,15 +16,27 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, OFormat}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 
-case class ReportDetails(
-    pstr: Option[String],
-    qtStatus: Option[QtStatus],
-    qtReference: Option[String],
-    qtDigitalStatus: Option[String]
-  )
+class PstrSpec extends AnyFreeSpec with Matchers {
 
-object ReportDetails {
-  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
+  "Pstr" - {
+    "Accept Pstr in correct format" in {
+      Pstr("12345678AB").value mustBe "12345678AB"
+    }
+
+    List(
+      "1234567AB",
+      "12345678A",
+      "12R45678AB",
+      "12345678A4",
+      ""
+    ) foreach {
+      testString =>
+        s"Return error message when incorrect format: $testString" in {
+          intercept[IllegalArgumentException](Pstr(testString)).getMessage mustBe "requirement failed: Incorrect PSTR format"
+        }
+    }
+  }
 }

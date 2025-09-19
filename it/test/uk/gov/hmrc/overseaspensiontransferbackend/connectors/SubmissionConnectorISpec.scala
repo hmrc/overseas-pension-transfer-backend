@@ -26,7 +26,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, QtDetails, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Pstr, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.Instant
@@ -167,6 +167,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
+          "pstr" -> "12345678AB",
           "qtDetails" -> Json.obj(
             "qtVersion" -> "001",
             "qtStatus" -> "Submitted",
@@ -182,6 +183,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       result mustBe Right(
         DownstreamTransferData(
+          Pstr("12345678AB"),
           QtDetails(
             "001",
             Submitted,

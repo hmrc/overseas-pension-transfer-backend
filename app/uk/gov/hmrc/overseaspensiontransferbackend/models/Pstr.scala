@@ -16,15 +16,12 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class ReportDetails(
-    pstr: Option[String],
-    qtStatus: Option[QtStatus],
-    qtReference: Option[String],
-    qtDigitalStatus: Option[String]
-  )
+case class Pstr(value: String) {
+  require(value.matches("^([0-9]{8}[A-Z]{2})$"), "Incorrect PSTR format")
+}
 
-object ReportDetails {
-  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
+object Pstr {
+  implicit val format: Format[Pstr] = Json.format[Pstr]
 }

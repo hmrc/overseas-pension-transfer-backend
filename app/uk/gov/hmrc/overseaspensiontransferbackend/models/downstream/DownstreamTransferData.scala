@@ -18,19 +18,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{
-  AboutReceivingQROPS,
-  AnswersData,
-  QtDetails,
-  ReportDetails,
-  SavedUserAnswers,
-  TransferDetails,
-  TransferringMember
-}
-
-import java.time.{ZoneId, ZoneOffset}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
 case class DownstreamTransferData(
+    pstr: Pstr,
     qtDetails: QtDetails,
     transferringMember: Option[TransferringMember],
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
@@ -41,7 +32,7 @@ case class DownstreamTransferData(
     SavedUserAnswers(
       qtDetails.qtReference.value,
       AnswersData(
-        Some(ReportDetails(Some(qtDetails.qtVersion), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),
+        Some(ReportDetails(Some(pstr.value), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),
         transferringMember,
         aboutReceivingQROPS,
         transferDetails
@@ -53,7 +44,8 @@ case class DownstreamTransferData(
 object DownstreamTransferData {
 
   implicit val reads: Reads[DownstreamTransferData] = (
-    (__ \ "success" \ "qtDetails").read[QtDetails] and
+    (__ \ "success" \ "pstr").read[String].map(Pstr.apply) and
+      (__ \ "success" \ "qtDetails").read[QtDetails] and
       (__ \ "success" \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "success" \ "aboutReceivingQrops").readNullable[AboutReceivingQROPS] and
       (__ \ "success" \ "transferDetails").readNullable[TransferDetails]

@@ -24,7 +24,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, QtDetails, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, Pstr, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
@@ -149,6 +149,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         List(Submitted, Compiled) foreach { qtStatus =>
           s"qtStatus is ${qtStatus.downstreamValue} and transformer deconstructs correctly" in {
             val saved       = DownstreamTransferData(
+              Pstr("12345678AB"),
               QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
               None,
               None,
@@ -198,6 +199,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
         "qtStatus is Compiled and deconstruct returns an error" in {
           val saved = DownstreamTransferData(
+            Pstr("12345678AB"),
             QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
             None,
             None,

@@ -28,6 +28,7 @@ object ParserHelpers {
   def handleResponse[A](resp: HttpResponse, successStatus: Int = OK)(implicit reads: Reads[A]): Either[DownstreamError, A] =
     resp.status match {
       case status if status == successStatus =>
+        println("\n----\n" + resp.json.validate[A] + "\n----\n")
         resp.json.validate[A]
           .asEither
           .left.map(_ => Unexpected(successStatus, resp.body.take(MaxSnippet)))
