@@ -70,7 +70,10 @@ class SubmissionServiceImpl @Inject() (
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
-              case Left(e)        => Left(mapDownstream(e))
+              case Left(err)      => {
+                logger.info(s"[submitAnswers] referenceId=${submission.referenceId} ${err.log}")
+                Left(mapDownstream(err))
+              }
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
@@ -114,8 +117,8 @@ class SubmissionServiceImpl @Inject() (
         }
       case Submitted | Compiled => connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
-          case Left(_)      =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD")
+          case Left(err)    =>
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.get} from HoD"))
         }
     }
