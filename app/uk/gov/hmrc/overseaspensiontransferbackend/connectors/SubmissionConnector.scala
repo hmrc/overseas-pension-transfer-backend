@@ -64,7 +64,7 @@ class SubmissionConnectorImpl @Inject() (
 
   override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
-    val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer"
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val payload: JsValue = Json.toJson(validated.saved.data)
 
@@ -133,7 +133,7 @@ class SubmissionConnectorImpl @Inject() (
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamAllTransfersData]] = {
 
-    val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer-overview"
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
 
     val correlationId = hc.requestId.fold {
       logger.error("[SubmissionConnector][getAllTransfers]: Request is missing X-Request-ID header")
@@ -142,12 +142,12 @@ class SubmissionConnectorImpl @Inject() (
 
     val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
 
-    val formatter = DateTimeFormatter.ofPattern("yyyy MM dd")
+    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
 
     val params =
       Seq(
-        "fromDate" -> fromDate.format(formatter),
-        "toDate"   -> toDate.format(formatter),
+        "dateFrom" -> fromDate.format(formatter),
+        "dateTo"   -> toDate.format(formatter),
         "pstr"     -> pstrNumber.normalised
       ) ++ qtRef.map(qt => "qtRef" -> qt.value)
 

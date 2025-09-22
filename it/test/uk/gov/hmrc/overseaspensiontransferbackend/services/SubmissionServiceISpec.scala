@@ -71,7 +71,7 @@ class SubmissionServiceISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
       val result = await(service.submitAnswers(normalised))
 
@@ -106,7 +106,7 @@ class SubmissionServiceISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
       val result = await(service.submitAnswers(normalised))
 
@@ -144,7 +144,7 @@ class SubmissionServiceISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
       val result = await(service.submitAnswers(normalised))
      result mustBe Left(SubmissionTransformationError("Submission failed validation"))
@@ -180,7 +180,7 @@ class SubmissionServiceISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
       val result = await(service.submitAnswers(normalised))
 
