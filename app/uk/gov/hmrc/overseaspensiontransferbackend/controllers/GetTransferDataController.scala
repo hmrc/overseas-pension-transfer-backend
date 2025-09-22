@@ -20,8 +20,9 @@ import com.google.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.TransferNotFound
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, QtStatus}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferNotFound, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -41,7 +42,10 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
       implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-        submissionService.getTransfer(referenceId, pstr, QtStatus(qtStatus), versionNumber) map {
+        val transferType: Either[TransferRetrievalError, GetSpecificTransferDTO] =
+          GetSpecificTransferDTO.apply(referenceId, Pstr(pstr), QtStatus(qtStatus), versionNumber)
+
+        submissionService.getTransfer(transferType) map {
           case Right(value)              => Ok(Json.toJson(value))
           case Left(TransferNotFound(_)) => NotFound
           case Left(_)                   => InternalServerError
