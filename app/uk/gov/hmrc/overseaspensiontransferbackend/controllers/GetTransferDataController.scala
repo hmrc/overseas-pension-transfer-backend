@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, QtStatus}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferNotFound, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -42,8 +42,8 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
       implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-        val transferType: Either[TransferRetrievalError, GetSpecificTransferDTO] =
-          GetSpecificTransferDTO.apply(referenceId, Pstr(pstr), QtStatus(qtStatus), versionNumber)
+        val transferType: Either[TransferRetrievalError, GetSpecificTransferHandler] =
+          GetSpecificTransferHandler.apply(referenceId, Pstr(pstr), QtStatus(qtStatus), versionNumber)
 
         submissionService.getTransfer(transferType) map {
           case Right(value)              => Ok(Json.toJson(value))

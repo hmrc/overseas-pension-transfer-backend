@@ -21,14 +21,14 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, 
 
 import scala.util.{Success, Try}
 
-sealed trait GetSpecificTransferDTO {
+sealed trait GetSpecificTransferHandler {
   def pstr: Pstr
   def qtStatus: QtStatus
 }
 
-object GetSpecificTransferDTO {
+object GetSpecificTransferHandler {
 
-  def apply(referenceId: String, pstr: Pstr, qtStatus: QtStatus, versionNumber: Option[String]): Either[TransferRetrievalError, GetSpecificTransferDTO] = {
+  def apply(referenceId: String, pstr: Pstr, qtStatus: QtStatus, versionNumber: Option[String]): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
     (qtStatus, versionNumber) match {
       case (InProgress, None)                    => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
       case (Submitted | Compiled, Some(version)) =>
@@ -47,11 +47,11 @@ final case class GetSaveForLaterRecord(
     referenceId: String,
     pstr: Pstr,
     qtStatus: QtStatus
-  ) extends GetSpecificTransferDTO
+  ) extends GetSpecificTransferHandler
 
 final case class GetEtmpRecord(
     referenceId: QtNumber,
     pstr: Pstr,
     qtStatus: QtStatus,
     versionNumber: String
-  ) extends GetSpecificTransferDTO
+  ) extends GetSpecificTransferHandler

@@ -21,37 +21,37 @@ import org.scalatest.matchers.must.Matchers
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{QtNumber, TransferIdentifierInvalid}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, Pstr, Submitted}
 
-class GetSpecificTransferDTOSpec extends AnyFreeSpec with Matchers {
+class GetSpecificTransferHandlerSpec extends AnyFreeSpec with Matchers {
 
   "apply" - {
     "when qtStatus is InProgress return Right GetSaveForLaterRecord" in {
-      GetSpecificTransferDTO.apply("refId", Pstr("12345678AB"), InProgress, None) mustBe
+      GetSpecificTransferHandler.apply("refId", Pstr("12345678AB"), InProgress, None) mustBe
         Right(GetSaveForLaterRecord("refId", Pstr("12345678AB"), InProgress))
     }
 
     "when qtStatus is Submitted and versionNumber is defined" in {
-      GetSpecificTransferDTO.apply("QT123456", Pstr("12345678AB"), Submitted, Some("001")) mustBe
+      GetSpecificTransferHandler.apply("QT123456", Pstr("12345678AB"), Submitted, Some("001")) mustBe
         Right(GetEtmpRecord(QtNumber("QT123456"), Pstr("12345678AB"), Submitted, "001"))
     }
 
     "when qtStatus is Compiled and versionNumber is defined" in {
-      GetSpecificTransferDTO.apply("QT123456", Pstr("12345678AB"), Compiled, Some("001")) mustBe
+      GetSpecificTransferHandler.apply("QT123456", Pstr("12345678AB"), Compiled, Some("001")) mustBe
         Right(GetEtmpRecord(QtNumber("QT123456"), Pstr("12345678AB"), Compiled, "001"))
     }
 
     "return Left TransferIdentifierInvalid" - {
       "qtStatus is InProgress and versionNumber is definined" in {
-        GetSpecificTransferDTO.apply("refId", Pstr("12345678AB"), InProgress, Some("001")) mustBe
+        GetSpecificTransferHandler.apply("refId", Pstr("12345678AB"), InProgress, Some("001")) mustBe
           Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
       }
 
       "qtStatus is Submitted and versionNumber is None" in {
-        GetSpecificTransferDTO.apply("QT123456", Pstr("12345678AB"), Submitted, None) mustBe
+        GetSpecificTransferHandler.apply("QT123456", Pstr("12345678AB"), Submitted, None) mustBe
           Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
       }
 
       "qtNumber is invalid" in {
-        GetSpecificTransferDTO.apply("refId", Pstr("12345678AB"), Submitted, Some("001")) mustBe
+        GetSpecificTransferHandler.apply("refId", Pstr("12345678AB"), Submitted, Some("001")) mustBe
           Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
       }
     }

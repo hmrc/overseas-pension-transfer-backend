@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferDTO, UserAnswersDTO}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
@@ -35,7 +35,7 @@ trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
 
   def getTransfer(
-      transferType: Either[TransferRetrievalError, GetSpecificTransferDTO]
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
@@ -90,7 +90,7 @@ class SubmissionServiceImpl @Inject() (
   }
 
   def getTransfer(
-      transferType: Either[TransferRetrievalError, GetSpecificTransferDTO]
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     transferType match {
