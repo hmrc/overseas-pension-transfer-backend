@@ -1,19 +1,3 @@
-/*
- * Copyright 2025 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import org.scalatest.freespec.AnyFreeSpec
@@ -35,7 +19,7 @@ import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.Future
 
 class GetAllTransfersControllerSpec
-    extends AnyFreeSpec
+  extends AnyFreeSpec
     with Matchers
     with SpecBase {
 
@@ -89,6 +73,22 @@ class GetAllTransfersControllerSpec
       }
     }
 
+    "must return 400 when PSTR is invalid" in {
+      val app: Application =
+        applicationBuilder()
+          .overrides(bind[Clock].toInstance(fixedClock))
+          .build()
+
+      running(app) {
+        val badPstr = "not-a-pstr"
+        val request = FakeRequest(GET, s"$endpoint/$badPstr")
+        val result  = route(app, request).value
+
+        status(result)        mustBe BAD_REQUEST
+        contentAsString(result) must include("PSTR must be 8 digits followed by 2 letters")
+      }
+    }
+
     "must return 404 when PSTR is valid but there are no transfers (None from upstream)" in {
       val mockSubmissionService: SubmissionService = mock[SubmissionService]
       val pstrStr                                  = "24000001AA"
@@ -113,22 +113,54 @@ class GetAllTransfersControllerSpec
       }
     }
 
-    "must return 400 when PSTR is invalid" in {
+    "must return 404 when service returns Left(NoTransfersFound)" in {
+      val mockSubmissionService: SubmissionService = mock[SubmissionService]
+      val pstrStr                                  = "24000001AA"
+      val pstr                                     = PstrNumber(pstrStr)
+
+      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
+        .thenReturn(Future.successful(Left(NoTransfersFound)))
+
       val app: Application =
         applicationBuilder()
-          .overrides(bind[Clock].toInstance(fixedClock))
+          .overrides(
+            bind[SubmissionService].toInstance(mockSubmissionService),
+            bind[Clock].toInstance(fixedClock)
+          )
           .build()
 
       running(app) {
-        val badPstr = "not-a-pstr"
-        val request = FakeRequest(GET, s"$endpoint/$badPstr")
+        val request = FakeRequest(GET, s"$endpoint/$pstrStr")
         val result  = route(app, request).value
 
-        status(result)        mustBe BAD_REQUEST
-        contentAsString(result) must include("PSTR must be 8 digits followed by 2 letters")
+        status(result) mustBe NOT_FOUND
       }
     }
 
-    // TODO: Test the Left(error) branch from SubmissionService
+    "must return 500 when service returns an unexpected Left(error)" in {
+      val mockSubmissionService: SubmissionService = mock[SubmissionService]
+      val pstrStr                                  = "24000001AA"
+      val pstr                                     = PstrNumber(pstrStr)
+
+      val unexpectedError: AllTransfersResponseError = mock[AllTransfersResponseError]
+
+      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
+        .thenReturn(Future.successful(Left(unexpectedError)))
+
+      val app: Application =
+        applicationBuilder()
+          .overrides(
+            bind[SubmissionService].toInstance(mockSubmissionService),
+            bind[Clock].toInstance(fixedClock)
+          )
+          .build()
+
+      running(app) {
+        val request = FakeRequest(GET, s"$endpoint/$pstrStr")
+        val result  = route(app, request).value
+
+        status(result) mustBe INTERNAL_SERVER_ERROR
+      }
+    }
   }
 }

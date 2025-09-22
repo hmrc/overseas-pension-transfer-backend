@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{AllTransfersResponse, NoTransfersFound}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -53,7 +53,10 @@ class GetAllTransfersController @Inject() (
                 Future.successful(Ok(Json.toJson(dto)))
               case None            => Future.successful(NotFound)
             }
-          case Left(_)                                     => ???
+          case Left(NoTransfersFound)                      =>
+            Future.successful(NotFound)
+          case Left(_)                                     =>
+            Future.successful(InternalServerError)
         }
       case Left(m)              => Future.successful(BadRequest(m))
     }
