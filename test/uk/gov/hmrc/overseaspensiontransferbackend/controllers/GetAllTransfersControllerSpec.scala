@@ -19,7 +19,7 @@ import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.Future
 
 class GetAllTransfersControllerSpec
-  extends AnyFreeSpec
+    extends AnyFreeSpec
     with Matchers
     with SpecBase {
 
