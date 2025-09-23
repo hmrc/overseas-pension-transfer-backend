@@ -41,6 +41,7 @@ class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
       memberFirstName   = None,
       memberSurname     = None,
       submissionDate    = None,
+      lastUpdated       = None,
       qtStatus          = None,
       pstrNumber        = Some(pstr)
     )

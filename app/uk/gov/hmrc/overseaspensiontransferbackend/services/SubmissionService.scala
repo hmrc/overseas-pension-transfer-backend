@@ -155,6 +155,8 @@ class SubmissionServiceImpl @Inject() (
             memberFirstName   = Some(r.firstName),
             memberSurname     = Some(r.lastName),
             submissionDate    = Some(r.qtDate),
+            // TODO: Add lastUpdated once the in progress transfers have been added, it should be the last time the in progress transfer was updated
+            lastUpdated       = None,
             qtStatus          = Some(QtStatus(r.qtStatus)),
             pstrNumber        = Some(pstrNumber)
           )

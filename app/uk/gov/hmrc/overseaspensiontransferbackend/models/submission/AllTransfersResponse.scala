@@ -37,6 +37,7 @@ case class AllTransfersItem(
     memberFirstName: Option[String],
     memberSurname: Option[String],
     submissionDate: Option[LocalDate],
+    lastUpdated: Option[LocalDate],
     qtStatus: Option[QtStatus],
     pstrNumber: Option[PstrNumber]
   )

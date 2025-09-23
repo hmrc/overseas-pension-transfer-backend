@@ -59,6 +59,7 @@ class GetAllTransfersControllerSpec
           memberFirstName   = None,
           memberSurname     = None,
           submissionDate    = None,
+          lastUpdated       = None,
           qtStatus          = None,
           pstrNumber        = None
         ))
