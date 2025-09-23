@@ -16,18 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-import java.time.Instant
-
-sealed trait Submitter
-
-object Submitter {
-  final case class PsaSubmitter(id: PsaId) extends Submitter
-  final case class PspSubmitter(id: PspId) extends Submitter
+trait TransferRetrievalError {
+  def msg: String
 }
 
-final case class NormalisedSubmission(
-    referenceId: String,
-    submitter: Submitter,
-    psaId: PsaId,
-    lastUpdated: Instant
-  )
+case class TransferNotFound(msg: String)                                     extends TransferRetrievalError
+case class TransferDeconstructionError(msg: String)                          extends TransferRetrievalError
+case class TransferIdentifierInvalid(msg: String)                            extends TransferRetrievalError
+case class TransferMissingQtDetails(msg: String = "Error QTDetails missing") extends TransferRetrievalError

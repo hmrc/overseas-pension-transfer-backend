@@ -16,25 +16,35 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.ApplicableExclusion
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
-class AmountTaxDeductedTransformer extends PathAwareTransformer {
+class ReasonNoOverseasTransferTransformer extends PathAwareTransformer with EnumTransformerStep {
 
-  private val jsonKey = "amountTaxDeducted"
+  private val jsonKey = "reasonNoOverseasTransfer"
 
   override def externalPath: JsPath = JsPath \ "transferDetails" \ jsonKey
 
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "taxableOverseasTransferDetails" \ jsonKey
+  override def internalPath: JsPath = externalPath
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: Seq[ApplicableExclusion] => JsArray = applicableExclusions =>
+      JsArray(
+        applicableExclusions.map {
+          applicableExclusion =>
+            JsString(applicableExclusion.downstreamValue)
+        }
+      )
+
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
+      constructEnum[Seq[ApplicableExclusion]](
+        externalPath,
+        enumConversion
       )
     )
 
@@ -44,11 +54,16 @@ class AmountTaxDeductedTransformer extends PathAwareTransformer {
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = internalPath,
-        to   = externalPath
+    val enumConversion: Seq[ApplicableExclusion] => JsArray = applicableExclusions =>
+      JsArray(
+        applicableExclusions.map {
+          applicableExclusion =>
+            JsString(applicableExclusion.toReasonNoOverseasTransferString)
+        }
       )
+
+    val steps: Seq[TransformerStep] = Seq(
+      constructEnum[Seq[ApplicableExclusion]](externalPath, enumConversion)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
