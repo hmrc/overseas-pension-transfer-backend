@@ -62,7 +62,7 @@ class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTrans
       JsArray(
         applicableExclusions.map {
           applicableExclusion =>
-            JsString(applicableExclusion.toString)
+            JsString(applicableExclusion.toApplicableExclusionString)
         }
       )
 

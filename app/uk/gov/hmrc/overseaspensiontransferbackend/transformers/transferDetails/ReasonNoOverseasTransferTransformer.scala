@@ -58,7 +58,7 @@ class ReasonNoOverseasTransferTransformer extends PathAwareTransformer with Enum
       JsArray(
         applicableExclusions.map {
           applicableExclusion =>
-            JsString(applicableExclusion.toString)
+            JsString(applicableExclusion.toReasonNoOverseasTransferString)
         }
       )
 

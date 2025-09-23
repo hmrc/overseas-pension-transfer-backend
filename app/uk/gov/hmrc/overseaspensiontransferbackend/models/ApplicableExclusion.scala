@@ -20,6 +20,8 @@ import play.api.libs.json._
 
 trait ApplicableExclusion {
   val downstreamValue: String
+  val toApplicableExclusionString: String
+  val toReasonNoOverseasTransferString: String
 }
 
 object ApplicableExclusion {
@@ -34,11 +36,11 @@ object ApplicableExclusion {
 
   implicit val reads: Reads[ApplicableExclusion] =
     Reads {
-      case JsString("occupational") | JsString("01")     => JsSuccess(Occupational)
-      case JsString("publicService") | JsString("02")    => JsSuccess(PublicService)
-      case JsString("internationalOrg") | JsString("03") => JsSuccess(InternationalOrg)
-      case JsString("resident") | JsString("04")         => JsSuccess(Resident)
-      case _                                             => JsError("Invalid value provided for ApplicableExclusion")
+      case JsString("occupational") | JsString("01") | JsString("individualIsEmployeeOccupational")         => JsSuccess(Occupational)
+      case JsString("publicService") | JsString("02") | JsString("individualIsEmployedPublicService")       => JsSuccess(PublicService)
+      case JsString("internationalOrg") | JsString("03") | JsString("individualIsEmployeeInternationalOrg") => JsSuccess(InternationalOrg)
+      case JsString("resident") | JsString("04") | JsString("individualAndQROPSResidentSameCountry")        => JsSuccess(Resident)
+      case _                                                                                                => JsError("Invalid value provided for ApplicableExclusion")
     }
 
   implicit val writes: Writes[ApplicableExclusion] =
@@ -51,21 +53,25 @@ object ApplicableExclusion {
 }
 
 case object Occupational extends ApplicableExclusion {
-  override def toString: String        = "occupational"
-  override val downstreamValue: String = "01"
+  override val toApplicableExclusionString: String      = "occupational"
+  override val toReasonNoOverseasTransferString: String = "individualIsEmployeeOccupational"
+  override val downstreamValue: String                  = "01"
 }
 
 case object PublicService extends ApplicableExclusion {
-  override def toString: String        = "publicService"
-  override val downstreamValue: String = "02"
+  override val toApplicableExclusionString: String      = "publicService"
+  override val toReasonNoOverseasTransferString: String = "individualIsEmployedPublicService"
+  override val downstreamValue: String                  = "02"
 }
 
 case object InternationalOrg extends ApplicableExclusion {
-  override def toString: String        = "internationalOrg"
-  override val downstreamValue: String = "03"
+  override val toApplicableExclusionString: String      = "internationalOrg"
+  override val toReasonNoOverseasTransferString: String = "individualIsEmployeeInternationalOrg"
+  override val downstreamValue: String                  = "03"
 }
 
 case object Resident extends ApplicableExclusion {
-  override def toString: String        = "resident"
-  override val downstreamValue: String = "04"
+  override val toApplicableExclusionString: String      = "resident"
+  override val toReasonNoOverseasTransferString: String = "individualAndQROPSResidentSameCountry"
+  override val downstreamValue: String                  = "04"
 }
