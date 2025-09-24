@@ -73,6 +73,6 @@ object LocalDecrypt extends App with Logging {
         originalJson + ("data" -> JsString(decrypted))
     }
 
-  // Explicit console output for local debugging
-  Console.out.println(Json.prettyPrint(enriched))
+  // Print decrypted JSON using logger
+  logger.info("\n" + Json.prettyPrint(enriched))
 }
