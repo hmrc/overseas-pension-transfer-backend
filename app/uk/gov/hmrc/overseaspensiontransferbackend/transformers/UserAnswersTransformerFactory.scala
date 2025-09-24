@@ -32,6 +32,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   PaymentTaxableOverseasTransformer,
   PropertyTransformer,
   QuotedSharesTransformer,
+  ReasonNoOverseasTransferTransformer,
   TransferMinusTaxTransformer,
   UnquotedSharesTransformer
 }
@@ -71,6 +72,7 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
   private def transferDetailsTransformers: Seq[Transformer] = Seq(
     new CashOnlyTransferTransformer,
     new PaymentTaxableOverseasTransformer,
+    new ReasonNoOverseasTransferTransformer,
     new ApplicableExclusionTransformer,
     new AmountTaxDeductedTransformer,
     new TransferMinusTaxTransformer,

@@ -18,17 +18,17 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.ApplicableExclusion
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
-class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTransformerStep {
+class ReasonNoOverseasTransferTransformer extends PathAwareTransformer with EnumTransformerStep {
 
-  private val jsonKey = "applicableExclusion"
+  private val jsonKey = "reasonNoOverseasTransfer"
 
   override def externalPath: JsPath = JsPath \ "transferDetails" \ jsonKey
 
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "taxableOverseasTransferDetails" \ jsonKey
+  override def internalPath: JsPath = externalPath
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
@@ -42,12 +42,8 @@ class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTrans
       )
 
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        externalPath,
-        internalPath
-      ),
       constructEnum[Seq[ApplicableExclusion]](
-        internalPath,
+        externalPath,
         enumConversion
       )
     )
@@ -62,16 +58,12 @@ class ApplicableExclusionTransformer extends PathAwareTransformer with EnumTrans
       JsArray(
         applicableExclusions.map {
           applicableExclusion =>
-            JsString(applicableExclusion.toApplicableExclusionString)
+            JsString(applicableExclusion.toReasonNoOverseasTransferString)
         }
       )
 
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[Seq[ApplicableExclusion]](internalPath, enumConversion),
-      moveStep(
-        internalPath,
-        externalPath
-      )
+      constructEnum[Seq[ApplicableExclusion]](externalPath, enumConversion)
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)

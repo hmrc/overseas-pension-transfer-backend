@@ -16,11 +16,16 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import play.api.Logging
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
 import javax.inject.{Inject, Singleton}
@@ -28,15 +33,21 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait SubmissionService {
   def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
+
+  def getTransfer(
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
 
 @Singleton
 class SubmissionServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
+    transformer: UserAnswersTransformer,
     connector: SubmissionConnector
   )(implicit ec: ExecutionContext
-  ) extends SubmissionService {
+  ) extends SubmissionService with Logging {
 
   override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId).flatMap {
@@ -77,14 +88,38 @@ class SubmissionServiceImpl @Inject() (
       SubmissionFailed
 
   }
-}
 
-@Singleton
-class DummySubmissionServiceImpl @Inject() (
-    implicit ec: ExecutionContext
-  ) extends SubmissionService {
+  def getTransfer(
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
+    transferType match {
+      case Right(GetSaveForLaterRecord(transferId, _, InProgress))                   =>
+        repository.get(transferId) map {
+          case Some(userAnswers) =>
+            deconstructSavedAnswers(userAnswers)
+          case None              =>
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $transferId from save-for-later")
+            Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
+        }
+      case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
+        connector.getTransfer(pstr, qtNumber, versionNumber) map {
+          case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
+          case Left(_)      =>
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.value} from HoD")
+            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
+        }
 
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] = {
-    Future.successful(Right(SubmissionResponse(QtNumber("QT123456"))))
+      case Left(transferRetrievalError) => Future.successful(Left(transferRetrievalError))
+    }
+  }
+
+  private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
+    transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
+      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, jsObject, savedUserAnswers.lastUpdated))
+      case Left(jsError)   =>
+        logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
+        Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
+    }
   }
 }

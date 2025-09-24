@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
-import play.api.libs.json._
-
-case class QtNumber(value: String) {
-  require(value.matches("QT[0-9]{6}"))
+trait TransferRetrievalError {
+  def msg: String
 }
 
-object QtNumber {
-  implicit val format: OFormat[QtNumber] = Json.format[QtNumber]
-}
+case class TransferNotFound(msg: String)                                     extends TransferRetrievalError
+case class TransferDeconstructionError(msg: String)                          extends TransferRetrievalError
+case class TransferIdentifierInvalid(msg: String)                            extends TransferRetrievalError
+case class TransferMissingQtDetails(msg: String = "Error QTDetails missing") extends TransferRetrievalError

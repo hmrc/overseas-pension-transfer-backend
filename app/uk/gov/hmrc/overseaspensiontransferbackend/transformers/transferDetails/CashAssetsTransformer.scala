@@ -53,7 +53,7 @@ class CashAssetsTransformer extends PathAwareTransformer with BooleanTransformer
     def setCashOnlyTransfer(): TransformerStep = json => {
       typeOfAssetsPath.asSingleJson(json).validate[TypeOfAssets] match {
         case JsSuccess(value, _) =>
-          if (value.getAssets.value.length == 1 && value.getAssets.value.contains(Cash.toString)) {
+          if (value.getAssets.value.length == 1 && value.getAssets.value.contains(JsString(Cash.toString))) {
             setPath(externalPath, JsBoolean(true), json)
           } else {
             setPath(externalPath, JsBoolean(false), json)

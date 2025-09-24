@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json._
+import play.api.libs.json.{Format, Json}
 
-case class QtNumber(value: String) {
-  require(value.matches("QT[0-9]{6}"))
+case class Pstr(value: String) {
+  require(value.matches("^([0-9]{8}[A-Z]{2})$"), "Incorrect PSTR format")
 }
 
-object QtNumber {
-  implicit val format: OFormat[QtNumber] = Json.format[QtNumber]
+object Pstr {
+  implicit val format: Format[Pstr] = Json.format[Pstr]
 }
