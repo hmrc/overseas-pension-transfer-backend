@@ -19,12 +19,15 @@ package uk.gov.hmrc.overseaspensiontransferbackend.utils
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 import com.typesafe.config.{ConfigFactory, ConfigValueType}
 import play.api.libs.json._
+import play.api.Logging
 import java.util.Base64
 
-object LocalDecrypt extends App {
+object LocalDecrypt extends App with Logging {
 
   if (args.length != 1) {
-    println("Usage: sbt \"runMain uk.gov.hmrc.overseaspensiontransferbackend.utils.LocalDecrypt <base64Json>\"")
+    logger.error(
+      "Usage: sbt \"runMain uk.gov.hmrc.overseaspensiontransferbackend.utils.LocalDecrypt <base64Json>\""
+    )
     sys.exit(1)
   }
 
@@ -47,7 +50,9 @@ object LocalDecrypt extends App {
   val masterKey = getOptionalString("mongodb.localMasterKey")
     .orElse(getOptionalString("encryption.masterKey"))
     .getOrElse(
-      throw new IllegalStateException("encryption master key not configured (mongodb.localMasterKey or encryption.masterKey)")
+      throw new IllegalStateException(
+        "encryption master key not configured (mongodb.localMasterKey or encryption.masterKey)"
+      )
     )
 
   val service = new EncryptionService(masterKey)
@@ -55,7 +60,7 @@ object LocalDecrypt extends App {
   val decrypted: String = service.decrypt(encrypted) match {
     case Right(value) => value
     case Left(err)    =>
-      println(s"Decryption failed: ${err.getMessage}")
+      logger.error(s"Decryption failed: ${err.getMessage}")
       sys.exit(1)
   }
 
@@ -68,5 +73,6 @@ object LocalDecrypt extends App {
         originalJson + ("data" -> JsString(decrypted))
     }
 
-  println(Json.prettyPrint(enriched))
+  // Explicit console output for local debugging
+  Console.out.println(Json.prettyPrint(enriched))
 }
