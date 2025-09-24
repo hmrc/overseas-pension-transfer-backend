@@ -17,10 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-
-import javax.xml.transform.TransformerFactory
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class AmountTaxDeductedTransformer extends PathAwareTransformer {
 

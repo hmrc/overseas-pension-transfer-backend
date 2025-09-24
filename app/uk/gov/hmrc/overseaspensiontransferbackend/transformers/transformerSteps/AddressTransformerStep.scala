@@ -17,7 +17,6 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 

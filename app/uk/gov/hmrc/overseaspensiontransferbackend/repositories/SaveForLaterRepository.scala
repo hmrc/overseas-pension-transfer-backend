@@ -17,16 +17,17 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 
 import org.apache.pekko.Done
-import org.mongodb.scala.SingleObservableFuture
-import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.bson._
+import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model._
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 import uk.gov.hmrc.play.http.logging.Mdc
+import play.api.Logging
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -36,64 +37,79 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SaveForLaterRepository @Inject() (
     mongoComponent: MongoComponent,
+    encryptionService: EncryptionService,
     appConfig: AppConfig,
     clock: Clock
   )(implicit ec: ExecutionContext
-  ) extends PlayMongoRepository[SavedUserAnswers](
-      collectionName = "saved-user-answers",
-      mongoComponent = mongoComponent,
-      domainFormat   = SavedUserAnswers.format,
-      indexes        = Seq(
-        IndexModel(
-          Indexes.ascending("lastUpdated"),
-          IndexOptions()
-            .name("lastUpdatedIdx")
-            .expireAfter(appConfig.cacheTtl, TimeUnit.DAYS)
-        )
-      )
-    ) {
+  ) extends Logging {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: String): Bson = Filters.equal("_id", id)
+  private val collection =
+    mongoComponent.database.getCollection[Document]("saved-user-answers")
 
-  private def byReferenceId(referenceId: String): Bson = Filters.equal("referenceId", referenceId)
+  initIndexes()
+
+  private def initIndexes(): Unit =
+    collection.createIndex(
+      Indexes.ascending("lastUpdated"),
+      IndexOptions().name("lastUpdatedIdx").expireAfter(appConfig.cacheTtl, TimeUnit.DAYS)
+    ).toFuture()
+      .recover { case ex => logger.warn("Failed to create TTL index on saved-user-answers", ex) }
+      .foreach(_ => logger.info("TTL index ensured on saved-user-answers"))
+
+  private def byReferenceId(referenceId: String) = Filters.equal("referenceId", referenceId)
+
+  private def toDocument(answers: SavedUserAnswers): Document = {
+    val dataJson  = Json.toJson(answers.data).toString()
+    val encrypted = encryptionService.encrypt(dataJson)
+    Document(
+      "referenceId" -> answers.referenceId,
+      "data"        -> encrypted,
+      "lastUpdated" -> BsonDateTime(answers.lastUpdated.toEpochMilli)
+    )
+  }
+
+  private def fromDocument(doc: Document): Option[SavedUserAnswers] =
+    for {
+      referenceId <- doc.get("referenceId").collect { case bs: BsonString => bs.getValue }
+      dataEnc     <- doc.get("data").collect { case bs: BsonString => bs.getValue }
+      lastUpdated <- doc.get("lastUpdated").collect { case d: BsonDateTime => Instant.ofEpochMilli(d.getValue) }
+      decrypted   <- encryptionService.decrypt(dataEnc).toOption
+    } yield {
+      val data = Json.parse(decrypted).as[AnswersData]
+      SavedUserAnswers(referenceId, data, lastUpdated)
+    }
+
+  // === Public API ===
 
   def keepAlive(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
-    collection
-      .updateOne(
-        filter = byReferenceId(referenceId),
-        update = Updates.set("lastUpdated", Instant.now(clock))
-      )
-      .toFuture()
-      .map(_ => true)
+    collection.updateOne(
+      filter = byReferenceId(referenceId),
+      update = Updates.set("lastUpdated", BsonDateTime(Instant.now(clock).toEpochMilli))
+    ).toFuture().map(_.wasAcknowledged())
   }
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
-    collection
-      .find(byReferenceId(referenceId))
+    collection.find(byReferenceId(referenceId))
       .headOption()
+      .map(_.flatMap(fromDocument))
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
-    collection
-      .replaceOne(
-        filter      = byReferenceId(answers.referenceId),
-        replacement = answers,
-        options     = ReplaceOptions().upsert(true)
-      )
-      .toFuture()
-      .map(_.wasAcknowledged())
+    collection.replaceOne(
+      filter      = byReferenceId(answers.referenceId),
+      replacement = toDocument(answers),
+      options     = ReplaceOptions().upsert(true)
+    ).toFuture().map(_.wasAcknowledged())
   }
 
   def clear(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
-    collection
-      .deleteOne(byReferenceId(referenceId))
-      .toFuture()
-      .map(_ => true)
+    collection.deleteOne(byReferenceId(referenceId)).toFuture().map(_.wasAcknowledged())
   }
 
-  def clear: Future[Done] = Mdc.preservingMdc {
-    collection.drop().toFuture().map(_ => Done)
+  /** Safely delete all documents, keeping the collection and indexes */
+  def clearAll(): Future[Done] = Mdc.preservingMdc {
+    collection.deleteMany(Document()).toFuture().map(_ => Done)
   }
 }
