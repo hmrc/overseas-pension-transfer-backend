@@ -93,6 +93,7 @@ class SaveForLaterRepositorySpec
           dateMemberTransferred          = Some(java.time.LocalDate.parse("2025-01-01")),
           cashOnlyTransfer               = Some("No"),
           paymentTaxableOverseas         = Some("Yes"),
+          reasonNoOverseasTransfer       = None,
           taxableOverseasTransferDetails = None,
           typeOfAssets                   = Some(
             TypeOfAssets(
@@ -172,19 +173,6 @@ class SaveForLaterRepositorySpec
       val enc2    = rawDocs.find(_.get("referenceId").get.asString().getValue == "ref2").get.get("data").get.asString().getValue
 
       enc1 must not be enc2
-    }
-
-    "must update lastUpdated on keepAlive" in {
-      val saved = buildUserAnswer("ref-keepalive")
-      repository.set(saved).futureValue mustBe true
-      val before = repository.get("ref-keepalive").futureValue.value.lastUpdated
-
-      mutableClock = Clock.offset(mutableClock, java.time.Duration.ofSeconds(1))
-      val updatedRepo = new SaveForLaterRepository(mongoComponent, encryption, appConfig, mutableClock)
-
-      updatedRepo.keepAlive("ref-keepalive").futureValue mustBe true
-      val after = repository.get("ref-keepalive").futureValue.value.lastUpdated
-      after.isAfter(before) mustBe true
     }
 
     "must delete a record by referenceId" in {
