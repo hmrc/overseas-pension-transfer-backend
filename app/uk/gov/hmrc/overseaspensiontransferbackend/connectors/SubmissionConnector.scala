@@ -25,12 +25,16 @@ import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
+import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Pstr
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
-import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,6 +48,14 @@ trait SubmissionConnector {
       versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]]
+
+  def getAllTransfers(
+      pstrNumber: PstrNumber,
+      fromDate: LocalDate,
+      toDate: LocalDate,
+      qtRef: Option[QtNumber]
+    )(implicit hs: HeaderCarrier
+    ): Future[Either[DownstreamError, DownstreamAllTransfersData]]
 }
 
 @Singleton
@@ -55,7 +67,7 @@ class SubmissionConnectorImpl @Inject() (
 
   override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
-    val url = url"${appConfig.etmpBaseUrl}/RESTAdapter/pods/reports/qrops-transfer"
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val payload: JsValue = Json.toJson(validated.saved.data)
 
@@ -116,5 +128,46 @@ class SubmissionConnectorImpl @Inject() (
       .transform(_.addQueryStringParameters(queryStringParams: _*))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
+  }
+
+  override def getAllTransfers(
+      pstrNumber: PstrNumber,
+      fromDate: LocalDate,
+      toDate: LocalDate,
+      qtRef: Option[QtNumber]
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[DownstreamError, DownstreamAllTransfersData]] = {
+
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
+
+    val correlationId = hc.requestId.fold {
+      logger.error("[SubmissionConnector][getAllTransfers]: Request is missing X-Request-ID header")
+      throw new Exception("Header X-Request-ID missing")
+    }(_.value)
+
+    val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
+
+    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    val params =
+      Seq(
+        "dateFrom" -> fromDate.format(formatter),
+        "dateTo"   -> toDate.format(formatter),
+        "pstr"     -> pstrNumber.normalised
+      ) ++ qtRef.map(qt => "qtRef" -> qt.value)
+
+    httpClientV2
+      .get(url)
+      .transform(_.addQueryStringParameters(params: _*))
+      .setHeader(
+        "correlationid"         -> correlationId,
+        "X-Message-Type"        -> "GetQTReportOverview",
+        "X-Originating-System"  -> "MDTP",
+        "X-Receipt-Date"        -> receiptDate,
+        "X-Regime-Type"         -> "PODS",
+        "X-Transmitting-System" -> "HIP"
+      )
+      .execute[HttpResponse]
+      .map(resp => handleResponse[DownstreamAllTransfersData](resp))
   }
 }
