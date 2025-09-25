@@ -155,19 +155,14 @@ class SubmissionServiceImpl @Inject() (
             pstrNumber        = Some(pstrNumber)
           )
         }
+        Right(AllTransfersResponse(items))
 
-        // defensively account for if api sends an empty list instead of a 404
-        if (items.nonEmpty) {
-          Right(AllTransfersResponse(Some(items)))
-        } else {
-          Left(NoTransfersFound)
-        }
-      case Left(err)         =>
+      case Left(err) =>
         logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${err.log}")
 
         err match {
-          case NotFound => Left(NoTransfersFound)
-          case _        => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
+          case NoTransfersFound => Left(NoTransfersFoundResponse)
+          case _                => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
         }
     }
   }
