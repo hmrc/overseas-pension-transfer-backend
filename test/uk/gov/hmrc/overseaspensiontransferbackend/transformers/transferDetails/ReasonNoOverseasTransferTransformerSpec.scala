@@ -26,7 +26,7 @@ class ReasonNoOverseasTransferTransformerSpec extends AnyFreeSpec with Matchers 
 
   "ReasonNoOverseasTransferTransformerSpec" - {
     "must transform transferDetails.reasonNoOverseasTransfer" in {
-      val inputJson = Json.obj("transferDetails" -> Json.obj("reasonNoOverseasTransfer" -> Seq("publicService")))
+      val inputJson = Json.obj("transferDetails" -> Json.obj("reasonNoOverseasTransfer" -> Seq("individualIsEmployedPublicService")))
       val expected  = Json.obj("transferDetails" -> Json.obj("reasonNoOverseasTransfer" -> Seq("02")))
 
       transformer.construct(inputJson) mustBe Right(expected)
@@ -34,7 +34,9 @@ class ReasonNoOverseasTransferTransformerSpec extends AnyFreeSpec with Matchers 
 
     "must move transferDetails.taxableOverseasTransferDetails.applicableExclusion to transferDetails.applicableExclusion" in {
       val inputJson = Json.obj("transferDetails" -> Json.obj("reasonNoOverseasTransfer" -> Seq("01", "04")))
-      val expected  = Json.obj("transferDetails" -> Json.obj("reasonNoOverseasTransfer" -> Seq("occupational", "resident")))
+      val expected  = Json.obj("transferDetails" -> Json.obj(
+        "reasonNoOverseasTransfer" -> Seq("individualIsEmployeeOccupational", "individualAndQROPSResidentSameCountry")
+      ))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }

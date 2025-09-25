@@ -41,7 +41,7 @@ object AnswersData {
   // A custom reads with readNullable will need to be written for every key we save to mongo.
   // This is due to the way that play handles nullable values.
   implicit val reads: Reads[AnswersData] = (
-    (__ \ "qtDetails").readNullable[ReportDetails] and
+    (__ \ "reportDetails").readNullable[ReportDetails] and
       (__ \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "transferDetails").readNullable[TransferDetails]
@@ -58,7 +58,7 @@ object SavedUserAnswers {
     (
       (__ \ "referenceId").read[String] and
         (__ \ "data").read[AnswersData] and
-        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(SavedUserAnswers.apply _)
   }
 
@@ -66,7 +66,7 @@ object SavedUserAnswers {
     (
       (__ \ "referenceId").write[String] and
         (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
     )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 

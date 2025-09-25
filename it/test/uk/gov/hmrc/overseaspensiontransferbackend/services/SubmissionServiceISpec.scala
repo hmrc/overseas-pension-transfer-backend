@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
-import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR, UNPROCESSABLE_ENTITY}
+import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR}
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json

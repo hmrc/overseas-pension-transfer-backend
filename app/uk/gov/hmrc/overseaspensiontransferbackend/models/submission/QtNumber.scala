@@ -18,7 +18,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
 import play.api.libs.json._
 
-case class QtNumber(value: String)
+case class QtNumber(value: String) {
+  require(value.matches("QT[0-9]{6}"))
+}
 
 object QtNumber {
   implicit val format: OFormat[QtNumber] = Json.format[QtNumber]

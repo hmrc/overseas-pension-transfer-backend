@@ -21,10 +21,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
@@ -38,12 +38,7 @@ trait SubmissionService {
   def getAllTransfers(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
 
   def getTransfer(
-      referenceId: String,
-      pstr: String,
-      qtStatus: QtStatus,
-      fbNumber: Option[String],
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
 }
@@ -99,28 +94,27 @@ class SubmissionServiceImpl @Inject() (
   }
 
   def getTransfer(
-      referenceId: String,
-      pstr: String,
-      qtStatus: QtStatus,
-      fbNumber: Option[String],
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
     )(implicit hc: HeaderCarrier
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
-    qtStatus match {
-      case InProgress           => repository.get(referenceId) map {
+    transferType match {
+      case Right(GetSaveForLaterRecord(transferId, _, InProgress))                   =>
+        repository.get(transferId) map {
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
           case None              =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $referenceId from save-for-later")
-            Left(TransferNotFound(s"Unable to find transferId: $referenceId from save-for-later"))
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $transferId from save-for-later")
+            Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
         }
-      case Submitted | Compiled => connector.getTransfer(pstr, qtNumber, versionNumber) map {
+      case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
+        connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
           case Left(err)    =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: ${qtNumber.get} from HoD: ${err.log}")
-            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.get} from HoD"))
+            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
+
+      case Left(transferRetrievalError) => Future.successful(Left(transferRetrievalError))
     }
   }
 

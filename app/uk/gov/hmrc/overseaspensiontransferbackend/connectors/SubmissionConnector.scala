@@ -28,6 +28,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Pstr
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.format.DateTimeFormatter
@@ -40,9 +43,9 @@ trait SubmissionConnector {
   def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
-      pstr: String,
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      pstr: Pstr,
+      qtNumber: QtNumber,
+      versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]]
 
@@ -94,22 +97,23 @@ class SubmissionConnectorImpl @Inject() (
   }
 
   override def getTransfer(
-      pstr: String,
-      qtNumber: Option[String],
-      versionNumber: Option[String]
+      pstr: Pstr,
+      qtNumber: QtNumber,
+      versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamTransferData]] = {
 
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=$pstr&qtNumber=${qtNumber.get}&versionNumber=${versionNumber.get}"
+    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
-    val correlationId = hc.requestId.fold {
+    val correlationId     = hc.requestId.fold {
       logger.error("[SubmissionConnector][getTransfer]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
     } {
       requestId =>
         requestId.value
     }
-    val receiptDate   = Instant.now().toString
+    val receiptDate       = Instant.now().toString
+    val queryStringParams = Seq("pstr" -> pstr.value, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
 
     httpClientV2
       .get(url)
@@ -121,6 +125,7 @@ class SubmissionConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
+      .transform(_.addQueryStringParameters(queryStringParams: _*))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }

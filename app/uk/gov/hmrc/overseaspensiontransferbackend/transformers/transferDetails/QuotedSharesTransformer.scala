@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsArray, JsError, JsObject, JsPath, Json, Reads}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{QuotedShares, UnquotedShares}
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QuotedShares
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerStep {
 

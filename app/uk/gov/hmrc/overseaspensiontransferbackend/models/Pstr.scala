@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import java.time.Instant
+import play.api.libs.json.{Format, Json}
 
-sealed trait Submitter
-
-object Submitter {
-  final case class PsaSubmitter(id: PsaId) extends Submitter
-  final case class PspSubmitter(id: PspId) extends Submitter
+case class Pstr(value: String) {
+  require(value.matches("^([0-9]{8}[A-Z]{2})$"), "Incorrect PSTR format")
 }
 
-final case class NormalisedSubmission(
-    referenceId: String,
-    submitter: Submitter,
-    psaId: PsaId,
-    lastUpdated: Instant
-  )
+object Pstr {
+  implicit val format: Format[Pstr] = Json.format[Pstr]
+}
