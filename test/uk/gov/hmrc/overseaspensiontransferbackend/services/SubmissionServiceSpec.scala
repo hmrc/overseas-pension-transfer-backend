@@ -135,7 +135,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     "getTransfer" - {
       "return Right UserAnswersDTO" - {
         "searching for GetSaveForLaterRecord" in {
-          val userAnswers = UserAnswersDTO(testId, Json.obj(), now)
+          val userAnswers = UserAnswersDTO(testId, Pstr("12345678AB"), Json.obj(), now)
 
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
@@ -154,7 +154,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
               None,
               None
             )
-            val userAnswers = UserAnswersDTO("QT123456", Json.obj(), now)
+            val userAnswers = UserAnswersDTO("QT123456", Pstr("12345678AB"), Json.obj(), now)
 
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))

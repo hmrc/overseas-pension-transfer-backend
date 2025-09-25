@@ -23,5 +23,6 @@ case class Pstr(value: String) {
 }
 
 object Pstr {
-  implicit val format: Format[Pstr] = Json.format[Pstr]
+
+  implicit val format: Format[Pstr] = Json.valueFormat[Pstr]
 }

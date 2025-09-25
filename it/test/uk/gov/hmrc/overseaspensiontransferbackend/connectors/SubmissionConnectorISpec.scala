@@ -39,8 +39,9 @@ class SubmissionConnectorISpec extends BaseISpec {
     )
 
   private val now = Instant.now()
+  private val pstr = Pstr("12345678AB")
   private val answersData = AnswersData(None, None, None, None)
-  private val savedUserAnswers = SavedUserAnswers("", answersData, now)
+  private val savedUserAnswers = SavedUserAnswers("", pstr, answersData, now)
 
   private val connector = app.injector.instanceOf[SubmissionConnector]
 

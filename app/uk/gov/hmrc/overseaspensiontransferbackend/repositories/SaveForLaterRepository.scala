@@ -25,7 +25,7 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, SavedUserAnswers}
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -54,20 +54,25 @@ class SaveForLaterRepository @Inject() (
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: String): Bson = Filters.equal("_id", id)
-
-  private def byReferenceId(referenceId: String): Bson = Filters.equal("referenceId", referenceId)
+  private def byId(id: String): Bson   = Filters.equal("_id", id)
+  private def byPstr(pstr: Pstr): Bson = Filters.equal("pstr", pstr.value)
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
     collection
-      .find(byReferenceId(referenceId))
+      .find(byId(referenceId))
       .headOption()
+  }
+
+  def getRecords(pstr: Pstr): Future[Seq[SavedUserAnswers]] = Mdc.preservingMdc {
+    collection
+      .find(byPstr(pstr))
+      .toFuture()
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
     collection
       .replaceOne(
-        filter      = byReferenceId(answers.referenceId),
+        filter      = byId(answers.referenceId),
         replacement = answers,
         options     = ReplaceOptions().upsert(true)
       )
@@ -77,7 +82,7 @@ class SaveForLaterRepository @Inject() (
 
   def clear(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
     collection
-      .deleteOne(byReferenceId(referenceId))
+      .deleteOne(byId(referenceId))
       .toFuture()
       .map(_ => true)
   }

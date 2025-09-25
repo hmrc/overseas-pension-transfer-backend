@@ -55,7 +55,7 @@ class SaveForLaterServiceImpl @Inject() (
       case Some(saved) =>
         deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
           case Right(deconstructed) =>
-            Right(UserAnswersDTO(saved.referenceId, deconstructed, saved.lastUpdated))
+            Right(UserAnswersDTO(saved.referenceId, saved.pstr, deconstructed, saved.lastUpdated))
 
           case Left(error) =>
             Left(error)
@@ -77,7 +77,7 @@ class SaveForLaterServiceImpl @Inject() (
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              val saved = SavedUserAnswers(dto.referenceId, validated, dto.lastUpdated)
+              val saved = SavedUserAnswers(dto.referenceId, dto.pstr, validated, dto.lastUpdated)
               repository.set(saved).map {
                 case true  => Right(())
                 case false => Left(SaveForLaterError.SaveFailed)

@@ -20,7 +20,7 @@ import org.apache.pekko.Done
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Pstr, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.DeleteFailed
@@ -46,11 +46,12 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val validSaved = SavedUserAnswers(
     referenceId = testId,
+    pstr        = pstr,
     data        = AnswersData(None, Some(TransferringMember(None)), None, None),
     lastUpdated = now
   )
 
-  private val validDTO = UserAnswersDTO(testId, validData, now)
+  private val validDTO = UserAnswersDTO(testId, pstr, validData, now)
 
   "SaveForLaterServiceSpec" - {
 

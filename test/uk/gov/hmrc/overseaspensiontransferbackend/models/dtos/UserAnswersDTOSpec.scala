@@ -18,8 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-
 import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Pstr
 
 import java.time.Instant
 
@@ -30,6 +30,7 @@ class UserAnswersDTOSpec extends AnyFreeSpec with Matchers {
     "must serialize and deserialize correctly" in {
       val dto = UserAnswersDTO(
         referenceId = "user-123",
+        pstr        = Pstr("12345678AB"),
         data        = Json.obj("foo" -> "bar"),
         lastUpdated = Instant.parse("2025-04-11T12:00:00Z")
       )
@@ -49,7 +50,7 @@ class UserAnswersDTOSpec extends AnyFreeSpec with Matchers {
     }
 
     "must round-trip with an empty object for data" in {
-      val dto    = UserAnswersDTO("abc", Json.obj(), Instant.now)
+      val dto    = UserAnswersDTO("abc", Pstr("12345678AB"), Json.obj(), Instant.now)
       val result = Json.toJson(dto).validate[UserAnswersDTO]
 
       result mustBe JsSuccess(dto)

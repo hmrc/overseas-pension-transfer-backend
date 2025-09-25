@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Pstr, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 class SaveForLaterServiceISpec extends BaseISpec {
@@ -28,6 +28,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
   private lazy val id  = freshId()
   private lazy val now = frozenNow()
+  private val pstr = Pstr("12345678AB")
 
   "SaveForLaterService" - {
 
@@ -35,20 +36,21 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
 
-      val dto = withSavedDto(id, rawJson, now)
+      val dto = withSavedDto(id, pstr, rawJson, now)
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
       val result = await(repository.get(id)).value
       result.referenceId mustBe id
+      result.pstr mustBe pstr
       result.lastUpdated mustBe now
 
-      result mustBe SavedUserAnswers(id, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
+      result mustBe SavedUserAnswers(id, pstr, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
 
     }
 
     "retrieve and transform full data" in {
-      val savedAnswers = SavedUserAnswers(id, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
+      val savedAnswers = SavedUserAnswers(id, pstr, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
 
       await(repository.set(savedAnswers)) mustBe true
 
@@ -65,7 +67,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
     "save user answers into internal format and return as external format" in {
       val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
 
-      val dto = withSavedDto(id, rawJson, now)
+      val dto = withSavedDto(id, pstr, rawJson, now)
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
@@ -75,6 +77,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
         case Right(dto) =>
 
           dto.referenceId mustBe id
+          dto.pstr mustBe pstr
           dto.lastUpdated mustBe now
           dto.data mustEqual UserAnswersTestData.fullUserAnswersExternalJson
         case Left(err) =>
@@ -83,8 +86,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
     }
 
     "incrementally add new data while maintaining previously added data" in {
-      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))               mustBe Right(())
-      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.qropsDetailsExternalJson, now.plusSeconds(1)))) mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, pstr, UserAnswersTestData.memberDetailsExternalJson, now)))               mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, pstr, UserAnswersTestData.qropsDetailsExternalJson, now.plusSeconds(1)))) mustBe Right(())
 
       val result = await(service.getAnswers(id))
 
@@ -108,8 +111,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
     "merge and overwrite specific fields without affecting others" in {
 
-      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalJson, now)))                      mustBe Right(())
-      await(service.saveAnswer(withSavedDto(id, UserAnswersTestData.memberDetailsExternalUpdateJson, now.plusSeconds(1)))) mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, pstr, UserAnswersTestData.memberDetailsExternalJson, now)))                      mustBe Right(())
+      await(service.saveAnswer(withSavedDto(id, pstr, UserAnswersTestData.memberDetailsExternalUpdateJson, now.plusSeconds(1)))) mustBe Right(())
 
       val result = await(service.getAnswers(id))
 
@@ -139,36 +142,38 @@ class SaveForLaterServiceISpec extends BaseISpec {
       val rawJson = UserAnswersTestData.memberDetailsExternalJson
         .deepMerge(UserAnswersTestData.qropsDetailsEstablishedExternalJson)
 
-      val dto = withSavedDto(id, rawJson, now)
+      val dto = withSavedDto(id, pstr, rawJson, now)
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
       val result = await(repository.get(id)).value
       result.referenceId mustBe id
+      result.pstr mustBe pstr
       result.lastUpdated mustBe now
 
       val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
         .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
 
-      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+      result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], now)
     }
 
     "transform and persist qropsEstablishedOther correctly" in {
       val rawJson = UserAnswersTestData.memberDetailsExternalJson
         .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
 
-      val dto = withSavedDto(id, rawJson, now)
+      val dto = withSavedDto(id, pstr, rawJson, now)
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
       val result = await(repository.get(id)).value
       result.referenceId mustBe id
+      result.pstr mustBe pstr
       result.lastUpdated mustBe now
 
       val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
         .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
 
-      result mustBe SavedUserAnswers(id, expectedInternal.as[AnswersData], now)
+      result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], now)
     }
 
   }

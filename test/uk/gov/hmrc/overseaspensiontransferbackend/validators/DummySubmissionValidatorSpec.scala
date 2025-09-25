@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
 import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, SavedUserAnswers}
 
 class DummySubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
 
@@ -27,6 +27,7 @@ class DummySubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     "must always return Right(ValidatedSubmission) containing the given SavedUserAnswers" in {
       val saved = SavedUserAnswers(
         referenceId = "ref-123",
+        pstr        = Pstr("12345678AB"),
         data        = sampleAnswersData,
         lastUpdated = now
       )

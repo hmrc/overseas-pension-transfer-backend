@@ -24,6 +24,7 @@ import java.time.Instant
 
 final case class SavedUserAnswers(
     referenceId: String,
+    pstr: Pstr,
     data: AnswersData,
     lastUpdated: Instant
   )
@@ -56,7 +57,8 @@ object SavedUserAnswers {
 
   val reads: Reads[SavedUserAnswers] = {
     (
-      (__ \ "referenceId").read[String] and
+      (__ \ "_id").read[String] and
+        (__ \ "pstr").read[Pstr] and
         (__ \ "data").read[AnswersData] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(SavedUserAnswers.apply _)
@@ -64,10 +66,11 @@ object SavedUserAnswers {
 
   val writes: OWrites[SavedUserAnswers] = {
     (
-      (__ \ "referenceId").write[String] and
+      (__ \ "_id").write[String] and
+        (__ \ "pstr").write[Pstr] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
+    )(ua => (ua.referenceId, ua.pstr, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 
   implicit val format: OFormat[SavedUserAnswers] = OFormat(reads, writes)
