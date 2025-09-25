@@ -17,26 +17,30 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{QtNumber, TransferIdentifierInvalid, TransferRetrievalError}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, Pstr, QtStatus, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
 import scala.util.{Success, Try}
 
 sealed trait GetSpecificTransferHandler {
-  def pstr: Pstr
+  def pstr: PstrNumber
   def qtStatus: QtStatus
 }
 
 object GetSpecificTransferHandler {
 
-  def apply(referenceId: String, pstr: Pstr, qtStatus: QtStatus, versionNumber: Option[String]): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
+  def apply(
+             referenceId: String,
+             pstr: PstrNumber,
+             qtStatus: QtStatus,
+             versionNumber: Option[String]
+           ): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
     (qtStatus, versionNumber) match {
       case (InProgress, None)                    => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
       case (Submitted | Compiled, Some(version)) =>
         Try(QtNumber(referenceId)) match {
           case Success(qtNumber) => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
-          case _                 => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
+          case _ => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
         }
-
       case _ =>
         Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
     }
@@ -45,13 +49,13 @@ object GetSpecificTransferHandler {
 
 final case class GetSaveForLaterRecord(
     referenceId: String,
-    pstr: Pstr,
+    pstr: PstrNumber,
     qtStatus: QtStatus
   ) extends GetSpecificTransferHandler
 
 final case class GetEtmpRecord(
     referenceId: QtNumber,
-    pstr: Pstr,
+    pstr: PstrNumber,
     qtStatus: QtStatus,
     versionNumber: String
   ) extends GetSpecificTransferHandler

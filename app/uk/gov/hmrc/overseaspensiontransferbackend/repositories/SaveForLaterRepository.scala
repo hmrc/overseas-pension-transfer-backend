@@ -25,7 +25,8 @@ import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, SavedUserAnswers}
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -55,7 +56,7 @@ class SaveForLaterRepository @Inject() (
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   private def byId(id: String): Bson   = Filters.equal("_id", id)
-  private def byPstr(pstr: Pstr): Bson = Filters.equal("pstr", pstr.value)
+  private def byPstr(pstr: PstrNumber): Bson = Filters.equal("pstr", pstr.value)
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
     collection
@@ -63,10 +64,13 @@ class SaveForLaterRepository @Inject() (
       .headOption()
   }
 
-  def getRecords(pstr: Pstr): Future[Seq[SavedUserAnswers]] = Mdc.preservingMdc {
+  def getRecords(pstr: PstrNumber): Future[Seq[AllTransfersItem]] = Mdc.preservingMdc {
     collection
       .find(byPstr(pstr))
       .toFuture()
+      .map(
+        _.map(_.toAllTransfersItem)
+      )
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {

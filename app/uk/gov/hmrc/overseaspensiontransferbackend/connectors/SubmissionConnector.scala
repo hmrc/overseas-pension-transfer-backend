@@ -43,7 +43,7 @@ trait SubmissionConnector {
   def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
-      pstr: Pstr,
+      pstr: PstrNumber,
       qtNumber: QtNumber,
       versionNumber: String
     )(implicit hc: HeaderCarrier
@@ -97,7 +97,7 @@ class SubmissionConnectorImpl @Inject() (
   }
 
   override def getTransfer(
-      pstr: Pstr,
+      pstr: PstrNumber,
       qtNumber: QtNumber,
       versionNumber: String
     )(implicit hc: HeaderCarrier
