@@ -27,9 +27,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFai
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
-import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, LocalDate}
 
 class SubmissionConnectorISpec extends BaseISpec {
 
@@ -56,7 +58,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       connector.submit(ValidatedSubmission(savedUserAnswers))
 
-      verify(postRequestedFor(urlEqualTo("/RESTAdapter/pods/reports/qrops-transfer"))
+      verify(postRequestedFor(urlEqualTo("/etmp/RESTAdapter/pods/reports/qrops-transfer"))
         .withHeader("correlationid", equalTo("id"))
       )
     }
@@ -72,7 +74,7 @@ class SubmissionConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
@@ -93,7 +95,7 @@ class SubmissionConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
@@ -111,7 +113,7 @@ class SubmissionConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
@@ -132,7 +134,7 @@ class SubmissionConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
@@ -154,7 +156,7 @@ class SubmissionConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubPost("/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
+      stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
       val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
 
@@ -279,6 +281,220 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
 
+      result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
+    }
+  }
+
+  "getAllTransfers" - {
+
+    val pstr         = PstrNumber("12345678AB")
+    val fromDate     = LocalDate.of(2025, 9, 22)
+    val toDate       = fromDate.minusYears(10)
+    val formatter    = DateTimeFormatter.ISO_LOCAL_DATE
+    val basePath     = "/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
+
+    def successBody(now: Instant): String =
+      Json.obj(
+        "success" -> Json.obj(
+          "qropsTransferOverview" -> Json.arr(
+            Json.obj(
+              "fbNumber"                   -> "123456000023",
+              "qtReference"                -> "QT564321",
+              "qtVersion"                  -> "001",
+              "qtStatus"                   -> "Compiled",
+              "qtDigitalStatus"            -> "Complied",
+              "nino"                       -> "AA000000A",
+              "firstName"                  -> "David",
+              "lastName"                   -> "Warne",
+              "qtDate"                     -> "2025-03-14",
+              "qropsReference"             -> "QROPS654321",
+              "submissionCompilationDate"  -> now.toString
+            )
+          )
+        )
+      ).toString()
+
+    "throw when X-Request-ID is missing" in {
+      intercept[Exception] {
+        await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+      }.getMessage mustBe "Header X-Request-ID missing"
+    }
+
+    "send correlationId header and required query params (without qtRef)" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("corr-id")))
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
+      )
+
+      await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+
+      verify(
+        getRequestedFor(urlPathEqualTo(basePath))
+          .withHeader("correlationid", equalTo("corr-id"))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+      )
+    }
+
+    "include qtRef when provided" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val qt = QtNumber("QT123456")
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .withQueryParam("qtRef", equalTo(qt.value))
+          .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
+      )
+
+      await(connector.getAllTransfers(pstr, fromDate, toDate, Some(qt)))
+
+      verify(
+        getRequestedFor(urlPathEqualTo(basePath))
+          .withQueryParam("qtRef", equalTo(qt.value))
+      )
+    }
+
+    "return Right(DownstreamAllTransfersData) on 200 with valid payload" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+
+      result.isRight mustBe true
+      val data = result.toOption.get
+      data.nonEmpty mustBe true
+      data.success.qropsTransferOverview.head.qtReference mustBe "QT564321"
+    }
+
+    "gracefully handle 200 with empty payload (defaults to empty list)" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+
+      val emptyPayload = Json.obj("success" -> Json.obj()).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(OK).withBody(emptyPayload))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+
+      result.isRight mustBe true
+      val data = result.toOption.get
+      data.nonEmpty mustBe false
+      data.success.qropsTransferOverview mustBe Nil
+    }
+
+    "map 400 HIP error to HipBadRequest" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val body = Json.obj(
+        "origin" -> "HIP",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(BAD_REQUEST).withBody(body))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+      result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
+    }
+
+    "map 422 to EtmpValidationError" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val body = Json.obj(
+        "errors" -> Json.obj(
+          "processingDate" -> now.toString,
+          "code" -> "003",
+          "text" -> "Request could not be processed"
+        )
+      ).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(UNPROCESSABLE_ENTITY).withBody(body))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+      result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
+    }
+
+    "map 500 to HipBadRequest (HoD origin example)" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val body = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "error" -> Json.obj(
+            "code" -> "code",
+            "message" -> "There's been an error",
+            "logID" -> "logID"
+          )
+        )
+      ).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR).withBody(body))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+      result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
+    }
+
+    "map 503 failures to HipOriginFailures" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val body = Json.obj(
+        "origin" -> "HoD",
+        "response" -> Json.obj(
+          "failures" -> Seq(
+            Json.obj("type" -> "type", "reason" -> "reason")
+          )
+        )
+      ).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(SERVICE_UNAVAILABLE).withBody(body))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }
   }
