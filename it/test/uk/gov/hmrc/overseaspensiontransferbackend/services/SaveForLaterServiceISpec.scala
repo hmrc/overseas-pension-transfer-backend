@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Pstr, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 class SaveForLaterServiceISpec extends BaseISpec {
@@ -28,7 +28,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
   private lazy val id  = freshId()
   private lazy val now = frozenNow()
-  private val pstr = Pstr("12345678AB")
+  private val pstr = PstrNumber("12345678AB")
 
   "SaveForLaterService" - {
 

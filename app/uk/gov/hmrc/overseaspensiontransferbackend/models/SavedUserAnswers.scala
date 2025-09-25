@@ -29,6 +29,7 @@ final case class SavedUserAnswers(
     data: AnswersData,
     lastUpdated: Instant
   ) {
+
   def toAllTransfersItem: AllTransfersItem =
     AllTransfersItem(
       Some(referenceId),
@@ -50,7 +51,7 @@ final case class AnswersData(
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
     transferDetails: Option[TransferDetails]
   ) {
-  def nino: Option[String] = transferringMember.flatMap(_.memberDetails.flatMap(_.nino))
+  def nino: Option[String]           = transferringMember.flatMap(_.memberDetails.flatMap(_.nino))
   def memberForeName: Option[String] = transferringMember.flatMap(_.memberDetails.flatMap(_.foreName))
   def memberLastName: Option[String] = transferringMember.flatMap(_.memberDetails.flatMap(_.lastName))
 }

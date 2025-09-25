@@ -55,7 +55,7 @@ class SaveForLaterRepository @Inject() (
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byId(id: String): Bson   = Filters.equal("_id", id)
+  private def byId(id: String): Bson         = Filters.equal("_id", id)
   private def byPstr(pstr: PstrNumber): Bson = Filters.equal("pstr", pstr.value)
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {

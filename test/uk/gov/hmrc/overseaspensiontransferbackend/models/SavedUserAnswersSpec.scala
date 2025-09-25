@@ -29,7 +29,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
     "must round trip to and from JSON" in {
       val original = SavedUserAnswers(
         referenceId = "ref-123",
-        pstr        = Pstr("12345678AB"),
+        pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
           reportDetails       = None,
           transferringMember  = Some(TransferringMember(None)),
@@ -53,7 +53,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferDetails     = None
       )
 
-      val obj = SavedUserAnswers("ref-456", Pstr("12345678AB"), data, Instant.parse("2025-01-01T10:00:00Z"))
+      val obj = SavedUserAnswers("ref-456", PstrNumber("12345678AB"), data, Instant.parse("2025-01-01T10:00:00Z"))
 
       val json = Json.toJson(obj)
 

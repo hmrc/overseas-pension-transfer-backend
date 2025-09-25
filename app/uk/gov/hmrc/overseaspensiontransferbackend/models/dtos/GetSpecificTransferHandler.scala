@@ -29,19 +29,19 @@ sealed trait GetSpecificTransferHandler {
 object GetSpecificTransferHandler {
 
   def apply(
-             referenceId: String,
-             pstr: PstrNumber,
-             qtStatus: QtStatus,
-             versionNumber: Option[String]
-           ): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
+      referenceId: String,
+      pstr: PstrNumber,
+      qtStatus: QtStatus,
+      versionNumber: Option[String]
+    ): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
     (qtStatus, versionNumber) match {
       case (InProgress, None)                    => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
       case (Submitted | Compiled, Some(version)) =>
         Try(QtNumber(referenceId)) match {
           case Success(qtNumber) => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
-          case _ => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
+          case _                 => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
         }
-      case _ =>
+      case _                                     =>
         Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
     }
   }

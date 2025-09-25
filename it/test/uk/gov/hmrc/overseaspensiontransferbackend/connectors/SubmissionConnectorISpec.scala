@@ -41,7 +41,7 @@ class SubmissionConnectorISpec extends BaseISpec {
     )
 
   private val now = Instant.now()
-  private val pstr = Pstr("12345678AB")
+  private val pstr = PstrNumber("12345678AB")
   private val answersData = AnswersData(None, None, None, None)
   private val savedUserAnswers = SavedUserAnswers("", pstr, answersData, now)
 
@@ -182,11 +182,11 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
 
       result mustBe Right(
         DownstreamTransferData(
-          Pstr("12345678AB"),
+          PstrNumber("12345678AB"),
           QtDetails(
             "001",
             Submitted,
@@ -218,7 +218,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -236,7 +236,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
 
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
@@ -257,7 +257,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -279,7 +279,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(Pstr("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }
