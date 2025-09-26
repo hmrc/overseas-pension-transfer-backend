@@ -26,9 +26,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.Configuration
 import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
-import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
@@ -52,24 +51,9 @@ class SaveForLaterRepositorySpec
   private val collectionName        = "saved-user-answers"
 
   private val now          = Instant.parse("2025-01-01T00:00:00Z")
-  private var mutableClock = Clock.fixed(now, ZoneOffset.UTC)
-  private val masterKey    = "test-master-key"
-  private val encryption   = new EncryptionService(masterKey)
-
-  private val appConfig = new AppConfig(
-    Configuration(
-      "appName"                            -> "overseas-pension-transfer-backend-test",
-      "microservice.services.auth.host"    -> "localhost",
-      "microservice.services.auth.port"    -> 8500,
-      "microservice.services.hip.protocol" -> "http",
-      "microservice.services.hip.host"     -> "localhost",
-      "microservice.services.hip.port"     -> 15602,
-      "mongodb.timeToLiveInDays"           -> 30,
-      "mongodb.uri"                        -> "mongodb://localhost:27017/test-saveforlater",
-      "mongodb.localMasterKey"             -> masterKey,
-      "getAllTransfers.yearsOffset"        -> 10
-    )
-  )
+  private val mutableClock = Clock.fixed(now, ZoneOffset.UTC)
+  private val encryption   = TestAppConfig.encryptionService
+  private val appConfig    = TestAppConfig.appConfig()
 
   private val repository = new SaveForLaterRepository(
     mongoComponent    = mongoComponent,

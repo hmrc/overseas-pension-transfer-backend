@@ -21,12 +21,12 @@ import org.mongodb.scala.bson._
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model._
 import play.api.Logging
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Format
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}
@@ -61,11 +61,12 @@ class SaveForLaterRepository @Inject() (
   private def byReferenceId(referenceId: String) = Filters.equal("referenceId", referenceId)
 
   private def toDocument(answers: SavedUserAnswers): Document = {
-    val dataJson  = Json.toJson(answers.data).toString()
-    val encrypted = encryptionService.encrypt(dataJson)
+    val encrypted: EncryptedAnswersData =
+      DecryptedAnswersData(answers.data).encrypt(appConfig, encryptionService)
+
     Document(
       "referenceId" -> answers.referenceId,
-      "data"        -> encrypted,
+      "data"        -> encrypted.encryptedString,
       "lastUpdated" -> BsonDateTime(answers.lastUpdated.toEpochMilli)
     )
   }
@@ -75,10 +76,9 @@ class SaveForLaterRepository @Inject() (
       referenceId <- doc.get("referenceId").collect { case bs: BsonString => bs.getValue }
       dataEnc     <- doc.get("data").collect { case bs: BsonString => bs.getValue }
       lastUpdated <- doc.get("lastUpdated").collect { case d: BsonDateTime => Instant.ofEpochMilli(d.getValue) }
-      decrypted   <- encryptionService.decrypt(dataEnc).toOption
+      decrypted   <- EncryptedAnswersData(dataEnc).decrypt(appConfig, encryptionService).toOption
     } yield {
-      val data = Json.parse(decrypted).as[AnswersData]
-      SavedUserAnswers(referenceId, data, lastUpdated)
+      SavedUserAnswers(referenceId, decrypted.data, lastUpdated)
     }
 
   // === Public API ===

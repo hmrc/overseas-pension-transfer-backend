@@ -19,10 +19,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
 
 class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
+
+  implicit private val appConfig: AppConfig = TestAppConfig.appConfig()
+  implicit private val encryptionService: EncryptionService = TestAppConfig.encryptionService
 
   "SavedUserAnswers JSON format" - {
 
@@ -58,6 +64,32 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
       (json \ "data" \ "transferringMember" \ "memberDetails" \ "foreName").as[String] mustBe "Jane"
       (json \ "referenceId").as[String]                                                mustBe "ref-456"
+    }
+  }
+
+  "AnswersDataWrapper format" - {
+
+    "must serialise and deserialize DecryptedAnswersData" in {
+      val decrypted: AnswersDataWrapper = DecryptedAnswersData(
+        AnswersData(None, Some(TransferringMember(None)), None, None)
+      )
+
+      val json   = Json.toJson(decrypted)(AnswersDataWrapper.wrapperFormat)
+      val parsed = json.validate[AnswersDataWrapper](AnswersDataWrapper.wrapperFormat)
+
+      parsed mustBe JsSuccess(decrypted)
+    }
+
+    "must serialise and deserialize EncryptedAnswersData" in {
+      val decrypted                     = DecryptedAnswersData(
+        AnswersData(None, Some(TransferringMember(None)), None, None)
+      )
+      val encrypted: AnswersDataWrapper = decrypted.encrypt
+
+      val json   = Json.toJson(encrypted)(AnswersDataWrapper.wrapperFormat)
+      val parsed = json.validate[AnswersDataWrapper](AnswersDataWrapper.wrapperFormat)
+
+      parsed mustBe JsSuccess(encrypted)
     }
   }
 }
