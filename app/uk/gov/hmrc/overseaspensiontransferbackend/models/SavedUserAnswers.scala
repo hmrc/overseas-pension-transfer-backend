@@ -21,7 +21,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
 
-import java.time.Instant
+import java.time.{Instant, LocalDate, ZoneId}
 
 final case class SavedUserAnswers(
     referenceId: String,
@@ -39,7 +39,7 @@ final case class SavedUserAnswers(
       data.memberForeName,
       data.memberLastName,
       None,
-      Some(lastUpdated),
+      Some(LocalDate.ofInstant(lastUpdated, ZoneId.systemDefault())),
       Some(InProgress),
       Some(pstr)
     )
