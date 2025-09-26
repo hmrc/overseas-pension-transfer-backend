@@ -28,9 +28,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.Pstr
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamError, DownstreamSuccess, DownstreamTransferData}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.format.DateTimeFormatter
@@ -43,7 +40,7 @@ trait SubmissionConnector {
   def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
-      pstr: Pstr,
+      pstr: PstrNumber,
       qtNumber: QtNumber,
       versionNumber: String
     )(implicit hc: HeaderCarrier
@@ -97,7 +94,7 @@ class SubmissionConnectorImpl @Inject() (
   }
 
   override def getTransfer(
-      pstr: Pstr,
+      pstr: PstrNumber,
       qtNumber: QtNumber,
       versionNumber: String
     )(implicit hc: HeaderCarrier

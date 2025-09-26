@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferDeconstructionError, TransferNotFound}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
@@ -45,7 +46,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
       val json = Json.obj("key" -> "value")
 
       when(mockSubmissionService.getTransfer(any)(any))
-        .thenReturn(Future.successful(Right(UserAnswersDTO("id", json, now))))
+        .thenReturn(Future.successful(Right(UserAnswersDTO("id", pstr, json, now))))
 
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")
@@ -55,6 +56,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.obj(
           "referenceId" -> "id",
+          "pstr"        -> "12345678AB",
           "data"        -> Json.obj("key" -> "value"),
           "lastUpdated" -> now
         )

@@ -25,7 +25,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTe
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{SubmissionConnector, SubmissionConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
@@ -50,6 +50,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val saved = SavedUserAnswers(
         referenceId = id,
+        pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
       )
@@ -84,6 +85,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val saved = SavedUserAnswers(
         referenceId = id,
+        pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
       )
@@ -120,6 +122,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val saved = SavedUserAnswers(
         referenceId = id,
+        pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
       )
@@ -156,6 +159,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       val saved = SavedUserAnswers(
         referenceId = id,
+        pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
       )

@@ -120,7 +120,7 @@ class SubmissionServiceImpl @Inject() (
 
   private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
-      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, jsObject, savedUserAnswers.lastUpdated))
+      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
       case Left(jsError)   =>
         logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
