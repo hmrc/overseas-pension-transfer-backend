@@ -18,5 +18,5 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
 
 sealed trait AllTransfersResponseError
 
-case object NoTransfersFound            extends AllTransfersResponseError
+case object NoTransfersFoundResponse    extends AllTransfersResponseError
 case class UnexpectedError(msg: String) extends AllTransfersResponseError

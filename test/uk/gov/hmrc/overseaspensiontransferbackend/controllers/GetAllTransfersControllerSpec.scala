@@ -69,7 +69,7 @@ class GetAllTransfersControllerSpec
           any[HeaderCarrier],
           any[AppConfig]
         )
-      ).thenReturn(Future.successful(Right(AllTransfersResponse(Some(items)))))
+      ).thenReturn(Future.successful(Right(AllTransfersResponse(items))))
 
       val app: Application =
         applicationBuilder()
@@ -112,31 +112,7 @@ class GetAllTransfersControllerSpec
       val pstr                                     = PstrNumber(pstrStr)
 
       when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
-        .thenReturn(Future.successful(Right(AllTransfersResponse(None))))
-
-      val app: Application =
-        applicationBuilder()
-          .overrides(
-            bind[SubmissionService].toInstance(mockSubmissionService),
-            bind[Clock].toInstance(fixedClock)
-          )
-          .build()
-
-      running(app) {
-        val request = FakeRequest(GET, s"$endpoint/$pstrStr")
-        val result  = route(app, request).value
-
-        status(result) mustBe NOT_FOUND
-      }
-    }
-
-    "must return 404 when service returns Left(NoTransfersFound)" in {
-      val mockSubmissionService: SubmissionService = mock[SubmissionService]
-      val pstrStr                                  = "24000001AA"
-      val pstr                                     = PstrNumber(pstrStr)
-
-      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
-        .thenReturn(Future.successful(Left(NoTransfersFound)))
+        .thenReturn(Future.successful(Left(NoTransfersFoundResponse)))
 
       val app: Application =
         applicationBuilder()

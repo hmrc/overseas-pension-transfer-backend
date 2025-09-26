@@ -39,6 +39,7 @@ object ParserHelpers {
         Left(
           resp.json.validate[EtmpValidationError]
             .asOpt
+            .map(mapEtmp422)
             .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body.take(MaxSnippet)))
         )
 
@@ -62,6 +63,12 @@ object ParserHelpers {
 
       case other =>
         Left(Unexpected(other, resp.body.take(MaxSnippet)))
+    }
+
+  private def mapEtmp422(ev: EtmpValidationError): DownstreamError =
+    ev.code match {
+      case "183" => NoTransfersFound
+      case _     => ev
     }
 
   /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */

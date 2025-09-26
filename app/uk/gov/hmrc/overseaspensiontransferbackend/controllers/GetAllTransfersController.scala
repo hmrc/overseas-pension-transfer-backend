@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{AllTransfersResponse, NoTransfersFound}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{AllTransfersResponse, NoTransfersFoundResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -46,16 +46,12 @@ class GetAllTransfersController @Inject() (
     maybePstr match {
       case Right(validatedPstr) =>
         submissionService.getAllTransfers(validatedPstr).flatMap {
-          case Right(AllTransfersResponse(maybeTransfers)) =>
-            maybeTransfers match {
-              case Some(transfers) =>
-                val dto = GetAllTransfersDTO.from(validatedPstr, transfers)(clock)
-                Future.successful(Ok(Json.toJson(dto)))
-              case None            => Future.successful(NotFound)
-            }
-          case Left(NoTransfersFound)                      =>
+          case Right(AllTransfersResponse(transfers)) =>
+            val dto = GetAllTransfersDTO.from(validatedPstr, transfers)(clock)
+            Future.successful(Ok(Json.toJson(dto)))
+          case Left(NoTransfersFoundResponse)         =>
             Future.successful(NotFound)
-          case Left(_)                                     =>
+          case Left(_)                                =>
             Future.successful(InternalServerError)
         }
       case Left(m)              => Future.successful(BadRequest(m))

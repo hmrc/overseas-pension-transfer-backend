@@ -65,13 +65,13 @@ class SubmissionServiceImpl @Inject() (
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
-              case Left(err)      => {
+              case Left(err)      =>
                 logger.info(s"[submitAnswers] referenceId=${submission.referenceId} ${err.log}")
                 Left(mapDownstream(err))
-              }
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
+        logger.info(s"[submitAnswers] referenceId=${submission.referenceId} No submission found in save for later repository")
         Future.successful(Left(SubmissionTransformationError(
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))
@@ -155,19 +155,14 @@ class SubmissionServiceImpl @Inject() (
             pstrNumber        = Some(pstrNumber)
           )
         }
+        Right(AllTransfersResponse(items))
 
-        // defensively account for if api sends an empty list instead of a 404
-        if (items.nonEmpty) {
-          Right(AllTransfersResponse(Some(items)))
-        } else {
-          Left(NoTransfersFound)
-        }
-      case Left(err)         =>
+      case Left(err) =>
         logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${err.log}")
 
         err match {
-          case NotFound => Left(NoTransfersFound)
-          case _        => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
+          case NoTransfersFound => Left(NoTransfersFoundResponse)
+          case _                => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
         }
     }
   }

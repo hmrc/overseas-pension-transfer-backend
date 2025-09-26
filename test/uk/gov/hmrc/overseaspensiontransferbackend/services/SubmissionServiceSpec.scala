@@ -266,7 +266,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         val result = service.getAllTransfers(pstr).futureValue
 
         result match {
-          case Right(AllTransfersResponse(Some(items))) =>
+          case Right(AllTransfersResponse(items)) =>
             items must have size 2
 
             val first = items.head
@@ -297,12 +297,12 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         val fromDate: LocalDate = toDate.minusYears(10)
 
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Left(NotFound)))
+          .thenReturn(Future.successful(Left(NoTransfersFound)))
 
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
-        result mustBe Left(NoTransfersFound)
+        result mustBe Left(NoTransfersFoundResponse)
       }
 
       "returns Left(UnexpectedError) when connector returns any other error" in {
@@ -311,7 +311,6 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
         val fromDate: LocalDate = toDate.minusYears(10)
 
-        // pick a concrete non-404 error
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Left(Forbidden)))
 
@@ -319,25 +318,6 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
         val result = service.getAllTransfers(pstr).futureValue
         result mustBe Left(UnexpectedError(s"Unable to get all transfers for ${pstr.value}"))
-      }
-
-      "treats empty downstream overview list as NoTransfersFound" in {
-        val pstr = PstrNumber("24000001AA")
-
-        val ds = DownstreamAllTransfersData(
-          DownstreamAllTransfersData.Payload(Nil)
-        )
-
-        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
-        val fromDate: LocalDate = toDate.minusYears(10)
-
-        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
-          .thenReturn(Future.successful(Right(ds)))
-
-        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
-
-        val result = service.getAllTransfers(pstr).futureValue
-        result mustBe Left(NoTransfersFound)
       }
     }
   }
