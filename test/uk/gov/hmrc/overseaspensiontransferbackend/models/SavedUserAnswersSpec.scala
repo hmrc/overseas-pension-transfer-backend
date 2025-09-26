@@ -20,14 +20,12 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
 
 class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
-  implicit private val appConfig: AppConfig = TestAppConfig.appConfig()
   implicit private val encryptionService: EncryptionService = TestAppConfig.encryptionService
 
   "SavedUserAnswers JSON format" - {

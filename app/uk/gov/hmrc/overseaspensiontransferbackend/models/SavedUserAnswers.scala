@@ -19,7 +19,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
@@ -79,13 +78,13 @@ sealed trait AnswersDataWrapper
 
 final case class EncryptedAnswersData(encryptedString: String) extends AnswersDataWrapper {
 
-  def decrypt(implicit appConfig: AppConfig, encryptionService: EncryptionService): Either[Throwable, DecryptedAnswersData] =
+  def decrypt(implicit encryptionService: EncryptionService): Either[Throwable, DecryptedAnswersData] =
     encryptionService.decrypt(encryptedString).map(json => DecryptedAnswersData(Json.parse(json).as[AnswersData]))
 }
 
 final case class DecryptedAnswersData(data: AnswersData) extends AnswersDataWrapper {
 
-  def encrypt(implicit appConfig: AppConfig, encryptionService: EncryptionService): EncryptedAnswersData =
+  def encrypt(implicit encryptionService: EncryptionService): EncryptedAnswersData =
     EncryptedAnswersData(encryptionService.encrypt(Json.toJson(data).toString()))
 }
 

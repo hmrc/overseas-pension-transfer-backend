@@ -62,7 +62,7 @@ class SaveForLaterRepository @Inject() (
 
   private def toDocument(answers: SavedUserAnswers): Document = {
     val encrypted: EncryptedAnswersData =
-      DecryptedAnswersData(answers.data).encrypt(appConfig, encryptionService)
+      DecryptedAnswersData(answers.data).encrypt(encryptionService)
 
     Document(
       "referenceId" -> answers.referenceId,
@@ -76,7 +76,7 @@ class SaveForLaterRepository @Inject() (
       referenceId <- doc.get("referenceId").collect { case bs: BsonString => bs.getValue }
       dataEnc     <- doc.get("data").collect { case bs: BsonString => bs.getValue }
       lastUpdated <- doc.get("lastUpdated").collect { case d: BsonDateTime => Instant.ofEpochMilli(d.getValue) }
-      decrypted   <- EncryptedAnswersData(dataEnc).decrypt(appConfig, encryptionService).toOption
+      decrypted   <- EncryptedAnswersData(dataEnc).decrypt(encryptionService).toOption
     } yield {
       SavedUserAnswers(referenceId, decrypted.data, lastUpdated)
     }
