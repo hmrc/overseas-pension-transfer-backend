@@ -66,7 +66,8 @@ class SaveForLaterRepositorySpec
       "microservice.services.hip.port"     -> 15602,
       "mongodb.timeToLiveInDays"           -> 30,
       "mongodb.uri"                        -> "mongodb://localhost:27017/test-saveforlater",
-      "mongodb.localMasterKey"             -> masterKey
+      "mongodb.localMasterKey"             -> masterKey,
+      "getAllTransfers.yearsOffset"        -> 10
     )
   )
 
