@@ -65,13 +65,13 @@ class SubmissionServiceImpl @Inject() (
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
-              case Left(err)      => {
+              case Left(err)      =>
                 logger.info(s"[submitAnswers] referenceId=${submission.referenceId} ${err.log}")
                 Left(mapDownstream(err))
-              }
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
+        logger.info(s"[submitAnswers] referenceId=${submission.referenceId} No submission found in save for later repository")
         Future.successful(Left(SubmissionTransformationError(
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))
