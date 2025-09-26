@@ -17,12 +17,14 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import com.google.inject.{AbstractModule, Provides, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.overseaspensiontransferbackend.services._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl, SubmissionService, SubmissionServiceImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
-import java.time.{Clock, ZoneOffset}
+import java.time.Clock
 
 class Module extends AbstractModule {
 
@@ -32,11 +34,22 @@ class Module extends AbstractModule {
     // TODO: These must be bound to the actual version in production
     bind(classOf[SubmissionService]).to(classOf[SubmissionServiceImpl])
     bind(classOf[SubmissionValidator]).to(classOf[DummySubmissionValidatorImpl])
-    bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+    bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }
 
   @Provides
   @Singleton
   def provideUserAnswersTransformer(countryCodeReader: CountryCodeReader): UserAnswersTransformer =
     new UserAnswersTransformerFactory(countryCodeReader).build()
+
+  @Provides
+  @Singleton
+  def provideEncryptionService(config: Configuration): EncryptionService = {
+    val master = config.getOptional[String]("mongodb.localMasterKey")
+      .orElse(config.getOptional[String]("encryption.masterKey"))
+      .getOrElse(
+        throw new IllegalStateException("encryption master key not configured (mongodb.localMasterKey or encryption.masterKey)")
+      )
+    new EncryptionService(master)
+  }
 }

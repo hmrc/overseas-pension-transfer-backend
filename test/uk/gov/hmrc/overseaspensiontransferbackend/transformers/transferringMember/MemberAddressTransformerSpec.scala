@@ -21,7 +21,6 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.QropsSchemeManagerAddressTransformer
 
 class MemberAddressTransformerSpec extends AnyFreeSpec with Matchers with MockitoSugar with SpecBase {
 
