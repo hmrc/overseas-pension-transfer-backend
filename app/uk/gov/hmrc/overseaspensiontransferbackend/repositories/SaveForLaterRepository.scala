@@ -17,13 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 
 import org.apache.pekko.Done
-import org.mongodb.scala.bson._
-import org.mongodb.scala.bson.collection.immutable.Document
+import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
-import play.api.Logging
-import play.api.libs.json.Format
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
@@ -41,68 +41,76 @@ class SaveForLaterRepository @Inject() (
     appConfig: AppConfig,
     clock: Clock
   )(implicit ec: ExecutionContext
-  ) extends Logging {
+  ) extends PlayMongoRepository[SavedUserAnswers](
+      collectionName = "saved-user-answers",
+      mongoComponent = mongoComponent,
+      domainFormat   = SaveForLaterRepository.encryptedFormat(encryptionService),
+      indexes        = Seq(
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions()
+            .name("lastUpdatedIdx")
+            .expireAfter(appConfig.cacheTtl, TimeUnit.DAYS)
+        )
+      )
+    ) {
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private val collection =
-    mongoComponent.database.getCollection[Document]("saved-user-answers")
-
-  initIndexes()
-
-  private def initIndexes(): Unit =
-    collection.createIndex(
-      Indexes.ascending("lastUpdated"),
-      IndexOptions().name("lastUpdatedIdx").expireAfter(appConfig.cacheTtl, TimeUnit.DAYS)
-    ).toFuture()
-      .recover { case ex => logger.warn("Failed to create TTL index on saved-user-answers", ex) }
-      .foreach(_ => logger.info("TTL index ensured on saved-user-answers"))
-
-  private def byReferenceId(referenceId: String) = Filters.equal("referenceId", referenceId)
-
-  private def toDocument(answers: SavedUserAnswers): Document = {
-    val encrypted: EncryptedAnswersData =
-      DecryptedAnswersData(answers.data).encrypt(encryptionService)
-
-    Document(
-      "referenceId" -> answers.referenceId,
-      "data"        -> encrypted.encryptedString,
-      "lastUpdated" -> BsonDateTime(answers.lastUpdated.toEpochMilli)
-    )
-  }
-
-  private def fromDocument(doc: Document): Option[SavedUserAnswers] =
-    for {
-      referenceId <- doc.get("referenceId").collect { case bs: BsonString => bs.getValue }
-      dataEnc     <- doc.get("data").collect { case bs: BsonString => bs.getValue }
-      lastUpdated <- doc.get("lastUpdated").collect { case d: BsonDateTime => Instant.ofEpochMilli(d.getValue) }
-      decrypted   <- EncryptedAnswersData(dataEnc).decrypt(encryptionService).toOption
-    } yield {
-      SavedUserAnswers(referenceId, decrypted.data, lastUpdated)
-    }
-
-  // === Public API ===
+  private def byReferenceId(referenceId: String): Bson = Filters.equal("referenceId", referenceId)
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
-    collection.find(byReferenceId(referenceId))
+    collection
+      .find(byReferenceId(referenceId))
       .headOption()
-      .map(_.flatMap(fromDocument))
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
-    collection.replaceOne(
-      filter      = byReferenceId(answers.referenceId),
-      replacement = toDocument(answers),
-      options     = ReplaceOptions().upsert(true)
-    ).toFuture().map(_.wasAcknowledged())
+    collection
+      .replaceOne(
+        filter      = byReferenceId(answers.referenceId),
+        replacement = answers,
+        options     = ReplaceOptions().upsert(true)
+      )
+      .toFuture()
+      .map(_.wasAcknowledged())
   }
 
   def clear(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
     collection.deleteOne(byReferenceId(referenceId)).toFuture().map(_.wasAcknowledged())
   }
 
-  /** Safely delete all documents, keeping the collection and indexes */
-  def clearAll(): Future[Done] = Mdc.preservingMdc {
-    collection.deleteMany(Document()).toFuture().map(_ => Done)
+  def clear: Future[Done] = Mdc.preservingMdc {
+    collection.drop().toFuture().map(_ => Done)
+  }
+}
+
+object SaveForLaterRepository {
+
+  def encryptedFormat(encryptionService: EncryptionService): OFormat[SavedUserAnswers] = {
+
+    val reads: Reads[SavedUserAnswers] = (
+      (__ \ "referenceId").read[String] and
+        (__ \ "data").read[String].map { enc =>
+          EncryptedAnswersData(enc).decrypt(encryptionService) match {
+            case Right(decrypted) => decrypted.data
+            case Left(err)        => throw new RuntimeException(s"Decryption failed: ${err.getMessage}")
+          }
+        } and
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
+    )(SavedUserAnswers.apply _)
+
+    val writes: OWrites[SavedUserAnswers] = OWrites { ua =>
+      val encrypted: EncryptedAnswersData =
+        DecryptedAnswersData(ua.data).encrypt(encryptionService)
+
+      Json.obj(
+        "referenceId" -> ua.referenceId,
+        "data"        -> encrypted.encryptedString,
+        "lastUpdated" -> MongoJavatimeFormats.instantFormat.writes(ua.lastUpdated)
+      )
+    }
+
+    OFormat(reads, writes)
   }
 }

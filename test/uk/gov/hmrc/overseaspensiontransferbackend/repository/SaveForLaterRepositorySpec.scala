@@ -17,20 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.repository
 
 import org.apache.pekko.Done
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
-import org.mockito.invocation.InvocationOnMock
 import org.mongodb.scala.bson.collection.immutable.Document
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
-import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,8 +36,7 @@ class SaveForLaterRepositorySpec
     with Matchers
     with OptionValues
     with CleanMongoCollectionSupport
-    with ScalaFutures
-    with MockitoSugar {
+    with ScalaFutures {
 
   implicit override val patienceConfig: PatienceConfig =
     PatienceConfig(timeout = 5.seconds, interval = 50.millis)
@@ -65,56 +59,57 @@ class SaveForLaterRepositorySpec
   private val rawCollection =
     mongoComponent.database.getCollection[Document](collectionName)
 
-  // --- Helper to build test data ---
-  private def buildUserAnswer(referenceId: String = "ref-useranswer-001"): SavedUserAnswers = {
-    val userAnswers = AnswersData(
-      reportDetails       = None,
-      transferringMember  = None,
-      aboutReceivingQROPS = None,
-      transferDetails     = Some(
-        TransferDetails(
-          transferAmount                 = Some(1000),
-          allowanceBeforeTransfer        = Some(5000),
-          dateMemberTransferred          = Some(java.time.LocalDate.parse("2025-01-01")),
-          cashOnlyTransfer               = Some("No"),
-          paymentTaxableOverseas         = Some("Yes"),
-          reasonNoOverseasTransfer       = None,
-          taxableOverseasTransferDetails = None,
-          typeOfAssets                   = Some(
-            TypeOfAssets(
-              cashAssets          = Some("Yes"),
-              cashValue           = Some(1000),
-              unquotedShareAssets = Some("Yes"),
-              moreUnquoted        = None,
-              unquotedShares      = Some(List(UnquotedShares(1000, 100, "Company A", "A"))),
-              quotedShareAssets   = Some("Yes"),
-              moreQuoted          = None,
-              quotedShares        = Some(List(QuotedShares(2000, 200, "Company B", "B"))),
-              propertyAsset       = Some("Yes"),
-              moreProp            = None,
-              propertyAssets      = Some(List(PropertyAssets(
-                propertyAddress = Address(
-                  addressLine1 = Some("6 Test Address"),
-                  addressLine2 = Some("Test Street"),
-                  addressLine3 = None,
-                  addressLine4 = None,
-                  addressLine5 = None,
-                  ukPostCode   = Some("XX89 6YY"),
-                  country      = Some("GB")
-                ),
-                propValue       = 300,
-                propDescription = "Test Property"
-              ))),
-              otherAsset          = Some("Yes"),
-              moreAsset           = None,
-              otherAssets         = Some(List(OtherAssets(400, "Other Asset")))
+  private def buildUserAnswer(referenceId: String = "ref-useranswer-001"): SavedUserAnswers =
+    SavedUserAnswers(
+      referenceId,
+      AnswersData(
+        reportDetails       = None,
+        transferringMember  = None,
+        aboutReceivingQROPS = None,
+        transferDetails     = Some(
+          TransferDetails(
+            transferAmount                 = Some(1000),
+            allowanceBeforeTransfer        = Some(5000),
+            dateMemberTransferred          = Some(java.time.LocalDate.parse("2025-01-01")),
+            cashOnlyTransfer               = Some("No"),
+            paymentTaxableOverseas         = Some("Yes"),
+            reasonNoOverseasTransfer       = None,
+            taxableOverseasTransferDetails = None,
+            typeOfAssets                   = Some(
+              TypeOfAssets(
+                cashAssets          = Some("Yes"),
+                cashValue           = Some(1000),
+                unquotedShareAssets = Some("Yes"),
+                unquotedShares      = Some(List(UnquotedShares(1000, 100, "Company A", "A"))),
+                quotedShareAssets   = Some("Yes"),
+                quotedShares        = Some(List(QuotedShares(2000, 200, "Company B", "B"))),
+                propertyAsset       = Some("Yes"),
+                propertyAssets      = Some(List(PropertyAssets(
+                  propertyAddress = Address(
+                    addressLine1 = Some("6 Test Address"),
+                    addressLine2 = Some("Test Street"),
+                    addressLine3 = None,
+                    addressLine4 = None,
+                    addressLine5 = None,
+                    ukPostCode   = Some("XX89 6YY"),
+                    country      = Some("GB")
+                  ),
+                  propValue       = 300,
+                  propDescription = "Test Property"
+                ))),
+                otherAsset          = Some("Yes"),
+                moreAsset           = None,
+                moreProp            = None,
+                moreQuoted          = None,
+                moreUnquoted        = None,
+                otherAssets         = Some(List(OtherAssets(400, "Other Asset")))
+              )
             )
           )
         )
-      )
+      ),
+      now
     )
-    SavedUserAnswers(referenceId, userAnswers, now)
-  }
 
   "SaveForLaterRepository" - {
 
@@ -136,14 +131,12 @@ class SaveForLaterRepositorySpec
       repository.set(saved).futureValue mustBe true
 
       val retrieved = repository.get(saved.referenceId).futureValue.value
-      retrieved.referenceId mustBe saved.referenceId
-      retrieved.data        mustBe saved.data
-      retrieved.lastUpdated mustBe now
+      retrieved mustBe saved
 
       val propertyAsset = retrieved.data.transferDetails.value.typeOfAssets.value.propertyAssets.value.head.propertyAddress
-      propertyAsset.addressLine1     mustBe Some("6 Test Address")
-      propertyAsset.addressLine2     mustBe Some("Test Street")
-      propertyAsset.ukPostCode.value mustBe "XX89 6YY"
+      propertyAsset.addressLine1.value mustBe "6 Test Address"
+      propertyAsset.addressLine2.value mustBe "Test Street"
+      propertyAsset.ukPostCode.value   mustBe "XX89 6YY"
     }
 
     "must produce different ciphertexts for the same userAnswer input" in {
@@ -167,21 +160,24 @@ class SaveForLaterRepositorySpec
       repository.get("ref-delete").futureValue   mustBe None
     }
 
-    "must delete all records with clearAll" in {
-      val saved = buildUserAnswer("ref-clearall")
-      repository.set(saved).futureValue          mustBe true
-      repository.clearAll().futureValue          mustBe Done
-      repository.get("ref-clearall").futureValue mustBe None
+    "must delete all records with clear" in {
+      val saved = buildUserAnswer("ref-clear")
+      repository.set(saved).futureValue       mustBe true
+      repository.clear.futureValue            mustBe Done
+      repository.get("ref-clear").futureValue mustBe None
     }
 
-    "must return None when decryption fails for corrupted payload" in {
+    "must throw when decryption fails for corrupted payload" in {
       val corruptDoc = Document(
         "referenceId" -> "ref-corrupt",
         "data"        -> "invalid-encryption",
         "lastUpdated" -> java.util.Date.from(now)
       )
       rawCollection.insertOne(corruptDoc).toFuture().futureValue
-      repository.get("ref-corrupt").futureValue mustBe None
+
+      assertThrows[RuntimeException] {
+        repository.get("ref-corrupt").futureValue
+      }
     }
 
     "must handle empty referenceId gracefully" in {
@@ -190,24 +186,6 @@ class SaveForLaterRepositorySpec
       repository.get("").futureValue.value.referenceId mustBe ""
       repository.clear("").futureValue                 mustBe true
       repository.get("").futureValue                   mustBe None
-    }
-
-    "must return None when decryption fails (mocked EncryptionService)" in {
-      val mockEncryption = mock[EncryptionService]
-
-      when(mockEncryption.encrypt(any[String])).thenAnswer((invocation: InvocationOnMock) => {
-        val arg = invocation.getArgument(0, classOf[String])
-        s"encrypted-$arg"
-      })
-
-      when(mockEncryption.decrypt(any[String])).thenReturn(Left(new RuntimeException("forced fail")))
-
-      val repo = new SaveForLaterRepository(mongoComponent, mockEncryption, appConfig, mutableClock)
-
-      val saved = buildUserAnswer("ref-fail")
-      repo.set(saved).futureValue mustBe true
-
-      repo.get("ref-fail").futureValue mustBe None
     }
   }
 }

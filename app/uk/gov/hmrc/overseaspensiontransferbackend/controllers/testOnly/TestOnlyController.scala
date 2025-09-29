@@ -26,6 +26,6 @@ class TestOnlyController @Inject() (repository: SaveForLaterRepository, cc: Cont
     extends AbstractController(cc) {
 
   def resetDatabase: Action[AnyContent] = Action.async {
-    repository.clearAll.map(_ => NoContent)
+    repository.clear.map(_ => NoContent)
   }
 }

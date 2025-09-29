@@ -91,7 +91,7 @@ trait BaseISpec
 
   private def clearMongoData(): Unit = {
     val repo = app.injector.instanceOf[SaveForLaterRepository]
-    await(repo.clearAll())
+    await(repo.collection.drop().toFuture())
   }
 
 

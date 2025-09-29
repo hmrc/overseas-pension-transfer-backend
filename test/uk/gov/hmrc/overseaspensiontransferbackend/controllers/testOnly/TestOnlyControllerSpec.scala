@@ -44,7 +44,7 @@ class TestOnlyControllerSpec extends AnyFreeSpec with Matchers with SpecBase wit
 
   "resetDatabase" - {
     "Return 204 No Content" in {
-      when(mockRepository.clearAll()).thenReturn(Future.successful(Done))
+      when(mockRepository.clear).thenReturn(Future.successful(Done))
 
       val request = FakeRequest(DELETE, "/test-only/reset-test-data")
 
