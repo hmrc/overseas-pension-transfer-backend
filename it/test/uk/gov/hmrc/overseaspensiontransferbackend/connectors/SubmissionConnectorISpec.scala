@@ -377,29 +377,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       result.isRight mustBe true
       val data = result.toOption.get
-      data.nonEmpty mustBe true
       data.success.qropsTransferOverview.head.qtReference mustBe "QT564321"
-    }
-
-    "gracefully handle 200 with empty payload (defaults to empty list)" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
-      val emptyPayload = Json.obj("success" -> Json.obj()).toString()
-
-      stubFor(
-        get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
-          .withQueryParam("pstr", equalTo(pstr.normalised))
-          .willReturn(aResponse().withStatus(OK).withBody(emptyPayload))
-      )
-
-      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
-
-      result.isRight mustBe true
-      val data = result.toOption.get
-      data.nonEmpty mustBe false
-      data.success.qropsTransferOverview mustBe Nil
     }
 
     "map 400 HIP error to HipBadRequest" in {
@@ -447,6 +425,28 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
+    }
+
+    "map 422 with subcode 183 to NoTransfersFound" in {
+      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
+      val body = Json.obj(
+        "errors" -> Json.obj(
+          "processingDate" -> now.toString,
+          "code" -> "183",
+          "text" -> "No QT was found in ETMP for the requested details"
+        )
+      ).toString()
+
+      stubFor(
+        get(urlPathEqualTo(basePath))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
+          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("pstr", equalTo(pstr.normalised))
+          .willReturn(aResponse().withStatus(UNPROCESSABLE_ENTITY).withBody(body))
+      )
+
+      val result = await(connector.getAllTransfers(pstr, fromDate, toDate, None))
+      result mustBe Left(NoTransfersFound)
     }
 
     "map 500 to HipBadRequest (HoD origin example)" in {
