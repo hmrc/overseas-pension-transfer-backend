@@ -23,5 +23,5 @@ case class QtNumber(value: String) {
 }
 
 object QtNumber {
-  implicit val format: OFormat[QtNumber] = Json.format[QtNumber]
+  implicit val format: Format[QtNumber] = Json.valueFormat[QtNumber]
 }
