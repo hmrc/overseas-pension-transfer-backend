@@ -20,12 +20,11 @@ import org.apache.pekko.Done
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsError, JsObject, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers, TransferringMember}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.DeleteFailed
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
-import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
 import scala.concurrent.Future
 

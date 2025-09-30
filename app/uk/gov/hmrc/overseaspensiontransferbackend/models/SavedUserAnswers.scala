@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
 
@@ -71,4 +72,35 @@ object SavedUserAnswers {
   }
 
   implicit val format: OFormat[SavedUserAnswers] = OFormat(reads, writes)
+}
+
+sealed trait AnswersDataWrapper
+
+final case class EncryptedAnswersData(encryptedString: String) extends AnswersDataWrapper {
+
+  def decrypt(implicit encryptionService: EncryptionService): Either[Throwable, DecryptedAnswersData] =
+    encryptionService.decrypt(encryptedString).map(json => DecryptedAnswersData(Json.parse(json).as[AnswersData]))
+}
+
+final case class DecryptedAnswersData(data: AnswersData) extends AnswersDataWrapper {
+
+  def encrypt(implicit encryptionService: EncryptionService): EncryptedAnswersData =
+    EncryptedAnswersData(encryptionService.encrypt(Json.toJson(data).toString()))
+}
+
+object AnswersDataWrapper {
+  implicit val encryptedFormat: OFormat[EncryptedAnswersData] = Json.format[EncryptedAnswersData]
+  implicit val decryptedFormat: OFormat[DecryptedAnswersData] = Json.format[DecryptedAnswersData]
+
+  implicit val wrapperFormat: OFormat[AnswersDataWrapper] = new OFormat[AnswersDataWrapper] {
+
+    override def reads(json: JsValue): JsResult[AnswersDataWrapper] =
+      (json \ "encryptedString").validate[String].map(EncryptedAnswersData.apply)
+        .orElse((json \ "data").validate[AnswersData].map(DecryptedAnswersData.apply))
+
+    override def writes(o: AnswersDataWrapper): JsObject = o match {
+      case e: EncryptedAnswersData => Json.obj("encryptedString" -> e.encryptedString)
+      case d: DecryptedAnswersData => Json.obj("data" -> Json.toJson(d.data))
+    }
+  }
 }
