@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{AllTransfersResponse, NoTransfersFoundResponse}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersResponse, NoTransfersFoundResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 

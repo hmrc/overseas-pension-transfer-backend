@@ -27,7 +27,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.format.DateTimeFormatter

@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
 import play.api.libs.json._
 
-sealed trait UserType
-case object Psa extends UserType
-case object Psp extends UserType
+final case class PsaId(value: String)
 
-object UserType {
+object PsaId {
+  implicit val format: OFormat[PsaId] = Json.format[PsaId]
+}
 
-  implicit val format: Format[UserType] = new Format[UserType] {
+final case class PspId(value: String)
 
-    def reads(js: JsValue): JsResult[UserType] = js.validate[String].flatMap {
-      case "Psa" => JsSuccess(Psa)
-      case "Psp" => JsSuccess(Psp)
-      case other => JsError(s"Invalid userType: $other")
-    }
-
-    def writes(ut: UserType): JsValue = JsString(ut match {
-      case Psa => "Psa"
-      case Psp => "Psp"
-    })
-  }
+object PspId {
+  implicit val format: OFormat[PspId] = Json.format[PspId]
 }

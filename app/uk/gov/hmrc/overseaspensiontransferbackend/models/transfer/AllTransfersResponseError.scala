@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import play.api.libs.json._
+sealed trait AllTransfersResponseError
 
-final case class PsaId(value: String)
-
-object PsaId {
-  implicit val format: OFormat[PsaId] = Json.format[PsaId]
-}
-
-final case class PspId(value: String)
-
-object PspId {
-  implicit val format: OFormat[PspId] = Json.format[PspId]
-}
+case object NoTransfersFoundResponse    extends AllTransfersResponseError
+case class UnexpectedError(msg: String) extends AllTransfersResponseError

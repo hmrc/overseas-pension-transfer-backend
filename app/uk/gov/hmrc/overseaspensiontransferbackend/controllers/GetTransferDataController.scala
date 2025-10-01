@@ -20,8 +20,9 @@ import com.google.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferNotFound, TransferRetrievalError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferNotFound, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController

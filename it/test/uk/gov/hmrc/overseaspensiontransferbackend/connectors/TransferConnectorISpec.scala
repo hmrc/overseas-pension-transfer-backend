@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission

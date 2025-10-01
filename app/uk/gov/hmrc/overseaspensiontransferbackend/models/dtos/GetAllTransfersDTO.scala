@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
 
 import java.time.{Clock, Instant}
 

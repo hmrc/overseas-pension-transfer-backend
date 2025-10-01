@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import play.api.libs.json.{Json, OFormat}
-
-final case class SubmissionResponse(qtNumber: QtNumber)
-
-object SubmissionResponse {
-  implicit val format: OFormat[SubmissionResponse] = Json.format[SubmissionResponse]
+trait TransferRetrievalError {
+  def msg: String
 }
 
-sealed trait SubmissionError
-
-final case class SubmissionTransformationError(msg: String) extends SubmissionError
-case object SubmissionFailed                                extends SubmissionError
+case class TransferNotFound(msg: String)                                     extends TransferRetrievalError
+case class TransferDeconstructionError(msg: String)                          extends TransferRetrievalError
+case class TransferIdentifierInvalid(msg: String)                            extends TransferRetrievalError
+case class TransferMissingQtDetails(msg: String = "Error QTDetails missing") extends TransferRetrievalError

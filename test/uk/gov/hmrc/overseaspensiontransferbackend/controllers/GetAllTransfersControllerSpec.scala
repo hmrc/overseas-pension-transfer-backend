@@ -28,7 +28,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import java.time.{Clock, Instant, ZoneOffset}
@@ -46,9 +46,9 @@ class GetAllTransfersControllerSpec
   "GetAllTransfersController.getAllTransfers" - {
 
     "must return 200 with DTO JSON when PSTR is valid and transfers exist" in {
-      val mockSubmissionService: TransferService = mock[TransferService]
-      val pstrStr                                = "24000001AA"
-      val pstr                                   = PstrNumber(pstrStr)
+      val mockTransferService: TransferService = mock[TransferService]
+      val pstrStr                              = "24000001AA"
+      val pstr                                 = PstrNumber(pstrStr)
 
       val items: Seq[AllTransfersItem] =
         Seq(AllTransfersItem(
@@ -65,7 +65,7 @@ class GetAllTransfersControllerSpec
         ))
 
       when(
-        mockSubmissionService.getAllTransfers(eqTo(pstr))(
+        mockTransferService.getAllTransfers(eqTo(pstr))(
           any[HeaderCarrier],
           any[AppConfig]
         )
@@ -74,7 +74,7 @@ class GetAllTransfersControllerSpec
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[TransferService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockTransferService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()
@@ -107,17 +107,17 @@ class GetAllTransfersControllerSpec
     }
 
     "must return 404 when PSTR is valid but there are no transfers (None from upstream)" in {
-      val mockSubmissionService: TransferService = mock[TransferService]
-      val pstrStr                                = "24000001AA"
-      val pstr                                   = PstrNumber(pstrStr)
+      val mockTransferService: TransferService = mock[TransferService]
+      val pstrStr                              = "24000001AA"
+      val pstr                                 = PstrNumber(pstrStr)
 
-      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
+      when(mockTransferService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
         .thenReturn(Future.successful(Left(NoTransfersFoundResponse)))
 
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[TransferService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockTransferService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()
@@ -131,19 +131,19 @@ class GetAllTransfersControllerSpec
     }
 
     "must return 500 when service returns an unexpected Left(error)" in {
-      val mockSubmissionService: TransferService = mock[TransferService]
-      val pstrStr                                = "24000001AA"
-      val pstr                                   = PstrNumber(pstrStr)
+      val mockTransferService: TransferService = mock[TransferService]
+      val pstrStr                              = "24000001AA"
+      val pstr                                 = PstrNumber(pstrStr)
 
       val unexpectedError: AllTransfersResponseError = mock[AllTransfersResponseError]
 
-      when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
+      when(mockTransferService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
         .thenReturn(Future.successful(Left(unexpectedError)))
 
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[TransferService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockTransferService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()

@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 
 import java.time.Instant
 

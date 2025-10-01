@@ -27,7 +27,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}

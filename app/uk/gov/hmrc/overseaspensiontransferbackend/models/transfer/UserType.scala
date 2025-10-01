@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.submission
+package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-sealed trait AllTransfersResponseError
+import play.api.libs.json._
 
-case object NoTransfersFoundResponse    extends AllTransfersResponseError
-case class UnexpectedError(msg: String) extends AllTransfersResponseError
+sealed trait UserType
+case object Psa extends UserType
+case object Psp extends UserType
+
+object UserType {
+
+  implicit val format: Format[UserType] = new Format[UserType] {
+
+    def reads(js: JsValue): JsResult[UserType] = js.validate[String].flatMap {
+      case "Psa" => JsSuccess(Psa)
+      case "Psp" => JsSuccess(Psp)
+      case other => JsError(s"Invalid userType: $other")
+    }
+
+    def writes(ut: UserType): JsValue = JsString(ut match {
+      case Psa => "Psa"
+      case Psp => "Psp"
+    })
+  }
+}

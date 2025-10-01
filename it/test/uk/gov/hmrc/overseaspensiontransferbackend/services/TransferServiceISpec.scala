@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{TransferConnector, TransferConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
@@ -42,7 +42,7 @@ class TransferServiceISpec extends BaseISpec {
   private lazy val repository: SaveForLaterRepository = app.injector.instanceOf[SaveForLaterRepository]
   private lazy val service: TransferService         = app.injector.instanceOf[TransferService]
 
-  "SubmissionService" - {
+  "TransferService" - {
 
     "returns a SubmissionResponse with QT number when PSA submits and data is valid" in {
       val id  = freshId()

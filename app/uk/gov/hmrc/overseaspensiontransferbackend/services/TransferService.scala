@@ -24,7 +24,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
@@ -103,14 +103,14 @@ class TransferServiceImpl @Inject() (
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
           case None              =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $transferId from save-for-later")
+            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $transferId from save-for-later")
             Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
         }
       case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
         connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
           case Left(err)    =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
 
@@ -122,7 +122,7 @@ class TransferServiceImpl @Inject() (
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
       case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
       case Left(jsError)   =>
-        logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
+        logger.error(s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }
   }

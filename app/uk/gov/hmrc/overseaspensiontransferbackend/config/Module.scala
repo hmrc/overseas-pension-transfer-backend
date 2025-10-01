@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.overseaspensiontransferbackend.services._
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl, SubmissionService, SubmissionServiceImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl, TransferService, TransferServiceImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}

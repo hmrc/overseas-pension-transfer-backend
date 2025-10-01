@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 
 import java.time.{Instant, LocalDate}
 
