@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -44,8 +44,9 @@ trait SpecBase
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val mockAppConfig: AppConfig  = mock[AppConfig]
 
-  val testId: String = "test-id"
-  val now: Instant   = Instant.parse("2025-04-11T12:00:00Z")
+  val testId: String   = "test-id"
+  val pstr: PstrNumber = PstrNumber("12345678AB")
+  val now: Instant     = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
     reportDetails       = None,
@@ -56,12 +57,14 @@ trait SpecBase
 
   val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(
     referenceId = testId,
+    pstr        = pstr,
     data        = sampleAnswersData,
     lastUpdated = now
   )
 
   val simpleUserAnswersDTO: UserAnswersDTO = UserAnswersDTO(
     referenceId = testId,
+    pstr        = pstr,
     data        = Json.obj("someField" -> "someIncomingValue"),
     lastUpdated = now
   )

@@ -27,6 +27,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}
@@ -57,18 +58,28 @@ class SaveForLaterRepository @Inject() (
 
   implicit val instantFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
-  private def byReferenceId(referenceId: String): Bson = Filters.equal("referenceId", referenceId)
+  private def byId(id: String): Bson         = Filters.equal("_id", id)
+  private def byPstr(pstr: PstrNumber): Bson = Filters.equal("pstr", pstr.value)
 
   def get(referenceId: String): Future[Option[SavedUserAnswers]] = Mdc.preservingMdc {
     collection
-      .find(byReferenceId(referenceId))
+      .find(byId(referenceId))
       .headOption()
+  }
+
+  def getRecords(pstr: PstrNumber): Future[Seq[AllTransfersItem]] = Mdc.preservingMdc {
+    collection
+      .find(byPstr(pstr))
+      .toFuture()
+      .map(
+        _.map(_.toAllTransfersItem)
+      )
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
     collection
       .replaceOne(
-        filter      = byReferenceId(answers.referenceId),
+        filter      = byId(answers.referenceId),
         replacement = answers,
         options     = ReplaceOptions().upsert(true)
       )
@@ -77,7 +88,10 @@ class SaveForLaterRepository @Inject() (
   }
 
   def clear(referenceId: String): Future[Boolean] = Mdc.preservingMdc {
-    collection.deleteOne(byReferenceId(referenceId)).toFuture().map(_.wasAcknowledged())
+    collection
+      .deleteOne(byId(referenceId))
+      .toFuture()
+      .map(_ => true)
   }
 
   def clear: Future[Done] = Mdc.preservingMdc {
@@ -91,6 +105,7 @@ object SaveForLaterRepository {
 
     val reads: Reads[SavedUserAnswers] = (
       (__ \ "referenceId").read[String] and
+        (__ \ "pstr").read[PstrNumber] and
         (__ \ "data").read[String].map { enc =>
           EncryptedAnswersData(enc).decrypt(encryptionService) match {
             case Right(decrypted) => decrypted.data
@@ -106,6 +121,7 @@ object SaveForLaterRepository {
 
       Json.obj(
         "referenceId" -> ua.referenceId,
+        "pstr"        -> ua.pstr,
         "data"        -> encrypted.encryptedString,
         "lastUpdated" -> MongoJavatimeFormats.instantFormat.writes(ua.lastUpdated)
       )

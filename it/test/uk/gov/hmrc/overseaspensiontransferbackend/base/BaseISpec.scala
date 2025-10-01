@@ -25,7 +25,7 @@ import play.api.libs.json._
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
@@ -98,16 +98,16 @@ trait BaseISpec
   def freshId(): String = UUID.randomUUID().toString
   def frozenNow(): Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
 
-  def dtoFrom(id: String, js: JsObject, now: Instant): UserAnswersDTO =
-    UserAnswersDTO(id, js, now)
+  def dtoFrom(id: String, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, pstr, js, now)
 
-  def savedFrom(id: String, js: JsObject, now: Instant): SavedUserAnswers =
-    SavedUserAnswers(id, js.as[AnswersData], now)
+  def savedFrom(id: String, pstr: PstrNumber, js: JsObject, now: Instant): SavedUserAnswers =
+    SavedUserAnswers(id, pstr, js.as[AnswersData], now)
 
   def parseJson(str: String): JsObject = Json.parse(str).as[JsObject]
 
-  def withSavedDto(id: String, js: JsObject, now: Instant): UserAnswersDTO =
-    UserAnswersDTO(id, js, now)
+  def withSavedDto(id: String, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
+    UserAnswersDTO(id, pstr, js, now)
 
   def assertJson(js: JsLookupResult, expected: Map[String, String]): Unit = {
     expected.foreach { case (key, value) =>

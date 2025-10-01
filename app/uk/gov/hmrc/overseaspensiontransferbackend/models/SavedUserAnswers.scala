@@ -19,22 +19,43 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
-import java.time.Instant
+import java.time.{Instant, LocalDate, ZoneId}
 
 final case class SavedUserAnswers(
     referenceId: String,
+    pstr: PstrNumber,
     data: AnswersData,
     lastUpdated: Instant
-  )
+  ) {
+
+  def toAllTransfersItem: AllTransfersItem =
+    AllTransfersItem(
+      Some(referenceId),
+      None,
+      None,
+      data.nino,
+      data.memberForeName,
+      data.memberLastName,
+      None,
+      Some(LocalDate.ofInstant(lastUpdated, ZoneId.systemDefault())),
+      Some(InProgress),
+      Some(pstr)
+    )
+}
 
 final case class AnswersData(
     reportDetails: Option[ReportDetails],
     transferringMember: Option[TransferringMember],
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
     transferDetails: Option[TransferDetails]
-  )
+  ) {
+  def nino: Option[String]           = transferringMember.flatMap(_.memberDetails.flatMap(_.nino))
+  def memberForeName: Option[String] = transferringMember.flatMap(_.memberDetails.flatMap(_.foreName))
+  def memberLastName: Option[String] = transferringMember.flatMap(_.memberDetails.flatMap(_.lastName))
+}
 
 object AnswersData {
 
@@ -57,7 +78,8 @@ object SavedUserAnswers {
 
   val reads: Reads[SavedUserAnswers] = {
     (
-      (__ \ "referenceId").read[String] and
+      (__ \ "_id").read[String] and
+        (__ \ "pstr").read[PstrNumber] and
         (__ \ "data").read[AnswersData] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
     )(SavedUserAnswers.apply _)
@@ -65,10 +87,11 @@ object SavedUserAnswers {
 
   val writes: OWrites[SavedUserAnswers] = {
     (
-      (__ \ "referenceId").write[String] and
+      (__ \ "_id").write[String] and
+        (__ \ "pstr").write[PstrNumber] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantFormat)
-    )(ua => (ua.referenceId, Json.toJsObject(ua.data), ua.lastUpdated))
+    )(ua => (ua.referenceId, ua.pstr, Json.toJsObject(ua.data), ua.lastUpdated))
   }
 
   implicit val format: OFormat[SavedUserAnswers] = OFormat(reads, writes)

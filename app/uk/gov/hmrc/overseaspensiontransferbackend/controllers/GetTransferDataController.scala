@@ -20,9 +20,9 @@ import com.google.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Pstr, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferNotFound, TransferRetrievalError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -43,7 +43,7 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
         val transferType: Either[TransferRetrievalError, GetSpecificTransferHandler] =
-          GetSpecificTransferHandler.apply(referenceId, Pstr(pstr), QtStatus(qtStatus), versionNumber)
+          GetSpecificTransferHandler.apply(referenceId, PstrNumber(pstr), QtStatus(qtStatus), versionNumber)
 
         submissionService.getTransfer(transferType) map {
           case Right(value)              => Ok(Json.toJson(value))

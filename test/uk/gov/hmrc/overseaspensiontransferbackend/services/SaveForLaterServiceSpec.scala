@@ -45,11 +45,12 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val validSaved = SavedUserAnswers(
     referenceId = testId,
+    pstr        = pstr,
     data        = AnswersData(None, Some(TransferringMember(None)), None, None),
     lastUpdated = now
   )
 
-  private val validDTO = UserAnswersDTO(testId, validData, now)
+  private val validDTO = UserAnswersDTO(testId, pstr, validData, now)
 
   "SaveForLaterServiceSpec" - {
 

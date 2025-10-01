@@ -21,7 +21,7 @@ import play.api.libs.json.{__, Reads}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
 case class DownstreamTransferData(
-    pstr: Pstr,
+    pstr: PstrNumber,
     qtDetails: QtDetails,
     transferringMember: Option[TransferringMember],
     aboutReceivingQROPS: Option[AboutReceivingQROPS],
@@ -31,6 +31,7 @@ case class DownstreamTransferData(
   def toSavedUserAnswers: SavedUserAnswers =
     SavedUserAnswers(
       qtDetails.qtReference.value,
+      pstr,
       AnswersData(
         Some(ReportDetails(Some(pstr.value), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),
         transferringMember,
@@ -44,7 +45,7 @@ case class DownstreamTransferData(
 object DownstreamTransferData {
 
   implicit val reads: Reads[DownstreamTransferData] = (
-    (__ \ "success" \ "pstr").read[String].map(Pstr.apply) and
+    (__ \ "success" \ "pstr").read[String].map(PstrNumber.apply) and
       (__ \ "success" \ "qtDetails").read[QtDetails] and
       (__ \ "success" \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "success" \ "aboutReceivingQrops").readNullable[AboutReceivingQROPS] and

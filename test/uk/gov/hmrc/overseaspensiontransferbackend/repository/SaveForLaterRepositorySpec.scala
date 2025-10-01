@@ -59,9 +59,10 @@ class SaveForLaterRepositorySpec
   private val rawCollection =
     mongoComponent.database.getCollection[Document](collectionName)
 
-  private def buildUserAnswer(referenceId: String = "ref-useranswer-001"): SavedUserAnswers =
+  private def buildUserAnswer(referenceId: String = "ref-useranswer-001", pstr: PstrNumber = PstrNumber("12345678AB")): SavedUserAnswers =
     SavedUserAnswers(
       referenceId,
+      pstr,
       AnswersData(
         reportDetails       = None,
         transferringMember  = None,
@@ -114,7 +115,7 @@ class SaveForLaterRepositorySpec
   "SaveForLaterRepository" - {
 
     "must save and retrieve simple record with encryption" in {
-      val simpleSaved = SavedUserAnswers("ref-simple", AnswersData(None, None, None, None), now)
+      val simpleSaved = SavedUserAnswers("ref-simple", PstrNumber("12345678AB"), AnswersData(None, None, None, None), now)
       repository.set(simpleSaved).futureValue mustBe true
 
       val retrieved = repository.get("ref-simple").futureValue.value
@@ -169,7 +170,8 @@ class SaveForLaterRepositorySpec
 
     "must throw when decryption fails for corrupted payload" in {
       val corruptDoc = Document(
-        "referenceId" -> "ref-corrupt",
+        "_id"         -> "ref-corrupt",
+        "pstr"        -> "12345678AB",
         "data"        -> "invalid-encryption",
         "lastUpdated" -> java.util.Date.from(now)
       )

@@ -137,12 +137,12 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     "getTransfer" - {
       "return Right UserAnswersDTO" - {
         "searching for GetSaveForLaterRecord" in {
-          val userAnswers = UserAnswersDTO(testId, Json.obj(), now)
+          val userAnswers = UserAnswersDTO(testId, PstrNumber("12345678AB"), Json.obj(), now)
 
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, Pstr("12345678AB"), InProgress))))
+          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
 
           result mustBe Right(userAnswers)
         }
@@ -150,18 +150,18 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         List(Submitted, Compiled) foreach { qtStatus =>
           s"GetEtmpRecord with qtStatus ${qtStatus.downstreamValue} and transformer deconstructs correctly" in {
             val saved       = DownstreamTransferData(
-              Pstr("12345678AB"),
+              PstrNumber("12345678AB"),
               QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
               None,
               None,
               None
             )
-            val userAnswers = UserAnswersDTO("QT123456", Json.obj(), now)
+            val userAnswers = UserAnswersDTO("QT123456", PstrNumber("12345678AB"), Json.obj(), now)
 
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-            val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), Pstr("12345678AB"), qtStatus, "001"))))
+            val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), PstrNumber("12345678AB"), qtStatus, "001"))))
 
             result mustBe Right(userAnswers)
           }
@@ -172,7 +172,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         "qtStatus is InProgress and Repo returns None" in {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
 
-          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, Pstr("12345678AB"), InProgress))))
+          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: $testId from save-for-later"))
         }
@@ -180,7 +180,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         "qtStatus is Submitted and Repo returns None" in {
           when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(HipOriginFailures("Failed", List()))))
 
-          val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), Pstr("12345678AB"), Submitted, "001"))))
+          val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), PstrNumber("12345678AB"), Submitted, "001"))))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: QT123456 from HoD"))
         }
@@ -191,7 +191,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, Pstr("12345678AB"), InProgress))))
+          val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")
@@ -200,7 +200,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
 
         "qtStatus is Compiled and deconstruct returns an error" in {
           val saved = DownstreamTransferData(
-            Pstr("12345678AB"),
+            PstrNumber("12345678AB"),
             QtDetails("001", Submitted, now, QtNumber("QT123456"), None, None),
             None,
             None,
@@ -210,7 +210,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
           when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
-          val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), Pstr("12345678AB"), Compiled, "001"))))
+          val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), PstrNumber("12345678AB"), Compiled, "001"))))
 
           result mustBe Left(
             TransferDeconstructionError("Unable to deconstruct json with error: JsError(List((,List(JsonValidationError(List(Error),List())))))")
