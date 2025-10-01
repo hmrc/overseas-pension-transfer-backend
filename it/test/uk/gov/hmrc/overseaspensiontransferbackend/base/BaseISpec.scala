@@ -43,12 +43,16 @@ trait BaseISpec
     with GuiceOneServerPerSuite
     with WireMockHelper {
 
+  /** --- Safe test Mongo configuration --- */
+  private val testMongoUri = "mongodb://localhost:27017/test-saveforlater"
+
   def servicesConfig: Map[String, String] = Map(
     "play.filters.csrf.header.bypassHeaders.Csrf-Token"          -> "nocheck",
     "microservice.services.hip.host"                             -> WireMockHelper.wireMockHost,
     "microservice.services.hip.port"                             -> WireMockHelper.wireMockPort.toString,
     "microservice.services.auth.host"                            -> WireMockHelper.wireMockHost,
-    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString
+    "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString,
+    "mongodb.uri"                                                -> testMongoUri
   )
 
   protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty

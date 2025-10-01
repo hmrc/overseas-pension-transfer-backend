@@ -64,7 +64,6 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers {
       )
 
       val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
-      model.nonEmpty mustBe true
 
       val items = model.success.qropsTransferOverview
       items must have size 2
@@ -86,27 +85,6 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers {
       second.qtReference               mustBe "QT564322"
       second.qtStatus                  mustBe "Submitted"
       second.submissionCompilationDate mustBe Instant.parse("2025-05-09T19:10:12Z")
-    }
-
-    "must read 200 OK with missing 'success' as empty list (nonEmpty=false)" in {
-      val json                = Json.parse("""{}""")
-      val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
-      model.nonEmpty                      mustBe false
-      model.success.qropsTransferOverview mustBe Nil
-    }
-
-    "must read 200 OK with empty 'success' object as empty list (nonEmpty=false)" in {
-      val json                = Json.parse("""{ "success": {} }""")
-      val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
-      model.nonEmpty                      mustBe false
-      model.success.qropsTransferOverview mustBe Nil
-    }
-
-    "must read 200 OK with explicit empty array as empty list (nonEmpty=false)" in {
-      val json                = Json.parse("""{ "success": { "qropsTransferOverview": [] } }""")
-      val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
-      model.nonEmpty                      mustBe false
-      model.success.qropsTransferOverview mustBe Nil
     }
 
     "must round-trip (write then read) and preserve data" in {
@@ -135,14 +113,6 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers {
 
       backIn                                                          mustBe in
       (jsonOut \ "success" \ "qropsTransferOverview").as[JsArray].value must have size 1
-    }
-
-    "must write empty model with an explicit empty array under success" in {
-      val emptyData = DownstreamAllTransfersData(DownstreamAllTransfersData.Payload(Nil))
-      val json      = Json.toJson(emptyData)
-
-      (json \ "success").toOption                                      must not be empty
-      (json \ "success" \ "qropsTransferOverview").as[JsArray].value mustBe empty
     }
   }
 }

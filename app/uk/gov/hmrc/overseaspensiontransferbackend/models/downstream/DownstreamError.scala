@@ -91,6 +91,7 @@ case object Unauthorized       extends DownstreamError { override def log: Strin
 case object Forbidden          extends DownstreamError { override def log: String = "403 Forbidden" }
 case object NotFound           extends DownstreamError { override def log: String = "404 NotFound" }
 case object UnsupportedMedia   extends DownstreamError { override def log: String = "415 UnsupportedMedia" }
+case object NoTransfersFound   extends DownstreamError { override def log: String = "422.183 NoTransfersFound" }
 case object ServerError        extends DownstreamError { override def log: String = "500 InternalServerError" } // (fallback if body doesn’t match HIP shapes)
 case object ServiceUnavailable extends DownstreamError { override def log: String = "503 ServiceUnavailable" }
 

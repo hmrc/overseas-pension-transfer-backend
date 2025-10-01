@@ -19,14 +19,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 import org.apache.pekko.Done
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model._
-import play.api.libs.json.Format
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
@@ -36,13 +38,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SaveForLaterRepository @Inject() (
     mongoComponent: MongoComponent,
+    encryptionService: EncryptionService,
     appConfig: AppConfig,
     clock: Clock
   )(implicit ec: ExecutionContext
   ) extends PlayMongoRepository[SavedUserAnswers](
       collectionName = "saved-user-answers",
       mongoComponent = mongoComponent,
-      domainFormat   = SavedUserAnswers.format,
+      domainFormat   = SaveForLaterRepository.encryptedFormat(encryptionService),
       indexes        = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),
@@ -93,5 +96,37 @@ class SaveForLaterRepository @Inject() (
 
   def clear: Future[Done] = Mdc.preservingMdc {
     collection.drop().toFuture().map(_ => Done)
+  }
+}
+
+object SaveForLaterRepository {
+
+  def encryptedFormat(encryptionService: EncryptionService): OFormat[SavedUserAnswers] = {
+
+    val reads: Reads[SavedUserAnswers] = (
+      (__ \ "referenceId").read[String] and
+        (__ \ "pstr").read[PstrNumber] and
+        (__ \ "data").read[String].map { enc =>
+          EncryptedAnswersData(enc).decrypt(encryptionService) match {
+            case Right(decrypted) => decrypted.data
+            case Left(err)        => throw new RuntimeException(s"Decryption failed: ${err.getMessage}")
+          }
+        } and
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
+    )(SavedUserAnswers.apply _)
+
+    val writes: OWrites[SavedUserAnswers] = OWrites { ua =>
+      val encrypted: EncryptedAnswersData =
+        DecryptedAnswersData(ua.data).encrypt(encryptionService)
+
+      Json.obj(
+        "referenceId" -> ua.referenceId,
+        "pstr"        -> ua.pstr,
+        "data"        -> encrypted.encryptedString,
+        "lastUpdated" -> MongoJavatimeFormats.instantFormat.writes(ua.lastUpdated)
+      )
+    }
+
+    OFormat(reads, writes)
   }
 }
