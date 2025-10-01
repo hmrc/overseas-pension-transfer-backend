@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import scala.concurrent.Future
 
@@ -38,10 +38,10 @@ class SubmissionControllerSpec
   private val routePrefix = "/overseas-pension-transfer-backend"
   private val testRefId   = "ref-123"
 
-  "SubmissionController.submitAnswers" - {
+  "SubmissionController.submitTransfer" - {
 
     "must normalise a PSA submission and return 200 with SubmissionResponse" in {
-      val mockService = mock[SubmissionService]
+      val mockService = mock[TransferService]
 
       val psaDto           = PsaSubmissionDTO(
         referenceId = "to-be-overridden",
@@ -52,12 +52,12 @@ class SubmissionControllerSpec
 
       val expectedResponse = SubmissionResponse(QtNumber("QT123456"))
 
-      when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
+      when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SubmissionService].toInstance(mockService))
+          .overrides(bind[TransferService].toInstance(mockService))
           .build()
 
       running(app) {
@@ -72,7 +72,7 @@ class SubmissionControllerSpec
         val captor: ArgumentCaptor[NormalisedSubmission] =
           ArgumentCaptor.forClass(classOf[NormalisedSubmission])
 
-        verify(mockService).submitAnswers(captor.capture())(any[HeaderCarrier])
+        verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
         captured.referenceId mustBe testRefId
@@ -83,7 +83,7 @@ class SubmissionControllerSpec
     }
 
     "must normalise a PSP submission and return 200 with SubmissionResponse" in {
-      val mockService = mock[SubmissionService]
+      val mockService = mock[TransferService]
 
       val pspDto           = PspSubmissionDTO(
         referenceId = "to-be-overridden",
@@ -95,12 +95,12 @@ class SubmissionControllerSpec
 
       val expectedResponse = SubmissionResponse(QtNumber("QT999999"))
 
-      when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
+      when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SubmissionService].toInstance(mockService))
+          .overrides(bind[TransferService].toInstance(mockService))
           .build()
 
       running(app) {
@@ -115,7 +115,7 @@ class SubmissionControllerSpec
         val captor: ArgumentCaptor[NormalisedSubmission] =
           ArgumentCaptor.forClass(classOf[NormalisedSubmission])
 
-        verify(mockService).submitAnswers(captor.capture())(any[HeaderCarrier])
+        verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
         captured.referenceId mustBe testRefId
@@ -126,14 +126,14 @@ class SubmissionControllerSpec
     }
 
     "must return 400 with error JSON when service returns TransformationError" in {
-      val mockService = mock[SubmissionService]
+      val mockService = mock[TransferService]
 
-      when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
+      when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(SubmissionTransformationError("bad data"))))
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SubmissionService].toInstance(mockService))
+          .overrides(bind[TransferService].toInstance(mockService))
           .build()
 
       val payload: JsValue = Json.toJson(
@@ -153,14 +153,14 @@ class SubmissionControllerSpec
     }
 
     "must return 500 when service returns SubmissionFailed" in {
-      val mockService = mock[SubmissionService]
+      val mockService = mock[TransferService]
 
-      when(mockService.submitAnswers(any[NormalisedSubmission])(any[HeaderCarrier]))
+      when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Left(SubmissionFailed)))
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SubmissionService].toInstance(mockService))
+          .overrides(bind[TransferService].toInstance(mockService))
           .build()
 
       val payload: JsValue = Json.toJson(

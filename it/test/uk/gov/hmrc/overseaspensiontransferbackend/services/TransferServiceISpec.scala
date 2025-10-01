@@ -22,25 +22,25 @@ import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{SubmissionConnector, SubmissionConnectorImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{TransferConnector, TransferConnectorImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
-class SubmissionServiceISpec extends BaseISpec {
+class TransferServiceISpec extends BaseISpec {
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
 
   override protected def moduleOverrides: Seq[GuiceableModule] = Seq(
-    inject.bind[SubmissionService].to[SubmissionServiceImpl],
+    inject.bind[TransferService].to[TransferServiceImpl],
     inject.bind[SubmissionValidator].to[DummySubmissionValidatorImpl],
-    inject.bind[SubmissionConnector].to[SubmissionConnectorImpl]
+    inject.bind[TransferConnector].to[TransferConnectorImpl]
   )
 
   private lazy val repository: SaveForLaterRepository = app.injector.instanceOf[SaveForLaterRepository]
-  private lazy val service: SubmissionService         = app.injector.instanceOf[SubmissionService]
+  private lazy val service: TransferService         = app.injector.instanceOf[TransferService]
 
   "SubmissionService" - {
 
@@ -74,7 +74,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result = await(service.submitAnswers(normalised))
+      val result = await(service.submitTransfer(normalised))
 
       result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
     }
@@ -110,7 +110,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result = await(service.submitAnswers(normalised))
+      val result = await(service.submitTransfer(normalised))
 
       result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
     }
@@ -149,7 +149,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result = await(service.submitAnswers(normalised))
+      val result = await(service.submitTransfer(normalised))
      result mustBe Left(SubmissionTransformationError("Submission failed validation"))
     }
 
@@ -186,7 +186,7 @@ class SubmissionServiceISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result = await(service.submitAnswers(normalised))
+      val result = await(service.submitTransfer(normalised))
 
      result mustBe Left(SubmissionFailed)
     }

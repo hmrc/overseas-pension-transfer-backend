@@ -21,7 +21,7 @@ import play.api.libs.json.{JsError, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
@@ -33,13 +33,13 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 import java.time.{LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
-class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
+class TransferServiceSpec extends AnyFreeSpec with SpecBase {
 
   private val mockRepo        = mock[SaveForLaterRepository]
   private val mockValidator   = mock[SubmissionValidator]
-  private val mockConnector   = mock[SubmissionConnector]
+  private val mockConnector   = mock[TransferConnector]
   private val mockTransformer = mock[UserAnswersTransformer]
-  private val service         = new SubmissionServiceImpl(mockRepo, mockValidator, mockTransformer, mockConnector)
+  private val service         = new TransferServiceImpl(mockRepo, mockValidator, mockTransformer, mockConnector)
 
   private val normalisedSubmission = NormalisedSubmission(
     referenceId = testId,
@@ -56,22 +56,22 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
     formBundleNumber = "119000004320"
   )
 
-  "SubmissionServiceImpl" - {
-    "submitAnswers" - {
+  "TransferServiceImpl" - {
+    "submitTransfer" - {
       "must return Right(SubmissionResponse) on happy path" in {
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
-        when(mockConnector.submit(eqTo(ValidatedSubmission(saved)))(any))
+        when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
           .thenReturn(Future.successful(Right(downstreamSuccess)))
 
-        val result = service.submitAnswers(normalisedSubmission).futureValue
+        val result = service.submitTransfer(normalisedSubmission).futureValue
         result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
       }
 
       "must return Left(SubmissionTransformationError) when no prepared submission found" in {
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
 
-        val result = service.submitAnswers(normalisedSubmission).futureValue
+        val result = service.submitTransfer(normalisedSubmission).futureValue
         result match {
           case Left(SubmissionTransformationError(msg)) =>
             msg must include(testId)
@@ -83,7 +83,7 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Left(ValidationError("boom")))
 
-        val result = service.submitAnswers(normalisedSubmission).futureValue
+        val result = service.submitTransfer(normalisedSubmission).futureValue
         result mustBe Left(SubmissionTransformationError("boom"))
       }
 
@@ -99,10 +99,10 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
 
         downstreamErrors.foreach { ue =>
-          when(mockConnector.submit(eqTo(ValidatedSubmission(saved)))(any))
+          when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
             .thenReturn(Future.successful(Left(ue)))
 
-          val result = service.submitAnswers(normalisedSubmission).futureValue
+          val result = service.submitTransfer(normalisedSubmission).futureValue
           result match {
             case Left(SubmissionTransformationError(msg)) =>
               msg must include("Submission failed validation")
@@ -126,10 +126,10 @@ class SubmissionServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
 
         infra.foreach { ue =>
-          when(mockConnector.submit(eqTo(ValidatedSubmission(saved)))(any))
+          when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
             .thenReturn(Future.successful(Left(ue)))
 
-          val result = service.submitAnswers(normalisedSubmission).futureValue
+          val result = service.submitTransfer(normalisedSubmission).futureValue
           result mustBe Left(SubmissionFailed)
         }
       }

@@ -35,9 +35,9 @@ import java.time.{Instant, LocalDate}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[SubmissionConnectorImpl])
-trait SubmissionConnector {
-  def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
+@ImplementedBy(classOf[TransferConnectorImpl])
+trait TransferConnector {
+  def submitTransfer(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
       pstr: PstrNumber,
@@ -56,13 +56,13 @@ trait SubmissionConnector {
 }
 
 @Singleton
-class SubmissionConnectorImpl @Inject() (
+class TransferConnectorImpl @Inject() (
     httpClientV2: HttpClientV2,
     appConfig: AppConfig
   )(implicit ec: ExecutionContext
-  ) extends SubmissionConnector with Logging {
+  ) extends TransferConnector with Logging {
 
-  override def submit(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+  override def submitTransfer(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
@@ -70,7 +70,7 @@ class SubmissionConnectorImpl @Inject() (
 
     // Required headers from the spec
     val correlationId = hc.requestId.fold {
-      logger.error("[SubmissionConnector][submit]: Request is missing X-Request-ID header")
+      logger.error("[TransferConnector][submit]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
     } {
       requestId =>
@@ -103,7 +103,7 @@ class SubmissionConnectorImpl @Inject() (
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val correlationId     = hc.requestId.fold {
-      logger.error("[SubmissionConnector][getTransfer]: Request is missing X-Request-ID header")
+      logger.error("[TransferConnector][getTransfer]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
     } {
       requestId =>
@@ -138,7 +138,7 @@ class SubmissionConnectorImpl @Inject() (
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
 
     val correlationId = hc.requestId.fold {
-      logger.error("[SubmissionConnector][getAllTransfers]: Request is missing X-Request-ID header")
+      logger.error("[TransferConnector][getAllTransfers]: Request is missing X-Request-ID header")
       throw new Exception("Header X-Request-ID missing")
     }(_.value)
 

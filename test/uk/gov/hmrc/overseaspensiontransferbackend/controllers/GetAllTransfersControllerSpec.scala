@@ -29,7 +29,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.Future
@@ -46,9 +46,9 @@ class GetAllTransfersControllerSpec
   "GetAllTransfersController.getAllTransfers" - {
 
     "must return 200 with DTO JSON when PSTR is valid and transfers exist" in {
-      val mockSubmissionService: SubmissionService = mock[SubmissionService]
-      val pstrStr                                  = "24000001AA"
-      val pstr                                     = PstrNumber(pstrStr)
+      val mockSubmissionService: TransferService = mock[TransferService]
+      val pstrStr                                = "24000001AA"
+      val pstr                                   = PstrNumber(pstrStr)
 
       val items: Seq[AllTransfersItem] =
         Seq(AllTransfersItem(
@@ -74,7 +74,7 @@ class GetAllTransfersControllerSpec
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[SubmissionService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockSubmissionService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()
@@ -107,9 +107,9 @@ class GetAllTransfersControllerSpec
     }
 
     "must return 404 when PSTR is valid but there are no transfers (None from upstream)" in {
-      val mockSubmissionService: SubmissionService = mock[SubmissionService]
-      val pstrStr                                  = "24000001AA"
-      val pstr                                     = PstrNumber(pstrStr)
+      val mockSubmissionService: TransferService = mock[TransferService]
+      val pstrStr                                = "24000001AA"
+      val pstr                                   = PstrNumber(pstrStr)
 
       when(mockSubmissionService.getAllTransfers(eqTo(pstr))(any[HeaderCarrier], any[AppConfig]))
         .thenReturn(Future.successful(Left(NoTransfersFoundResponse)))
@@ -117,7 +117,7 @@ class GetAllTransfersControllerSpec
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[SubmissionService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockSubmissionService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()
@@ -131,9 +131,9 @@ class GetAllTransfersControllerSpec
     }
 
     "must return 500 when service returns an unexpected Left(error)" in {
-      val mockSubmissionService: SubmissionService = mock[SubmissionService]
-      val pstrStr                                  = "24000001AA"
-      val pstr                                     = PstrNumber(pstrStr)
+      val mockSubmissionService: TransferService = mock[TransferService]
+      val pstrStr                                = "24000001AA"
+      val pstr                                   = PstrNumber(pstrStr)
 
       val unexpectedError: AllTransfersResponseError = mock[AllTransfersResponseError]
 
@@ -143,7 +143,7 @@ class GetAllTransfersControllerSpec
       val app: Application =
         applicationBuilder()
           .overrides(
-            bind[SubmissionService].toInstance(mockSubmissionService),
+            bind[TransferService].toInstance(mockSubmissionService),
             bind[Clock].toInstance(fixedClock)
           )
           .build()

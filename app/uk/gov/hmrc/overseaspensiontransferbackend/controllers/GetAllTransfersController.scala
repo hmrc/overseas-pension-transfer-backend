@@ -23,7 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{AllTransfersResponse, NoTransfersFoundResponse}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import java.time.Clock
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class GetAllTransfersController @Inject() (
     cc: ControllerComponents,
-    submissionService: SubmissionService,
+    transferService: TransferService,
     clock: Clock
   )(implicit ec: ExecutionContext,
     appConfig: AppConfig
@@ -45,7 +45,7 @@ class GetAllTransfersController @Inject() (
 
     maybePstr match {
       case Right(validatedPstr) =>
-        submissionService.getAllTransfers(validatedPstr).flatMap {
+        transferService.getAllTransfers(validatedPstr).flatMap {
           case Right(AllTransfersResponse(transfers)) =>
             val dto = GetAllTransfersDTO.from(validatedPstr, transfers)(clock)
             Future.successful(Ok(Json.toJson(dto)))

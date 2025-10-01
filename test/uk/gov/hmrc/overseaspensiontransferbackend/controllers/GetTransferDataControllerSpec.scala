@@ -29,16 +29,16 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferDeconstructionError, TransferNotFound}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import scala.concurrent.Future
 
 class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val mockSubmissionService: SubmissionService = mock[SubmissionService]
+  private val mockSubmissionService: TransferService = mock[TransferService]
 
   def application: Application = GuiceApplicationBuilder().overrides(
-    bind[SubmissionService].toInstance(mockSubmissionService)
+    bind[TransferService].toInstance(mockSubmissionService)
   ).build()
 
   "getTransfer" - {

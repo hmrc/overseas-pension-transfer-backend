@@ -22,14 +22,14 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
 import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferNotFound, TransferRetrievalError}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext
 
-class GetTransferDataController @Inject() (cc: ControllerComponents, submissionService: SubmissionService)(implicit ec: ExecutionContext)
+class GetTransferDataController @Inject() (cc: ControllerComponents, transferService: TransferService)(implicit ec: ExecutionContext)
     extends BackendController(cc) {
 
   def getTransfer(
@@ -45,7 +45,7 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, submissionS
         val transferType: Either[TransferRetrievalError, GetSpecificTransferHandler] =
           GetSpecificTransferHandler.apply(referenceId, PstrNumber(pstr), QtStatus(qtStatus), versionNumber)
 
-        submissionService.getTransfer(transferType) map {
+        transferService.getTransfer(transferType) map {
           case Right(value)              => Ok(Json.toJson(value))
           case Left(TransferNotFound(_)) => NotFound
           case Left(_)                   => InternalServerError

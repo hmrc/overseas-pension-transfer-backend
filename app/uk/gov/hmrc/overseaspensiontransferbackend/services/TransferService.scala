@@ -20,7 +20,7 @@ import play.api.Logging
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
@@ -33,8 +33,8 @@ import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SubmissionService {
-  def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
+trait TransferService {
+  def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
   def getAllTransfers(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
 
   def getTransfer(
@@ -44,34 +44,34 @@ trait SubmissionService {
 }
 
 @Singleton
-class SubmissionServiceImpl @Inject() (
+class TransferServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
     transformer: UserAnswersTransformer,
-    connector: SubmissionConnector
+    connector: TransferConnector
   )(implicit ec: ExecutionContext
-  ) extends SubmissionService with Logging {
+  ) extends TransferService with Logging {
 
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
+  override def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId).flatMap {
       case Some(saved) =>
         validator.validate(saved) match {
           case Left(err)        =>
             Future.successful(Left(SubmissionTransformationError(err.message)))
           case Right(validated) =>
-            connector.submit(validated).map {
+            connector.submitTransfer(validated).map {
               case Right(success) =>
                 // TODO: the session store for the dashboards should be updated for the newly
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
               case Left(err)      =>
-                logger.info(s"[submitAnswers] referenceId=${submission.referenceId} ${err.log}")
+                logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 Left(mapDownstream(err))
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
-        logger.info(s"[submitAnswers] referenceId=${submission.referenceId} No submission found in save for later repository")
+        logger.info(s"[submitTransfer] referenceId=${submission.referenceId} No submission found in save for later repository")
         Future.successful(Left(SubmissionTransformationError(
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))

@@ -4,7 +4,7 @@ GET         /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontrans
 POST        /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.saveAnswers(referenceId)
 DELETE      /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.deleteAnswers(referenceId)
 
-POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitAnswers(referenceId)
+POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitTransfer(referenceId)
 
 GET         /get-all-transfers/:pstrNumber    uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetAllTransfersController.getAllTransfers(pstrNumber)
 

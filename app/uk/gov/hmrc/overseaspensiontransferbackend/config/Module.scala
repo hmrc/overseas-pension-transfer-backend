@@ -32,7 +32,7 @@ class Module extends AbstractModule {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
     // TODO: These must be bound to the actual version in production
-    bind(classOf[SubmissionService]).to(classOf[SubmissionServiceImpl])
+    bind(classOf[TransferService]).to(classOf[TransferServiceImpl])
     bind(classOf[SubmissionValidator]).to(classOf[DummySubmissionValidatorImpl])
     bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }
