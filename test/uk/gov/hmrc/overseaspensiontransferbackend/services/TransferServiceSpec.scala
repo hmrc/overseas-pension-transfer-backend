@@ -380,10 +380,10 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
 
         result match {
           case Right(AllTransfersResponse(items)) =>
-            items must have size 2
-            items.head mustBe inProg
+            items                               must have size 2
+            items.head                        mustBe inProg
             items(1).qtReference.map(_.value) mustBe Some("QT123456")
-          case other => fail(s"Unexpected: $other")
+          case other                              => fail(s"Unexpected: $other")
         }
       }
 
@@ -476,7 +476,6 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Right(ds)))
 
-
         when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.failed(new RuntimeException("boom")))
 
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
@@ -486,7 +485,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         result match {
           case Right(AllTransfersResponse(items)) =>
             items.map(_.qtReference.map(_.value)) mustBe Seq(Some("QT654321"))
-          case other => fail(s"Unexpected: $other")
+          case other                              => fail(s"Unexpected: $other")
         }
       }
     }

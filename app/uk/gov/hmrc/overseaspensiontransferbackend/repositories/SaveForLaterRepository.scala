@@ -97,6 +97,10 @@ class SaveForLaterRepository @Inject() (
   def clear: Future[Done] = Mdc.preservingMdc {
     collection.drop().toFuture().map(_ => Done)
   }
+
+  def testOnlyDeleteByPstr(pstr: PstrNumber): Future[Unit] = Mdc.preservingMdc {
+    collection.deleteMany(Filters.equal("pstr", pstr.value)).toFuture().map(_ => ())
+  }
 }
 
 object SaveForLaterRepository {
