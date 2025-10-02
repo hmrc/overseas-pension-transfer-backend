@@ -17,6 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber}
+
 import java.time.{Instant, LocalDate}
 
 final case class DownstreamAllTransfersData(success: DownstreamAllTransfersData.Payload)
@@ -38,6 +41,22 @@ object DownstreamAllTransfersData {
       qropsReference: String,
       submissionCompilationDate: Instant
     )
+
+  def toAllTransferItems(pstrNumber: PstrNumber, d: DownstreamAllTransfersData): Seq[AllTransfersItem] =
+    d.success.qropsTransferOverview.map { r =>
+      AllTransfersItem(
+        transferReference = None,
+        qtReference       = Some(QtNumber(r.qtReference)),
+        qtVersion         = Some(r.qtVersion),
+        nino              = Some(r.nino),
+        memberFirstName   = Some(r.firstName),
+        memberSurname     = Some(r.lastName),
+        submissionDate    = Some(r.qtDate),
+        lastUpdated       = None, // in-progress supplies lastUpdated
+        qtStatus          = Some(QtStatus(r.qtStatus)),
+        pstrNumber        = Some(pstrNumber)
+      )
+    }
 
   implicit val overviewItemFormat: OFormat[OverviewItem]       = Json.format[OverviewItem]
   implicit val payloadFormat: OFormat[Payload]                 = Json.format[Payload]

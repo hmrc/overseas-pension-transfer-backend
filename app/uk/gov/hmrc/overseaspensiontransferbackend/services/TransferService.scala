@@ -135,35 +135,39 @@ class TransferServiceImpl @Inject() (
     val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
     val fromDate: LocalDate = toDate.minusYears(config.getAllTransfersYearsOffset)
 
-    /* This is a simplified version of the get all transfers service layer that just returns the last 10 years of transfers,
-    It will need to be updated with in progress transfers (when we've indexed the mongo by scheme id) and perhaps later with
-    from and to dates and utilising the qt reference functionality. */
-    connector.getAllTransfers(pstrNumber = pstrNumber, fromDate = fromDate, toDate = toDate, qtRef = None).map {
-      case Right(downstream) =>
-        val items = downstream.success.qropsTransferOverview.map { r =>
-          AllTransfersItem(
-            transferReference = None,
-            qtReference       = Some(QtNumber(r.qtReference)),
-            qtVersion         = Some(r.qtVersion),
-            qtStatus          = Some(QtStatus(r.qtStatus)),
-            nino              = Some(r.nino),
-            memberFirstName   = Some(r.firstName),
-            memberSurname     = Some(r.lastName),
-            qtDate            = Some(r.qtDate),
-            lastUpdated       = None,
-            pstrNumber        = Some(pstrNumber),
-            submissionDate    = Some(r.submissionCompilationDate)
-          )
-        }
-        Right(AllTransfersResponse(items))
+    val downstreamEitherF: Future[Either[DownstreamError, DownstreamAllTransfersData]] =
+      connector.getAllTransfers(
+        pstrNumber = pstrNumber,
+        fromDate   = fromDate,
+        toDate     = toDate,
+        qtRef      = None
+      )
 
-      case Left(err) =>
-        logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${err.log}")
+    val inProgressF: Future[Seq[AllTransfersItem]] =
+      repository.getRecords(pstrNumber).recover { case e =>
+        logger.warn(s"[getAllTransfers] in-progress lookup failed for pstr=${pstrNumber.normalised}", e)
+        Seq.empty
+      }
 
-        err match {
-          case NoTransfersFound => Left(NoTransfersFoundResponse)
-          case _                => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
-        }
+    for {
+      dsEither   <- downstreamEitherF
+      inProgress <- inProgressF
+    } yield {
+      dsEither match {
+        case Right(ds) =>
+          val submitted = DownstreamAllTransfersData.toAllTransferItems(pstrNumber, ds)
+          Right(AllTransfersResponse(inProgress ++ submitted))
+        case Left(e)   =>
+          logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${e.log}")
+          if (inProgress.nonEmpty) {
+            Right(AllTransfersResponse(inProgress))
+          } else {
+            e match {
+              case NoTransfersFound => Left(NoTransfersFoundResponse)
+              case _                => Left(UnexpectedError(s"Unable to get all transfers for ${pstrNumber.value}"))
+            }
+          }
+      }
     }
   }
 }

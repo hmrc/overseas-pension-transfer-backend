@@ -219,6 +219,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
       }
     }
     "getAllTransfers" - {
+
       "must map downstream overview rows into AllTransfersItem and wrap in Right" in {
         val pstr           = PstrNumber("24000001AA")
         val submissionDate = now
@@ -262,6 +263,9 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Right(ds)))
 
+        // no in-progress
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Nil))
+
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
@@ -292,7 +296,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         }
       }
 
-      "returns Left(NoTransfersFound) when connector returns NotFound" in {
+      "returns Left(NoTransfersFound) when connector returns NotFound and no in-progress exists" in {
         val pstr = PstrNumber("24000001AA")
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -301,13 +305,15 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Left(NoTransfersFound)))
 
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Nil))
+
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
         result mustBe Left(NoTransfersFoundResponse)
       }
 
-      "returns Left(UnexpectedError) when connector returns any other error" in {
+      "returns Left(UnexpectedError) when connector returns any other error and no in-progress exists" in {
         val pstr = PstrNumber("24000001AA")
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -316,10 +322,172 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
         when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
           .thenReturn(Future.successful(Left(Forbidden)))
 
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Nil))
+
         when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
 
         val result = service.getAllTransfers(pstr).futureValue
         result mustBe Left(UnexpectedError(s"Unable to get all transfers for ${pstr.value}"))
+      }
+
+      "merges in-progress (repo) with submitted (downstream) when both present" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val ds = DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "fb",
+                qtReference               = "QT123456",
+                qtVersion                 = "002",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = "Submitted",
+                nino                      = "AA000002A",
+                firstName                 = "Alice",
+                lastName                  = "Liddell",
+                qtDate                    = LocalDate.parse("2025-02-02"),
+                qropsReference            = "QROPS9",
+                submissionCompilationDate = now
+              )
+            )
+          )
+        )
+
+        val inProg = AllTransfersItem(
+          transferReference = Some("T-1"),
+          qtReference       = None,
+          qtVersion         = None,
+          nino              = Some("AB123456C"),
+          memberFirstName   = Some("In"),
+          memberSurname     = Some("Progress"),
+          submissionDate    = None,
+          lastUpdated       = Some(LocalDate.parse("2025-03-01")),
+          qtStatus          = Some(QtStatus("InProgress")),
+          pstrNumber        = Some(pstr)
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(ds)))
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Seq(inProg)))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+
+        result match {
+          case Right(AllTransfersResponse(items)) =>
+            items must have size 2
+            items.head mustBe inProg
+            items(1).qtReference.map(_.value) mustBe Some("QT123456")
+          case other => fail(s"Unexpected: $other")
+        }
+      }
+
+      "returns in-progress items when connector returns NoTransfersFound but repo has records" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val inProg = AllTransfersItem(
+          transferReference = Some("T-2"),
+          qtReference       = None,
+          qtVersion         = None,
+          nino              = None,
+          memberFirstName   = Some("Only"),
+          memberSurname     = Some("InProgress"),
+          submissionDate    = None,
+          lastUpdated       = Some(LocalDate.parse("2025-04-01")),
+          qtStatus          = Some(QtStatus("InProgress")),
+          pstrNumber        = Some(pstr)
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(NoTransfersFound)))
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Seq(inProg)))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+        result mustBe Right(AllTransfersResponse(Seq(inProg)))
+      }
+
+      "returns in-progress items when connector returns another error but repo has records" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val inProg = AllTransfersItem(
+          transferReference = Some("T-3"),
+          qtReference       = None,
+          qtVersion         = None,
+          nino              = None,
+          memberFirstName   = Some("Still"),
+          memberSurname     = Some("Proceeding"),
+          submissionDate    = None,
+          lastUpdated       = Some(LocalDate.parse("2025-05-01")),
+          qtStatus          = Some(QtStatus("InProgress")),
+          pstrNumber        = Some(pstr)
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Left(Unauthorized)))
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Seq(inProg)))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+        result mustBe Right(AllTransfersResponse(Seq(inProg)))
+      }
+
+      "recovers repo failure to empty in-progress and still returns downstream results" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val ds = DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "fb",
+                qtReference               = "QT654321",
+                qtVersion                 = "001",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = "Submitted",
+                nino                      = "AA777777A",
+                firstName                 = "Sue",
+                lastName                  = "Smith",
+                qtDate                    = LocalDate.parse("2025-06-01"),
+                qropsReference            = "QROPS777",
+                submissionCompilationDate = now
+              )
+            )
+          )
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(ds)))
+
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.failed(new RuntimeException("boom")))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+
+        result match {
+          case Right(AllTransfersResponse(items)) =>
+            items.map(_.qtReference.map(_.value)) mustBe Seq(Some("QT654321"))
+          case other => fail(s"Unexpected: $other")
+        }
       }
     }
   }
