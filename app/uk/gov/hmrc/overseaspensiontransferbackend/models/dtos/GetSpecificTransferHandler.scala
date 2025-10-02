@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{QtNumber, TransferIdentifierInvalid, TransferRetrievalError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferIdentifierInvalid, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
 import scala.util.{Success, Try}

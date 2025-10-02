@@ -20,8 +20,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{SubmissionFailed, SubmissionTransformationError}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{SubmissionFailed, SubmissionTransformationError}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
@@ -30,17 +30,17 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class SubmissionController @Inject() (
     cc: ControllerComponents,
-    submissionService: SubmissionService
+    transferService: TransferService
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def submitAnswers(referenceId: String): Action[SubmissionDTO] =
+  def submitTransfer(referenceId: String): Action[SubmissionDTO] =
     Action.async(parse.json[SubmissionDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       val normalised = request.body.normalise(referenceId)
 
-      submissionService.submitAnswers(normalised).map {
+      transferService.submitTransfer(normalised).map {
         case Right(submissionResponse)                =>
           Ok(Json.toJson(submissionResponse))
         case Left(SubmissionTransformationError(msg)) =>

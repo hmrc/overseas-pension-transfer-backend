@@ -28,24 +28,24 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{TransferDeconstructionError, TransferNotFound}
-import uk.gov.hmrc.overseaspensiontransferbackend.services.SubmissionService
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferDeconstructionError, TransferNotFound}
+import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import scala.concurrent.Future
 
 class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
-  private val mockSubmissionService: SubmissionService = mock[SubmissionService]
+  private val mockTransferService: TransferService = mock[TransferService]
 
   def application: Application = GuiceApplicationBuilder().overrides(
-    bind[SubmissionService].toInstance(mockSubmissionService)
+    bind[TransferService].toInstance(mockTransferService)
   ).build()
 
   "getTransfer" - {
     "Return 200 with Json when service returns Right UserAnswersDTO" in {
       val json = Json.obj("key" -> "value")
 
-      when(mockSubmissionService.getTransfer(any)(any))
+      when(mockTransferService.getTransfer(any)(any))
         .thenReturn(Future.successful(Right(UserAnswersDTO("id", pstr, json, now))))
 
       running(application) {
@@ -64,7 +64,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 404 when service returns Left TransferNotFound" in {
-      when(mockSubmissionService.getTransfer(any)(any))
+      when(mockTransferService.getTransfer(any)(any))
         .thenReturn(Future.successful(Left(TransferNotFound("No Transfer found"))))
 
       running(application) {
@@ -77,7 +77,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 500 when service returns Left TransferDeconstructionError" in {
-      when(mockSubmissionService.getTransfer(any)(any))
+      when(mockTransferService.getTransfer(any)(any))
         .thenReturn(Future.successful(Left(TransferDeconstructionError("Error"))))
 
       running(application) {

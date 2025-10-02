@@ -20,11 +20,11 @@ import play.api.Logging
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.SubmissionConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
@@ -33,8 +33,8 @@ import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SubmissionService {
-  def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
+trait TransferService {
+  def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
   def getAllTransfers(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
 
   def getTransfer(
@@ -44,34 +44,34 @@ trait SubmissionService {
 }
 
 @Singleton
-class SubmissionServiceImpl @Inject() (
+class TransferServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
     transformer: UserAnswersTransformer,
-    connector: SubmissionConnector
+    connector: TransferConnector
   )(implicit ec: ExecutionContext
-  ) extends SubmissionService with Logging {
+  ) extends TransferService with Logging {
 
-  override def submitAnswers(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
+  override def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId).flatMap {
       case Some(saved) =>
         validator.validate(saved) match {
           case Left(err)        =>
             Future.successful(Left(SubmissionTransformationError(err.message)))
           case Right(validated) =>
-            connector.submit(validated).map {
+            connector.submitTransfer(validated).map {
               case Right(success) =>
                 // TODO: the session store for the dashboards should be updated for the newly
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
                 Right(SubmissionResponse(success.qtNumber))
               case Left(err)      =>
-                logger.info(s"[submitAnswers] referenceId=${submission.referenceId} ${err.log}")
+                logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 Left(mapDownstream(err))
             }.recover { case _ => Left(SubmissionFailed) }
         }
       case None        =>
-        logger.info(s"[submitAnswers] referenceId=${submission.referenceId} No submission found in save for later repository")
+        logger.info(s"[submitTransfer] referenceId=${submission.referenceId} No submission found in save for later repository")
         Future.successful(Left(SubmissionTransformationError(
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))
@@ -103,14 +103,14 @@ class SubmissionServiceImpl @Inject() (
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
           case None              =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $transferId from save-for-later")
+            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $transferId from save-for-later")
             Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
         }
       case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
         connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
           case Left(err)    =>
-            logger.error(s"[SubmissionService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
 
@@ -122,7 +122,7 @@ class SubmissionServiceImpl @Inject() (
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
       case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
       case Left(jsError)   =>
-        logger.error(s"[SubmissionService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
+        logger.error(s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }
   }

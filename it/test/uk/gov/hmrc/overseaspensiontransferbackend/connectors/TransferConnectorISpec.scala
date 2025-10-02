@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
@@ -33,11 +33,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
 
-class SubmissionConnectorISpec extends BaseISpec {
+class TransferConnectorISpec extends BaseISpec {
 
   override protected def moduleOverrides: Seq[GuiceableModule] =
     Seq(
-      inject.bind[SubmissionConnector].to[SubmissionConnectorImpl]
+      inject.bind[TransferConnector].to[TransferConnectorImpl]
     )
 
   private val now = Instant.now()
@@ -45,18 +45,18 @@ class SubmissionConnectorISpec extends BaseISpec {
   private val answersData = AnswersData(None, None, None, None)
   private val savedUserAnswers = SavedUserAnswers("", pstr, answersData, now)
 
-  private val connector = app.injector.instanceOf[SubmissionConnector]
+  private val connector = app.injector.instanceOf[TransferConnector]
 
   "submit" - {
     "return an exception when X-Request-Id is missing" in {
-      intercept[Exception](connector.submit(ValidatedSubmission(savedUserAnswers))).getMessage mustBe
+      intercept[Exception](connector.submitTransfer(ValidatedSubmission(savedUserAnswers))).getMessage mustBe
         "Header X-Request-ID missing"
     }
 
     "send correlationId as header when RequestId is present" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
 
-      connector.submit(ValidatedSubmission(savedUserAnswers))
+      connector.submitTransfer(ValidatedSubmission(savedUserAnswers))
 
       verify(postRequestedFor(urlEqualTo("/etmp/RESTAdapter/pods/reports/qrops-transfer"))
         .withHeader("correlationid", equalTo("id"))
@@ -76,7 +76,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Right(DownstreamSuccess(QtNumber("QT123456"), now, "123"))
     }
@@ -97,7 +97,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -115,7 +115,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
@@ -136,7 +136,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -158,7 +158,7 @@ class SubmissionConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submit(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }

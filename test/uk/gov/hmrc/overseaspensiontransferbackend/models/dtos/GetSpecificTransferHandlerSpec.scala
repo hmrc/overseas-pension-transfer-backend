@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.{QtNumber, TransferIdentifierInvalid}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferIdentifierInvalid}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{Compiled, InProgress, PstrNumber, Submitted}
 
 class GetSpecificTransferHandlerSpec extends AnyFreeSpec with Matchers {

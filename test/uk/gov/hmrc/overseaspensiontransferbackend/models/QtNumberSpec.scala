@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 
 class QtNumberSpec extends AnyFreeSpec with Matchers {
 

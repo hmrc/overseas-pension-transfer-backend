@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Instant, LocalDate, ZoneId}

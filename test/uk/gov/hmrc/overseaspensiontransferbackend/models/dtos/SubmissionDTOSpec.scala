@@ -19,8 +19,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission.Submitter._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.submission._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 
 import java.time.Instant
 
