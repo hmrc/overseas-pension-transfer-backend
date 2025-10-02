@@ -145,14 +145,14 @@ class TransferServiceImpl @Inject() (
             transferReference = None,
             qtReference       = Some(QtNumber(r.qtReference)),
             qtVersion         = Some(r.qtVersion),
+            qtStatus          = Some(QtStatus(r.qtStatus)),
             nino              = Some(r.nino),
             memberFirstName   = Some(r.firstName),
             memberSurname     = Some(r.lastName),
-            submissionDate    = Some(r.qtDate),
-            // TODO: Add lastUpdated once the in progress transfers have been added, it should be the last time the in progress transfer was updated
+            qtDate            = Some(r.qtDate),
             lastUpdated       = None,
-            qtStatus          = Some(QtStatus(r.qtStatus)),
-            pstrNumber        = Some(pstrNumber)
+            pstrNumber        = Some(pstrNumber),
+            submissionDate    = Some(r.submissionCompilationDate)
           )
         }
         Right(AllTransfersResponse(items))

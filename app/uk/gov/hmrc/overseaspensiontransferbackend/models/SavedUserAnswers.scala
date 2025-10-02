@@ -22,7 +22,7 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
-import java.time.{Instant, LocalDate, ZoneId}
+import java.time.Instant
 
 final case class SavedUserAnswers(
     referenceId: String,
@@ -33,16 +33,17 @@ final case class SavedUserAnswers(
 
   def toAllTransfersItem: AllTransfersItem =
     AllTransfersItem(
-      Some(referenceId),
-      None,
-      None,
-      data.nino,
-      data.memberForeName,
-      data.memberLastName,
-      None,
-      Some(LocalDate.ofInstant(lastUpdated, ZoneId.systemDefault())),
-      Some(InProgress),
-      Some(pstr)
+      transferReference = Some(referenceId),
+      qtReference       = None,
+      qtVersion         = None,
+      qtStatus          = Some(InProgress),
+      nino              = data.nino,
+      memberFirstName   = data.memberForeName,
+      memberSurname     = data.memberLastName,
+      qtDate            = None,
+      lastUpdated       = Some(lastUpdated),
+      pstrNumber        = Some(pstr),
+      submissionDate    = None
     )
 }
 

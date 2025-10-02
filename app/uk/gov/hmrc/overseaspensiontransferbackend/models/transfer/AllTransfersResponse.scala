@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate}
 
 case class AllTransfersResponse(
     transfers: Seq[AllTransfersItem]
@@ -33,13 +33,14 @@ case class AllTransfersItem(
     transferReference: Option[String],
     qtReference: Option[QtNumber],
     qtVersion: Option[String],
+    qtStatus: Option[QtStatus],
     nino: Option[String],
     memberFirstName: Option[String],
     memberSurname: Option[String],
-    submissionDate: Option[LocalDate],
-    lastUpdated: Option[LocalDate],
-    qtStatus: Option[QtStatus],
-    pstrNumber: Option[PstrNumber]
+    qtDate: Option[LocalDate],
+    lastUpdated: Option[Instant],
+    pstrNumber: Option[PstrNumber],
+    submissionDate: Option[Instant]
   )
 
 object AllTransfersItem {
