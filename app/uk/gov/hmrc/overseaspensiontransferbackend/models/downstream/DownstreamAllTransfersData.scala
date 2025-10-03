@@ -51,10 +51,11 @@ object DownstreamAllTransfersData {
         nino              = Some(r.nino),
         memberFirstName   = Some(r.firstName),
         memberSurname     = Some(r.lastName),
-        submissionDate    = Some(r.qtDate),
+        submissionDate    = Some(r.submissionCompilationDate),
         lastUpdated       = None, // in-progress supplies lastUpdated
         qtStatus          = Some(QtStatus(r.qtStatus)),
-        pstrNumber        = Some(pstrNumber)
+        pstrNumber        = Some(pstrNumber),
+        qtDate            = Some(r.qtDate)
       )
     }
 

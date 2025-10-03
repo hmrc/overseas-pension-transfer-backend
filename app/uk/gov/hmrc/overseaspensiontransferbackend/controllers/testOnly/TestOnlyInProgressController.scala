@@ -24,8 +24,10 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly.NameGenerator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, LocalDate, ZoneOffset}
 import java.util.concurrent.ThreadLocalRandom
+import java.util.concurrent.TimeUnit.DAYS
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -51,13 +53,11 @@ class TestOnlyInProgressController @Inject() (
   }
 
   def generate(pstr: String, n: Int): Action[AnyContent] = Action.async {
-    val today       = LocalDate.now(ZoneOffset.UTC)
-    val maxDaysBack = 30
-    val rng         = ThreadLocalRandom.current()
+    val now         = Instant.now
+    val maxDaysBack = now.minus(31, ChronoUnit.DAYS)
     val seeds       = (1 to n).map { i =>
       val (first, last) = NameGenerator.nameFor(pstr, i)
-      val daysBack      = rng.nextLong(0L, maxDaysBack + 1L)
-      val lastUpdated   = today.minusDays(daysBack)
+      val lastUpdated   = randomInstantBetween(maxDaysBack, now)
       SeedInProgress(
         pstr              = pstr,
         transferReference = s"T-$i",
@@ -68,6 +68,16 @@ class TestOnlyInProgressController @Inject() (
       )
     }
     Future.sequence(seeds.map(s => saveForLaterRepo.set(s.toSavedUserAnswers))).map(_ => Created)
+  }
+
+  private def nextLong(startMs: Long, endMs: Long)       = {
+    ThreadLocalRandom.current().nextLong(startMs, endMs)
+  }
+
+  private def randomInstantBetween(start: Instant, end: Instant): Instant = {
+    val s = start.toEpochMilli
+    val e = end.toEpochMilli
+    Instant.ofEpochMilli(nextLong(s, e))
   }
 
   def clear(pstr: String): Action[AnyContent] = Action.async {

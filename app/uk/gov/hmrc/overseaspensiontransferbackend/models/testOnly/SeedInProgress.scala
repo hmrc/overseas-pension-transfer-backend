@@ -20,12 +20,12 @@ import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber}
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.{Instant, ZoneOffset}
 
 final case class SeedInProgress(
     pstr: String,
     transferReference: String,
-    lastUpdated: LocalDate,
+    lastUpdated: Instant,
     nino: Option[String]        = None,
     firstName: Option[String]   = None,
     lastName: Option[String]    = None,
@@ -58,7 +58,8 @@ final case class SeedInProgress(
       submissionDate    = None,
       lastUpdated       = Some(lastUpdated),
       qtStatus          = Some(InProgress),
-      pstrNumber        = Some(PstrNumber(pstr))
+      pstrNumber        = Some(PstrNumber(pstr)),
+      qtDate            = None
     )
 
   def toSavedUserAnswers: SavedUserAnswers =
@@ -66,7 +67,7 @@ final case class SeedInProgress(
       referenceId = transferReference,
       pstr        = PstrNumber(pstr),
       data        = toAnswersData,
-      lastUpdated = lastUpdated.atStartOfDay().toInstant(ZoneOffset.UTC)
+      lastUpdated = lastUpdated
     )
 }
 
