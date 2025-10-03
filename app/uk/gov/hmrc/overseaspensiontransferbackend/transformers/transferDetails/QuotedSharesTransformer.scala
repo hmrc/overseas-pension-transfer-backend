@@ -31,13 +31,7 @@ class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerS
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
-    implicit val reads: Reads[QuotedShares] = QuotedShares.upstreamReads
-
-    val enumConversion: List[QuotedShares] => JsArray = listOfShares =>
-      JsArray(listOfShares.map(Json.toJson(_)))
-
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[List[QuotedShares]](externalPath, enumConversion),
       moveStep(externalPath, internalPath)
     )
 
@@ -47,11 +41,7 @@ class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerS
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: List[QuotedShares] => JsArray = quotedShares =>
-      JsArray(quotedShares.map(_.toDownstreamJson))
-
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[List[QuotedShares]](internalPath, enumConversion),
       moveStep(internalPath, externalPath)
     )
 
