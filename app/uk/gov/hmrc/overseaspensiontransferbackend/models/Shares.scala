@@ -20,10 +20,10 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Format, JsValue, Json, Reads, Writes}
 
 trait Shares {
-  val value: BigDecimal
-  val shareTotal: Int
-  val company: String
-  val shareClass: String
+  val value: Option[BigDecimal]
+  val shareTotal: Option[Int]
+  val company: Option[String]
+  val shareClass: Option[String]
 
   def toDownstreamJson: JsValue = Json.toJson[Shares](this)
 }
@@ -31,74 +31,74 @@ trait Shares {
 object Shares {
 
   implicit val writes: Writes[Shares] = (
-    (__ \ "valueOfShares").write[BigDecimal] and
-      (__ \ "numberOfShares").write[Int] and
-      (__ \ "companyName").write[String] and
-      (__ \ "classOfShares").write[String]
+    (__ \ "valueOfShares").writeNullable[BigDecimal] and
+      (__ \ "numberOfShares").writeNullable[Int] and
+      (__ \ "companyName").writeNullable[String] and
+      (__ \ "classOfShares").writeNullable[String]
   )(shares => (shares.value, shares.shareTotal, shares.company, shares.shareClass))
 }
 
 case class UnquotedShares(
-    value: BigDecimal,
-    shareTotal: Int,
-    company: String,
-    shareClass: String
+    value: Option[BigDecimal],
+    shareTotal: Option[Int],
+    company: Option[String],
+    shareClass: Option[String]
   ) extends Shares
 
 object UnquotedShares {
 
   implicit val upstreamReads: Reads[UnquotedShares] = (
-    (__ \ "valueOfShares").read[BigDecimal] and
-      (__ \ "numberOfShares").read[Int] and
-      (__ \ "companyName").read[String] and
-      (__ \ "classOfShares").read[String]
+    (__ \ "valueOfShares").readNullable[BigDecimal] and
+      (__ \ "numberOfShares").readNullable[Int] and
+      (__ \ "companyName").readNullable[String] and
+      (__ \ "classOfShares").readNullable[String]
   )(UnquotedShares.apply _)
 
   implicit val reads: Reads[UnquotedShares] = (
-    (__ \ "unquotedValue").read[BigDecimal] and
-      (__ \ "unquotedShareTotal").read[Int] and
-      (__ \ "unquotedCompany").read[String] and
-      (__ \ "unquotedClass").read[String]
+    (__ \ "unquotedValue").readNullable[BigDecimal] and
+      (__ \ "unquotedShareTotal").readNullable[Int] and
+      (__ \ "unquotedCompany").readNullable[String] and
+      (__ \ "unquotedClass").readNullable[String]
   )(UnquotedShares.apply _)
 
   implicit val writes: Writes[UnquotedShares] = (
-    (__ \ "unquotedValue").write[BigDecimal] and
-      (__ \ "unquotedShareTotal").write[Int] and
-      (__ \ "unquotedCompany").write[String] and
-      (__ \ "unquotedClass").write[String]
+    (__ \ "unquotedValue").writeNullable[BigDecimal] and
+      (__ \ "unquotedShareTotal").writeNullable[Int] and
+      (__ \ "unquotedCompany").writeNullable[String] and
+      (__ \ "unquotedClass").writeNullable[String]
   )(us => (us.value, us.shareTotal, us.company, us.shareClass))
 
   implicit val format: Format[UnquotedShares] = Format(reads, writes)
 }
 
 case class QuotedShares(
-    value: BigDecimal,
-    shareTotal: Int,
-    company: String,
-    shareClass: String
+    value: Option[BigDecimal],
+    shareTotal: Option[Int],
+    company: Option[String],
+    shareClass: Option[String]
   ) extends Shares
 
 object QuotedShares {
 
   implicit val upstreamReads: Reads[QuotedShares] = (
-    (__ \ "valueOfShares").read[BigDecimal] and
-      (__ \ "numberOfShares").read[Int] and
-      (__ \ "companyName").read[String] and
-      (__ \ "classOfShares").read[String]
+    (__ \ "valueOfShares").readNullable[BigDecimal] and
+      (__ \ "numberOfShares").readNullable[Int] and
+      (__ \ "companyName").readNullable[String] and
+      (__ \ "classOfShares").readNullable[String]
   )(QuotedShares.apply _)
 
   implicit val reads: Reads[QuotedShares] = (
-    (__ \ "quotedValue").read[BigDecimal] and
-      (__ \ "quotedShareTotal").read[Int] and
-      (__ \ "quotedCompany").read[String] and
-      (__ \ "quotedClass").read[String]
+    (__ \ "quotedValue").readNullable[BigDecimal] and
+      (__ \ "quotedShareTotal").readNullable[Int] and
+      (__ \ "quotedCompany").readNullable[String] and
+      (__ \ "quotedClass").readNullable[String]
   )(QuotedShares.apply _)
 
   implicit val writes: Writes[QuotedShares] = (
-    (__ \ "quotedValue").write[BigDecimal] and
-      (__ \ "quotedShareTotal").write[Int] and
-      (__ \ "quotedCompany").write[String] and
-      (__ \ "quotedClass").write[String]
+    (__ \ "quotedValue").writeNullable[BigDecimal] and
+      (__ \ "quotedShareTotal").writeNullable[Int] and
+      (__ \ "quotedCompany").writeNullable[String] and
+      (__ \ "quotedClass").writeNullable[String]
   )(qs => (qs.value, qs.shareTotal, qs.company, qs.shareClass))
 
   implicit val format: Format[QuotedShares] = Format(reads, writes)
