@@ -55,13 +55,14 @@ class GetAllTransfersControllerSpec
           transferReference = None,
           qtReference       = None,
           qtVersion         = None,
+          qtStatus          = None,
           nino              = None,
           memberFirstName   = None,
           memberSurname     = None,
-          submissionDate    = None,
+          qtDate            = None,
           lastUpdated       = None,
-          qtStatus          = None,
-          pstrNumber        = None
+          pstrNumber        = None,
+          submissionDate    = None
         ))
 
       when(

@@ -43,7 +43,8 @@ class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
       submissionDate    = None,
       lastUpdated       = None,
       qtStatus          = None,
-      pstrNumber        = Some(pstr)
+      pstrNumber        = Some(pstr),
+      qtDate            = None
     )
 
   "GetAllTransfersDTO.from" - {

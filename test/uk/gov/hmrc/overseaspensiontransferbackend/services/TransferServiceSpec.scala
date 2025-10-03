@@ -220,7 +220,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
     }
     "getAllTransfers" - {
       "must map downstream overview rows into AllTransfersItem and wrap in Right" in {
-        val pstr = PstrNumber("24000001AA")
+        val pstr           = PstrNumber("24000001AA")
+        val submissionDate = now
 
         val ds = DownstreamAllTransfersData(
           DownstreamAllTransfersData.Payload(
@@ -236,7 +237,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
                 lastName                  = "Warne",
                 qtDate                    = LocalDate.parse("2025-03-14"),
                 qropsReference            = "QROPS654321",
-                submissionCompilationDate = now
+                submissionCompilationDate = submissionDate
               ),
               DownstreamAllTransfersData.OverviewItem(
                 fbNumber                  = "123456000024",
@@ -249,7 +250,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
                 lastName                  = "Ennis-Hill",
                 qtDate                    = LocalDate.parse("2025-01-01"),
                 qropsReference            = "QROPS654322",
-                submissionCompilationDate = now
+                submissionCompilationDate = submissionDate
               )
             )
           )
@@ -273,12 +274,13 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
             first.transferReference mustBe None
             first.qtReference       mustBe Some(QtNumber("QT564321"))
             first.qtVersion         mustBe Some("001")
+            first.qtStatus          mustBe Some(QtStatus("Compiled"))
             first.nino              mustBe Some("AA000000A")
             first.memberFirstName   mustBe Some("David")
             first.memberSurname     mustBe Some("Warne")
-            first.submissionDate    mustBe Some(LocalDate.parse("2025-03-14"))
-            first.qtStatus          mustBe Some(QtStatus("Compiled"))
+            first.qtDate            mustBe Some(LocalDate.parse("2025-03-14"))
             first.pstrNumber        mustBe Some(pstr)
+            first.submissionDate    mustBe Some(submissionDate)
 
             val second = items(1)
             second.qtReference     mustBe Some(QtNumber("QT564322"))
