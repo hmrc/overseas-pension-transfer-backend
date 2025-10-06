@@ -26,11 +26,9 @@ final case class SeedInProgress(
     pstr: String,
     transferReference: String,
     lastUpdated: Instant,
-    nino: Option[String]        = None,
-    firstName: Option[String]   = None,
-    lastName: Option[String]    = None,
-    qtReference: Option[String] = None,
-    qtVersion: Option[String]   = None
+    nino: Option[String]      = None,
+    firstName: Option[String] = None,
+    lastName: Option[String]  = None
   ) {
 
   private def minimalAnswersDataJson: JsObject =
@@ -50,8 +48,8 @@ final case class SeedInProgress(
   private def toItem: AllTransfersItem =
     AllTransfersItem(
       transferReference = Some(transferReference),
-      qtReference       = qtReference.map(QtNumber.apply),
-      qtVersion         = qtVersion,
+      qtReference       = None,
+      qtVersion         = None,
       nino              = nino,
       memberFirstName   = firstName,
       memberSurname     = lastName,
