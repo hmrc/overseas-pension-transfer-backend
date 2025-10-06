@@ -30,7 +30,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 
-import java.time.{LocalDate, ZoneOffset}
+import java.time.{Instant, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
 class TransferServiceSpec extends AnyFreeSpec with SpecBase {
@@ -361,9 +361,10 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
           memberFirstName   = Some("In"),
           memberSurname     = Some("Progress"),
           submissionDate    = None,
-          lastUpdated       = Some(LocalDate.parse("2025-03-01")),
+          lastUpdated       = Some(Instant.parse("2025-03-01T00:00:00Z")),
           qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr)
+          pstrNumber        = Some(pstr),
+          qtDate            = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -398,9 +399,10 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
           memberFirstName   = Some("Only"),
           memberSurname     = Some("InProgress"),
           submissionDate    = None,
-          lastUpdated       = Some(LocalDate.parse("2025-04-01")),
+          lastUpdated       = Some(Instant.parse("2025-04-01T00:00:00Z")),
           qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr)
+          pstrNumber        = Some(pstr),
+          qtDate            = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -428,9 +430,10 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
           memberFirstName   = Some("Still"),
           memberSurname     = Some("Proceeding"),
           submissionDate    = None,
-          lastUpdated       = Some(LocalDate.parse("2025-05-01")),
+          lastUpdated       = Some(Instant.parse("2025-05-01T00:00:00Z")),
           qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr)
+          pstrNumber        = Some(pstr),
+          qtDate            = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)

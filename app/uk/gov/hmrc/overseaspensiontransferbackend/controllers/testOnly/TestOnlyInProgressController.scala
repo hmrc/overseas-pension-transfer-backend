@@ -44,6 +44,7 @@ class TestOnlyInProgressController @Inject() (
       s => saveForLaterRepo.set(s.toSavedUserAnswers).map(_ => Created)
     )
   }
+
   // Takes an array of SeedInProgress as request body and seeds the database
   def bulk: Action[JsValue] = Action.async(parse.json) { implicit req =>
     req.body.validate[Seq[SeedInProgress]].fold(
