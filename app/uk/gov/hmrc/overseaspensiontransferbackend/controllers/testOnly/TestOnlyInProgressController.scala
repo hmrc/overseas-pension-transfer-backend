@@ -24,10 +24,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly.NameGenerator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.time.{Instant, LocalDate, ZoneOffset}
 import java.util.concurrent.ThreadLocalRandom
-import java.util.concurrent.TimeUnit.DAYS
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,13 +37,14 @@ class TestOnlyInProgressController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends BackendController(cc) {
 
+  // Takes a SeedInProgress as request body and seeds the database
   def seed: Action[JsValue] = Action.async(parse.json) { implicit req =>
     req.body.validate[SeedInProgress].fold(
       e => Future.successful(BadRequest(JsError.toJson(e))),
       s => saveForLaterRepo.set(s.toSavedUserAnswers).map(_ => Created)
     )
   }
-
+  // Takes an array of SeedInProgress as request body and seeds the database
   def bulk: Action[JsValue] = Action.async(parse.json) { implicit req =>
     req.body.validate[Seq[SeedInProgress]].fold(
       e => Future.successful(BadRequest(JsError.toJson(e))),
@@ -52,6 +52,7 @@ class TestOnlyInProgressController @Inject() (
     )
   }
 
+  // generates n number of InProgress transfers for given PSTR and seeds database
   def generate(pstr: String, n: Int): Action[AnyContent] = Action.async {
     val now         = Instant.now
     val maxDaysBack = now.minus(31, ChronoUnit.DAYS)
@@ -70,7 +71,7 @@ class TestOnlyInProgressController @Inject() (
     Future.sequence(seeds.map(s => saveForLaterRepo.set(s.toSavedUserAnswers))).map(_ => Created)
   }
 
-  private def nextLong(startMs: Long, endMs: Long)       = {
+  private def nextLong(startMs: Long, endMs: Long) = {
     ThreadLocalRandom.current().nextLong(startMs, endMs)
   }
 
