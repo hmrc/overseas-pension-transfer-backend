@@ -10,6 +10,18 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+->          /                                            prod.Routes
 
-DELETE      /test-only/reset-test-data          uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyController.resetDatabase
+DELETE      /test-only/reset-test-data                   uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyController.resetDatabase
+
+# Seed a single in-progress transfer
+POST        /test-only/in-progress/seed                  uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyInProgressController.seed
+
+# Bulk seed (JSON array)
+POST        /test-only/in-progress/bulk                  uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyInProgressController.bulk
+
+# Generate N fake records for a PSTR
+POST        /test-only/in-progress/generate/:pstr/:n     uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyInProgressController.generate(pstr: String, n: Int)
+
+# Clear by PSTR (or all if no PSTR supplied)
+DELETE      /test-only/in-progress/clear/:pstr           uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyInProgressController.clear(pstr: String)
