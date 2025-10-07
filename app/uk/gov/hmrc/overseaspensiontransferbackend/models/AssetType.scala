@@ -18,54 +18,38 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json._
 
-trait AssetType {
-  val jsonKey: String
-}
+trait AssetType
 
 object AssetType {
 
   case object Cash extends AssetType {
-    override def toString: String = "cash"
-    override val jsonKey: String  = "cashAssets"
+    override def toString: String = "cashAssets"
   }
 
   case object Property extends AssetType {
-    override def toString: String = "property"
-    override val jsonKey: String  = "propertyAsset"
+    override def toString: String = "propertyAsset"
   }
 
   case object UnquotedShares extends AssetType {
-    override def toString: String = "unquotedShares"
-    override val jsonKey: String  = "unquotedShareAssets"
+    override def toString: String = "unquotedShareAssets"
   }
 
   case object QuotedShares extends AssetType {
-    override def toString: String = "quotedShares"
-    override val jsonKey: String  = "quotedShareAssets"
+    override def toString: String = "quotedShareAssets"
   }
 
   case object Other extends AssetType {
-    override def toString: String = "other"
-    override val jsonKey: String  = "otherAsset"
+    override def toString: String = "otherAsset"
   }
-
-  def apply(value: String) =
-    value match {
-      case "cash"           => Cash
-      case "property"       => Property
-      case "unquotedShares" => UnquotedShares
-      case "quotedShares"   => UnquotedShares
-      case "other"          => Other
-    }
 
   implicit val reads: Reads[AssetType] =
     Reads {
-      case JsString("cash")           => JsSuccess(Cash)
-      case JsString("property")       => JsSuccess(Property)
-      case JsString("unquotedShares") => JsSuccess(UnquotedShares)
-      case JsString("quotedShares")   => JsSuccess(QuotedShares)
-      case JsString("other")          => JsSuccess(Other)
-      case _                          => JsError("Unable to parse value as AssetType")
+      case JsString("cashAssets")          => JsSuccess(Cash)
+      case JsString("propertyAsset")       => JsSuccess(Property)
+      case JsString("unquotedShareAssets") => JsSuccess(UnquotedShares)
+      case JsString("quotedShareAssets")   => JsSuccess(QuotedShares)
+      case JsString("otherAsset")          => JsSuccess(Other)
+      case _                               => JsError("Unable to parse value as AssetType")
     }
 
   implicit val writes: Writes[AssetType] =

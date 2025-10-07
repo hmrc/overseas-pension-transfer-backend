@@ -27,14 +27,14 @@ class OtherAssetsTransformerSpec extends AnyFreeSpec with Matchers {
   "OtherAssetsTransformer" - {
     "convert transferDetails.otherAssets to transferDetails.typeOfAssets.otherAssets" in {
       val input = Json.obj("transferDetails" ->
-        Json.obj("otherAssets" -> JsArray(Seq(Json.obj(
+        Json.obj("otherAsset" -> JsArray(Seq(Json.obj(
           "assetValue"       -> 985421.87,
           "assetDescription" -> "bakery business"
         )))))
 
       val expected = Json.obj("transferDetails" ->
         Json.obj(
-          "typeOfAssets" -> Json.obj("otherAssets" -> JsArray(Seq(Json.obj(
+          "typeOfAssets" -> Json.obj("otherAsset" -> JsArray(Seq(Json.obj(
             "assetValue"       -> 985421.87,
             "assetDescription" -> "bakery business"
           ))))

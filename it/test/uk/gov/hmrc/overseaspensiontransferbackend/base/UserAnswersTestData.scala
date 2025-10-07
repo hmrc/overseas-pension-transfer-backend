@@ -107,7 +107,7 @@ object UserAnswersTestData {
       "applicableExclusion" -> Seq("occupational", "resident"),
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
-      "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
+      "typeOfAsset" -> Seq("cashAssets", "unquotedShareAssets", "otherAsset"),
       "moreQuoted" -> false,
       "moreUnquoted" -> true,
       "moreProp" -> false,
