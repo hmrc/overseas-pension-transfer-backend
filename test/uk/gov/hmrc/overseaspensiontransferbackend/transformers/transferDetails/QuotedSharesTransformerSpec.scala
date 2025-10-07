@@ -28,10 +28,10 @@ class QuotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
     "convert transferDetails.quotedShares to transferDetails.typeOfAssets.quotedShares" in {
       val input = Json.obj("transferDetails" ->
         Json.obj("quotedShares" -> JsArray(Seq(Json.obj(
-          "valueOfShares"  -> 12345.01,
-          "numberOfShares" -> 34,
-          "companyName"    -> "BigCompany",
-          "classOfShares"  -> "ABC"
+          "quotedValue"      -> 12345.01,
+          "quotedShareTotal" -> 34,
+          "quotedCompany"    -> "BigCompany",
+          "quotedClass"      -> "ABC"
         )))))
 
       val expected = Json.obj("transferDetails" ->
@@ -51,32 +51,14 @@ class QuotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
       val newArray = Json.obj("transferDetails" ->
         Json.obj("quotedShares" -> JsArray(Seq(
           Json.obj(
-            "valueOfShares"  -> 12345.01,
-            "numberOfShares" -> 34,
-            "companyName"    -> "BigCompany",
-            "classOfShares"  -> "ABC"
-          ),
-          Json.obj(
-            "valueOfShares"  -> 4567.99,
-            "numberOfShares" -> 12,
-            "companyName"    -> "Company Ltd.",
-            "classOfShares"  -> "2"
+            "quotedValue"      -> 4567.99,
+            "quotedShareTotal" -> 12,
+            "quotedCompany"    -> "Company Ltd.",
+            "quotedClass"      -> "2"
           )
         ))))
 
       val existingArray = Json.obj("transferDetails" ->
-        Json.obj(
-          "typeOfAssets" -> Json.obj("quotedShares" -> JsArray(Seq(Json.obj(
-            "quotedValue"      -> 12345.01,
-            "quotedShareTotal" -> 34,
-            "quotedCompany"    -> "BigCompany",
-            "quotedClass"      -> "ABC"
-          ))))
-        ))
-
-      val input = newArray.deepMerge(existingArray)
-
-      val expected = Json.obj("transferDetails" ->
         Json.obj(
           "typeOfAssets" -> Json.obj("quotedShares" -> JsArray(Seq(
             Json.obj(
@@ -85,6 +67,20 @@ class QuotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
               "quotedCompany"    -> "BigCompany",
               "quotedClass"      -> "ABC"
             ),
+            Json.obj(
+              "quotedValue"      -> 4567.99,
+              "quotedShareTotal" -> 12,
+              "quotedCompany"    -> "Company Ltd.",
+              "quotedClass"      -> "2"
+            )
+          )))
+        ))
+
+      val input = newArray.deepMerge(existingArray)
+
+      val expected = Json.obj("transferDetails" ->
+        Json.obj(
+          "typeOfAssets" -> Json.obj("quotedShares" -> JsArray(Seq(
             Json.obj(
               "quotedValue"      -> 4567.99,
               "quotedShareTotal" -> 12,
@@ -111,10 +107,10 @@ class QuotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
 
       val expected = Json.obj("transferDetails" ->
         Json.obj("quotedShares" -> JsArray(Seq(Json.obj(
-          "valueOfShares"  -> 12345.01,
-          "numberOfShares" -> 34,
-          "companyName"    -> "BigCompany",
-          "classOfShares"  -> "ABC"
+          "quotedValue"      -> 12345.01,
+          "quotedShareTotal" -> 34,
+          "quotedCompany"    -> "BigCompany",
+          "quotedClass"      -> "ABC"
         )))))
 
       transformer.deconstruct(input) mustBe Right(expected)
