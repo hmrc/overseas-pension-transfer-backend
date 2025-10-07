@@ -48,7 +48,7 @@ object DownstreamTransferData {
     (__ \ "success" \ "pstr").read[String].map(PstrNumber.apply) and
       (__ \ "success" \ "qtDetails").read[QtDetails] and
       (__ \ "success" \ "transferringMember").readNullable[TransferringMember] and
-      (__ \ "success" \ "aboutReceivingQrops").readNullable[AboutReceivingQROPS] and
+      (__ \ "success" \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "success" \ "transferDetails").readNullable[TransferDetails]
   )(DownstreamTransferData.apply _)
 }
