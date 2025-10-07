@@ -114,18 +114,18 @@ object UserAnswersTestData {
       "moreAsset" -> false,
       "quotedShares" -> Seq(
         Json.obj(
-          "valueOfShares" -> 1234.99,
-          "numberOfShares" -> 54,
-          "companyName" -> "Some Company",
-          "classOfShares" -> "ABC"
+          "quotedValue" -> 1234.99,
+          "quotedShareTotal" -> 54,
+          "quotedCompany" -> "Some Company",
+          "quotedClass" -> "ABC"
         )
       ),
       "unquotedShares" -> Seq(
         Json.obj(
-          "valueOfShares" -> 99999.99,
-          "numberOfShares" -> 12,
-          "companyName" -> "Unquoted",
-          "classOfShares" -> "Class"
+          "unquotedValue" -> 99999.99,
+          "unquotedShareTotal" -> 12,
+          "unquotedCompany" -> "Unquoted",
+          "unquotedClass" -> "Class"
         )
       ),
       "propertyAssets" -> Seq(
