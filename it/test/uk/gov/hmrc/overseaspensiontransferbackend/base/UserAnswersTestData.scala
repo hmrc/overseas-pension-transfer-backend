@@ -104,6 +104,7 @@ object UserAnswersTestData {
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
+      "whyTaxableOT" -> "noExclusion",
       "applicableExclusion" -> Seq("occupational", "resident"),
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
@@ -231,6 +232,7 @@ object UserAnswersTestData {
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
       "taxableOverseasTransferDetails" -> Json.obj(
+        "whyTaxableOT" -> "02",
         "applicableExclusion" -> Seq("01", "04"),
         "amountTaxDeducted" -> 9876543.21,
         "transferMinusTax" -> 123456.99
@@ -338,7 +340,7 @@ object UserAnswersTestData {
         "ukPostCode"   -> "YY2 2YY",
         "country"      -> Json.obj("code" -> "FR", "name" -> "France")
       ),
-      "qropsEstablishedOther" -> Json.obj("code" -> "BR", "name" -> "Brazil")
+      "qropsEstablishedOther" -> "Wales"
     )
   )
 
@@ -354,7 +356,7 @@ object UserAnswersTestData {
         "country"      -> "FR"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablishedOther" -> "BR"
+        "qropsEstablishedOther" -> "Wales"
       )
     )
   )

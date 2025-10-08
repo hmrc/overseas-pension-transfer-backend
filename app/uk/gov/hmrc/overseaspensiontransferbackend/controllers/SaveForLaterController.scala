@@ -55,7 +55,6 @@ class SaveForLaterController @Inject() (
     Action.async(parse.json[UserAnswersDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      println("\n----\nrequest.body = " + Json.prettyPrint(Json.toJson(request.body)) + "\n----\n")
       saveForLaterService.saveAnswer(request.body).map {
         case Right(_)                                         =>
           NoContent

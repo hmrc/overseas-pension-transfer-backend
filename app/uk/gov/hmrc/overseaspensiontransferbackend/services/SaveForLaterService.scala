@@ -71,15 +71,12 @@ class SaveForLaterServiceImpl @Inject() (
       case Left(err)               =>
         Future.successful(Left(err))
       case Right(transformedInput) =>
-        println("\n----\ntransformedInput = " + transformedInput + "\n----\n")
         repository.get(dto.referenceId).flatMap { maybeExisting =>
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
-          println("\n----\nmergedJson = " + Json.prettyPrint(mergedJson) + "\n----\n")
           validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              println("\n----\nvalidated = " + Json.prettyPrint(Json.toJson(validated)) + "\n----\n")
               val saved = SavedUserAnswers(dto.referenceId, dto.pstr, validated, dto.lastUpdated)
               repository.set(saved).map {
                 case true  => Right(())
