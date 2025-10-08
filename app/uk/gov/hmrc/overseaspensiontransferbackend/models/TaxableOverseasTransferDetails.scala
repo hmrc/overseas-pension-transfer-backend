@@ -20,6 +20,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Format, Json, Reads, Writes}
 
 case class TaxableOverseasTransferDetails(
+    whyTaxableOT: Option[WhyTransferTaxable],
     applicableExclusion: Option[Seq[ApplicableExclusion]],
     amountTaxDeducted: Option[BigDecimal],
     transferMinusTax: Option[BigDecimal]
@@ -28,7 +29,8 @@ case class TaxableOverseasTransferDetails(
 object TaxableOverseasTransferDetails {
 
   implicit val reads: Reads[TaxableOverseasTransferDetails] = (
-    (__ \ "applicableExclusion").readNullable[Seq[ApplicableExclusion]] and
+    (__ \ "whyTaxableOT").readNullable[WhyTransferTaxable] and
+      (__ \ "applicableExclusion").readNullable[Seq[ApplicableExclusion]] and
       (__ \ "amountTaxDeducted").readNullable[BigDecimal] and
       (__ \ "transferMinusTax").readNullable[BigDecimal]
   )(TaxableOverseasTransferDetails.apply _)
