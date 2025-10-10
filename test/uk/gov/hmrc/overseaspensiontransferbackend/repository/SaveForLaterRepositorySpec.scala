@@ -81,12 +81,12 @@ class SaveForLaterRepositorySpec
                 cashAssets          = Some("Yes"),
                 cashValue           = Some(1000),
                 unquotedShareAssets = Some("Yes"),
-                unquotedShares      = Some(List(UnquotedShares(1000, 100, "Company A", "A"))),
+                unquotedShares      = Some(List(UnquotedShares(Some(1000), Some(100), Some("Company A"), Some("A")))),
                 quotedShareAssets   = Some("Yes"),
-                quotedShares        = Some(List(QuotedShares(2000, 200, "Company B", "B"))),
+                quotedShares        = Some(List(QuotedShares(Some(2000), Some(200), Some("Company B"), Some("B")))),
                 propertyAsset       = Some("Yes"),
                 propertyAssets      = Some(List(PropertyAssets(
-                  propertyAddress = Address(
+                  propertyAddress = Some(Address(
                     addressLine1 = Some("6 Test Address"),
                     addressLine2 = Some("Test Street"),
                     addressLine3 = None,
@@ -94,16 +94,16 @@ class SaveForLaterRepositorySpec
                     addressLine5 = None,
                     ukPostCode   = Some("XX89 6YY"),
                     country      = Some("GB")
-                  ),
-                  propValue       = 300,
-                  propDescription = "Test Property"
+                  )),
+                  propValue       = Some(300),
+                  propDescription = Some("Test Property")
                 ))),
                 otherAsset          = Some("Yes"),
                 moreAsset           = None,
                 moreProp            = None,
                 moreQuoted          = None,
                 moreUnquoted        = None,
-                otherAssets         = Some(List(OtherAssets(400, "Other Asset")))
+                otherAssets         = Some(List(OtherAssets(Some(400), Some("Other Asset"))))
               )
             )
           )
@@ -134,7 +134,7 @@ class SaveForLaterRepositorySpec
       val retrieved = repository.get(saved.referenceId).futureValue.value
       retrieved mustBe saved
 
-      val propertyAsset = retrieved.data.transferDetails.value.typeOfAssets.value.propertyAssets.value.head.propertyAddress
+      val propertyAsset = retrieved.data.transferDetails.value.typeOfAssets.value.propertyAssets.value.head.propertyAddress.get
       propertyAsset.addressLine1.value mustBe "6 Test Address"
       propertyAsset.addressLine2.value mustBe "Test Street"
       propertyAsset.ukPostCode.value   mustBe "XX89 6YY"

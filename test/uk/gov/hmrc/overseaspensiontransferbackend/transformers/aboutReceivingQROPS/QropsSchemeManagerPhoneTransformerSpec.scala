@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 
 class QropsSchemeManagerPhoneTransformerSpec extends AnyFreeSpec with Matchers {
 
-  private val transformer = new QropsSchemeManagerPhoneTranformer
+  private val transformer = new QropsSchemeManagerPhoneTransformer
 
   "QropsSchemeManagerEmailTransformer" - {
 

@@ -28,10 +28,10 @@ class UnquotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
     "convert transferDetails.unquotedShares to transferDetails.typeOfAssets.unquotedShares" in {
       val input = Json.obj("transferDetails" ->
         Json.obj("unquotedShares" -> JsArray(Seq(Json.obj(
-          "valueOfShares"  -> 12345.01,
-          "numberOfShares" -> 34,
-          "companyName"    -> "BigCompany",
-          "classOfShares"  -> "ABC"
+          "unquotedValue"      -> 12345.01,
+          "unquotedShareTotal" -> 34,
+          "unquotedCompany"    -> "BigCompany",
+          "unquotedClass"      -> "ABC"
         )))))
 
       val expected = Json.obj("transferDetails" ->
@@ -51,16 +51,16 @@ class UnquotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
       val newArray = Json.obj("transferDetails" ->
         Json.obj("unquotedShares" -> JsArray(Seq(
           Json.obj(
-            "valueOfShares"  -> 12345.01,
-            "numberOfShares" -> 34,
-            "companyName"    -> "BigCompany",
-            "classOfShares"  -> "ABC"
+            "unquotedValue"      -> 12345.01,
+            "unquotedShareTotal" -> 34,
+            "unquotedCompany"    -> "BigCompany",
+            "unquotedClass"      -> "ABC"
           ),
           Json.obj(
-            "valueOfShares"  -> 4567.99,
-            "numberOfShares" -> 12,
-            "companyName"    -> "Company Ltd.",
-            "classOfShares"  -> "2"
+            "unquotedValue"      -> 4567.99,
+            "unquotedShareTotal" -> 12,
+            "unquotedCompany"    -> "Company Ltd.",
+            "unquotedClass"      -> "2"
           )
         ))))
 
@@ -111,10 +111,10 @@ class UnquotedSharesTransformerSpec extends AnyFreeSpec with Matchers {
 
       val expected = Json.obj("transferDetails" ->
         Json.obj("unquotedShares" -> JsArray(Seq(Json.obj(
-          "valueOfShares"  -> 12345.01,
-          "numberOfShares" -> 34,
-          "companyName"    -> "BigCompany",
-          "classOfShares"  -> "ABC"
+          "unquotedValue"      -> 12345.01,
+          "unquotedShareTotal" -> 34,
+          "unquotedCompany"    -> "BigCompany",
+          "unquotedClass"      -> "ABC"
         )))))
 
       transformer.deconstruct(input) mustBe Right(expected)

@@ -27,7 +27,7 @@ class AssetTypeTransformerSpec extends AnyFreeSpec with Matchers {
   "AssetTypeTransformer" - {
     "convert a list of Assets to Json obj of Yes Enum values when present" in {
       val input = Json.obj("transferDetails" ->
-        Json.obj("typeOfAssets" -> Seq("cash", "unquotedShares", "quotedShares", "property", "other")))
+        Json.obj("typeOfAsset" -> Seq("cashAssets", "unquotedShareAssets", "quotedShareAssets", "propertyAsset", "otherAsset")))
 
       val expected = Json.obj("transferDetails" ->
         Json.obj("typeOfAssets" -> Json.obj(
@@ -71,7 +71,7 @@ class AssetTypeTransformerSpec extends AnyFreeSpec with Matchers {
       val expected = Json.obj("transferDetails" ->
         Json.obj(
           "typeOfAssets" -> Json.obj("moreProp" -> "No"),
-          "typeOfAsset"  -> Seq("cash", "unquotedShares", "quotedShares", "property", "other")
+          "typeOfAsset"  -> Seq("cashAssets", "unquotedShareAssets", "quotedShareAssets", "propertyAsset", "otherAsset")
         ))
 
       transformer.deconstruct(input) mustBe Right(expected)

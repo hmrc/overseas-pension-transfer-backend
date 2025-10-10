@@ -24,6 +24,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   AssetTypeTransformer,
   CashAssetsTransformer,
   CashOnlyTransferTransformer,
+  CashValueTransformer,
   MoreOtherAssetTransformer,
   MorePropertyTransformer,
   MoreQuotedTransformer,
@@ -34,7 +35,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   QuotedSharesTransformer,
   ReasonNoOverseasTransferTransformer,
   TransferMinusTaxTransformer,
-  UnquotedSharesTransformer
+  UnquotedSharesTransformer,
+  WhyTaxableTransformer
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
@@ -63,21 +65,25 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
 
   private def qropsSchemeManagerDetailsTransformers: Seq[Transformer] = Seq(
     new QropsSchemeManagerTypeTransformer,
+    new QropsSchemeManagerOrganisationNameTransformer,
     new QropsSchemeManagerAddressTransformer(countryCodeReader),
     new QropsSchemeManagerEmailTransformer,
-    new QropsSchemeManagerPhoneTranformer,
-    new QropsSchemeManagerIndividualTransformer
+    new QropsSchemeManagerPhoneTransformer,
+    new QropsSchemeManagerIndividualTransformer,
+    new QropsSchemeManagerOrganisationContactNameTransformer
   )
 
   private def transferDetailsTransformers: Seq[Transformer] = Seq(
     new CashOnlyTransferTransformer,
     new PaymentTaxableOverseasTransformer,
     new ReasonNoOverseasTransferTransformer,
+    new WhyTaxableTransformer,
     new ApplicableExclusionTransformer,
     new AmountTaxDeductedTransformer,
     new TransferMinusTaxTransformer,
     new CashAssetsTransformer,
     new AssetTypeTransformer,
+    new CashValueTransformer,
     new MoreQuotedTransformer,
     new MoreUnquotedTransformer,
     new MorePropertyTransformer,

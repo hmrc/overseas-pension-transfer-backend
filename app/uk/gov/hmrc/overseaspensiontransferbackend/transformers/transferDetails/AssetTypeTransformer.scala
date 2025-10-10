@@ -39,9 +39,9 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
       fullAssetTypeSet.foldLeft(Json.obj()) {
         (acc, asset) =>
           if (listOfAssets.contains(asset)) {
-            acc.deepMerge(Json.obj(asset.jsonKey -> "Yes"))
+            acc.deepMerge(Json.obj(asset.toString -> "Yes"))
           } else {
-            acc.deepMerge(Json.obj(asset.jsonKey -> "No"))
+            acc.deepMerge(Json.obj(asset.toString -> "No"))
           }
       }
     }
@@ -73,7 +73,7 @@ class AssetTypeTransformer extends PathAwareTransformer with EnumTransformerStep
 
       Right(fullAssetTypeSet.foldLeft(json) {
         (acc, curr) =>
-          pruneAtPath(internalPath \ curr.jsonKey)(acc)
+          pruneAtPath(internalPath \ curr.toString)(acc)
       })
     }
 
