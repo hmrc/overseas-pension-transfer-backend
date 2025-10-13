@@ -44,7 +44,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
   "must create correct minimal json for different journey types" in {
     JourneySubmittedType.values.foreach {
       journey =>
-        val result = ReportSubmittedAuditModel.build(journey, "correlationId", None, None, None, None, None)
+        val result = ReportSubmittedAuditModel.build("internalTransferId", journey, "correlationId", None, None, None, None, None)
         result.auditType   mustBe "overseasPensionTransferReportSubmitted"
         result.journeyType mustBe journey
     }
@@ -122,7 +122,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       )
 
       val expectedJson = Json.obj(
-        "internalReportReferenceId"                 -> "testID",
+        "internalReportReferenceId"                 -> "internalTransferId",
         "journeyType"                               -> "newReportSubmissionSucceeded",
         "correlationId"                             -> "x-request-id",
         "overseasPensionTransferReportReference"    -> "QT123456",
@@ -193,6 +193,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       )
 
       val result = ReportSubmittedAuditModel.build(
+        "internalTransferId",
         SubmissionSucceeded,
         "x-request-id",
         None,
@@ -210,15 +211,15 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
 
     "must create correct json" in {
 
-      // TODO Refactor ID once backend fix is in
       val expectedJson = Json.obj(
-        "internalReportReferenceId" -> "testID",
+        "internalReportReferenceId" -> "internalTransferId",
         "journeyType"               -> "reportSubmissionFailed",
         "correlationId"             -> "x-request-id",
         "failureReason"             -> "400 - Bad request"
       )
 
       val result = ReportSubmittedAuditModel.build(
+        "internalTransferId",
         SubmissionFailed,
         "x-request-id",
         Some("400 - Bad request"),

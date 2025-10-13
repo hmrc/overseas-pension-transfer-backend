@@ -21,6 +21,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, M
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 
 case class ReportSubmittedAuditModel(
+    referenceId: String,
     journeyType: JourneySubmittedType,
     correlationId: String,
     failureReason: Option[String],
@@ -30,8 +31,6 @@ case class ReportSubmittedAuditModel(
     maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
   ) extends JsonAuditModel {
   override val auditType: String = "overseasPensionTransferReportSubmitted"
-
-  private val internalReportReferenceId = "testID"
 
   private val qtNumber =
     maybeQTNumber match {
@@ -70,7 +69,7 @@ case class ReportSubmittedAuditModel(
 //  "authorisingSchemeAdministratorID": "A1000002"
 
   override val detail: JsValue = Json.obj(
-    "internalReportReferenceId" -> internalReportReferenceId,
+    "internalReportReferenceId" -> referenceId,
     "journeyType"               -> journeyType.toString,
     "correlationId"             -> correlationId
   ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS
@@ -79,6 +78,7 @@ case class ReportSubmittedAuditModel(
 object ReportSubmittedAuditModel {
 
   def build(
+      referenceId: String,
       journeyType: JourneySubmittedType,
       correlationId: String,
       failureReason: Option[String],
@@ -88,6 +88,7 @@ object ReportSubmittedAuditModel {
       maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
     ): ReportSubmittedAuditModel =
     ReportSubmittedAuditModel(
+      referenceId,
       journeyType,
       correlationId,
       failureReason,
