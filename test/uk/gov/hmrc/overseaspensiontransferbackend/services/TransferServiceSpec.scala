@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import org.mockito.{ArgumentCaptor, Mockito}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{times, verify}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsError, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
@@ -26,6 +30,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
@@ -33,13 +38,21 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators._
 import java.time.{Instant, LocalDate, ZoneOffset}
 import scala.concurrent.Future
 
-class TransferServiceSpec extends AnyFreeSpec with SpecBase {
+class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterEach {
 
-  private val mockRepo        = mock[SaveForLaterRepository]
-  private val mockValidator   = mock[SubmissionValidator]
-  private val mockConnector   = mock[TransferConnector]
-  private val mockTransformer = mock[UserAnswersTransformer]
-  private val service         = new TransferServiceImpl(mockRepo, mockValidator, mockTransformer, mockConnector)
+  private val mockRepo         = mock[SaveForLaterRepository]
+  private val mockValidator    = mock[SubmissionValidator]
+  private val mockConnector    = mock[TransferConnector]
+  private val mockTransformer  = mock[UserAnswersTransformer]
+  private val mockAuditService = mock[AuditService]
+
+  private val service = new TransferServiceImpl(
+    mockRepo,
+    mockValidator,
+    mockTransformer,
+    mockConnector,
+    mockAuditService
+  )
 
   private val normalisedSubmission = NormalisedSubmission(
     referenceId = testId,
@@ -48,7 +61,29 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
     lastUpdated = now
   )
 
-  private val saved: SavedUserAnswers = simpleSavedUserAnswers
+  private val newData                 = sampleAnswersData.copy(transferringMember =
+    Some(TransferringMember(Some(MemberDetails(
+      Some("Forename"),
+      Some("Last name"),
+      Some(LocalDate.of(2000, 1, 1)),
+      Some("AA123456A"),
+      None,
+      Some(PrincipalResAddDetails(
+        Some(Address(
+          Some("line 1"),
+          Some("line 2"),
+          Some("line 3"),
+          Some("line 4"),
+          Some("line 5"),
+          Some("ZZ1 1ZZ"),
+          Some("UK")
+        )),
+        None
+      )),
+      Some(MemberResidencyDetails(Some("true"), None, None))
+    ))))
+  )
+  private val saved: SavedUserAnswers = simpleSavedUserAnswers.copy(data = newData)
 
   private val downstreamSuccess = DownstreamSuccess(
     qtNumber         = QtNumber("QT123456"),
@@ -56,16 +91,25 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
     formBundleNumber = "119000004320"
   )
 
+  override def beforeEach(): Unit = {
+    Mockito.reset(mockRepo)
+    Mockito.reset(mockValidator)
+    Mockito.reset(mockAuditService)
+    super.beforeEach()
+  }
+
   "TransferServiceImpl" - {
     "submitTransfer" - {
-      "must return Right(SubmissionResponse) on happy path" in {
+      "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
         when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
           .thenReturn(Future.successful(Right(downstreamSuccess)))
+        doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
         result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
+        verify(mockAuditService, times(1)).audit(any[JsonAuditModel])(any[HeaderCarrier])
       }
 
       "must return Left(SubmissionTransformationError) when no prepared submission found" in {
@@ -82,12 +126,14 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
       "must return Left(SubmissionTransformationError) when validator fails" in {
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Left(ValidationError("boom")))
+        doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
         result mustBe Left(SubmissionTransformationError("boom"))
+        verify(mockAuditService, times(0)).audit(any[JsonAuditModel])(any[HeaderCarrier])
       }
 
-      "must map validation-type downstream errors to SubmissionTransformationError" in {
+      "must map validation-type downstream errors to SubmissionTransformationError and audit correctly" in {
         val downstreamErrors: List[DownstreamError] = List(
           EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
           HipBadRequest(origin               = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
@@ -97,12 +143,17 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase {
 
         when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
+        doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         downstreamErrors.foreach { ue =>
+          Mockito.reset(mockAuditService)
           when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue
+
+          verify(mockAuditService, times(1)).audit(any[JsonAuditModel])(any[HeaderCarrier])
+
           result match {
             case Left(SubmissionTransformationError(msg)) =>
               msg must include("Submission failed validation")
