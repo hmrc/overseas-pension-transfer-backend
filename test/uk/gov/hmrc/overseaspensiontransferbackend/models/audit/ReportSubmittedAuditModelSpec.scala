@@ -76,7 +76,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       val transferDetails = TransferDetails(
         Some(100),
         Some(100),
-        Some(LocalDate.now()),
+        Some(LocalDate.of(2013, 1, 1)),
         Some("false"),
         Some("true"),
         Some(Seq(Occupational)),
@@ -149,7 +149,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
         "pensionTransfer"                           -> Json.obj(
           "transferAmount"           -> 100,
           "allowanceBeforeTransfer"  -> 100,
-          "dateMemberTransferred"    -> "2025-10-13",
+          "dateMemberTransferred"    -> "2013-01-01",
           "cashOnlyTransfer"         -> "false",
           "paymentTaxableOverseas"   -> "true",
           "reasonNoOverseasTransfer" -> Json.arr(
