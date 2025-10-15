@@ -18,9 +18,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly
 
 import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
 
-import java.time.{Instant, ZoneOffset}
+import java.time.Instant
 
 final case class SeedInProgress(
     pstr: String,
