@@ -34,9 +34,11 @@ object QtStatus {
 
   implicit val reads: Reads[QtStatus] =
     Reads {
-      case JsString("Compiled")  => JsSuccess(Compiled)
-      case JsString("Submitted") => JsSuccess(Submitted)
-      case _                     => JsError("Invalid value provided for QtStatus")
+      case JsString("Compiled")        => JsSuccess(Compiled)
+      case JsString("Submitted")       => JsSuccess(Submitted)
+      case JsString("InProgress")      => JsSuccess(InProgress)
+      case JsString("AmendInProgress") => JsSuccess(AmendInProgress)
+      case _                           => JsError("Invalid value provided for QtStatus")
     }
 
   implicit val writes: Writes[QtStatus] =
