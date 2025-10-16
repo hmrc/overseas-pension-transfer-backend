@@ -39,8 +39,6 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
     * If the free-text "other" field is being set by the frontend, this removes any conflicting structured country value.
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: Country => JsValue = country => JsString(country.code)
-
     val steps: Seq[TransformerStep] = Seq(
       conditionalPruneStep(
         onlyIfSetAt = externalPath,
@@ -49,8 +47,7 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
       moveStep(
         from        = externalPath,
         to          = internalPath
-      ),
-      constructEnum[Country](internalPath, enumConversion)
+      )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)
   }
@@ -58,11 +55,8 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: String => JsValue = string =>
-      Json.toJson(countryCodeReader.readCountryCode(string))
 
     val steps: Seq[TransformerStep] = Seq(
-      constructEnum[String](internalPath, enumConversion),
       moveStep(
         from = internalPath,
         to   = externalPath

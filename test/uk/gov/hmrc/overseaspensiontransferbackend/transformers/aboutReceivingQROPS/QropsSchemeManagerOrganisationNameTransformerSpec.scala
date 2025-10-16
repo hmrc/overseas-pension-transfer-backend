@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json
 
-class QropsSchemeManagerOrganisationName extends AnyFreeSpec with Matchers {
+class QropsSchemeManagerOrganisationNameTransformerSpec extends AnyFreeSpec with Matchers {
 
   private val transformer = new QropsSchemeManagerOrganisationNameTransformer
 

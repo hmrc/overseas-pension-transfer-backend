@@ -104,28 +104,29 @@ object UserAnswersTestData {
       "dateMemberTransferred" -> "2012-12-12",
       "cashOnlyTransfer" -> false,
       "paymentTaxableOverseas" -> true,
+      "whyTaxableOT" -> "noExclusion",
       "applicableExclusion" -> Seq("occupational", "resident"),
       "amountTaxDeducted" -> 9876543.21,
       "transferMinusTax" -> 123456.99,
-      "typeOfAsset" -> Seq("cash", "unquotedShares", "other"),
+      "typeOfAsset" -> Seq("cashAssets", "unquotedShareAssets", "otherAsset"),
       "moreQuoted" -> false,
       "moreUnquoted" -> true,
       "moreProp" -> false,
       "moreAsset" -> false,
       "quotedShares" -> Seq(
         Json.obj(
-          "valueOfShares" -> 1234.99,
-          "numberOfShares" -> 54,
-          "companyName" -> "Some Company",
-          "classOfShares" -> "ABC"
+          "quotedValue" -> 1234.99,
+          "quotedShareTotal" -> 54,
+          "quotedCompany" -> "Some Company",
+          "quotedClass" -> "ABC"
         )
       ),
       "unquotedShares" -> Seq(
         Json.obj(
-          "valueOfShares" -> 99999.99,
-          "numberOfShares" -> 12,
-          "companyName" -> "Unquoted",
-          "classOfShares" -> "Class"
+          "unquotedValue" -> 99999.99,
+          "unquotedShareTotal" -> 12,
+          "unquotedCompany" -> "Unquoted",
+          "unquotedClass" -> "Class"
         )
       ),
       "propertyAssets" -> Seq(
@@ -231,6 +232,7 @@ object UserAnswersTestData {
       "cashOnlyTransfer" -> "No",
       "paymentTaxableOverseas" -> "Yes",
       "taxableOverseasTransferDetails" -> Json.obj(
+        "whyTaxableOT" -> "02",
         "applicableExclusion" -> Seq("01", "04"),
         "amountTaxDeducted" -> 9876543.21,
         "transferMinusTax" -> 123456.99
@@ -338,7 +340,7 @@ object UserAnswersTestData {
         "ukPostCode"   -> "YY2 2YY",
         "country"      -> Json.obj("code" -> "FR", "name" -> "France")
       ),
-      "qropsEstablishedOther" -> Json.obj("code" -> "BR", "name" -> "Brazil")
+      "qropsEstablishedOther" -> "Wales"
     )
   )
 
@@ -354,7 +356,7 @@ object UserAnswersTestData {
         "country"      -> "FR"
       ),
       "receivingQropsEstablishedDetails" -> Json.obj(
-        "qropsEstablishedOther" -> "BR"
+        "qropsEstablishedOther" -> "Wales"
       )
     )
   )

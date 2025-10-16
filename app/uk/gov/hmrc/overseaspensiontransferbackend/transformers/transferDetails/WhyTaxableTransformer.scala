@@ -16,23 +16,35 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.QuotedShares
+import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.WhyTransferTaxable
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
-class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerStep {
+class WhyTaxableTransformer extends PathAwareTransformer with EnumTransformerStep {
 
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "quotedShares"
+  private val jsonKey = "whyTaxableOT"
 
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "quotedShares"
+  override def externalPath: JsPath = JsPath \ "transferDetails" \ jsonKey
+
+  override def internalPath: JsPath = JsPath \ "transferDetails" \ "taxableOverseasTransferDetails" \ jsonKey
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: WhyTransferTaxable => JsString = whyTransferTaxable =>
+      JsString(whyTransferTaxable.downstreamValue)
+
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(externalPath, internalPath)
+      moveStep(
+        externalPath,
+        internalPath
+      ),
+      constructEnum[WhyTransferTaxable](
+        internalPath,
+        enumConversion
+      )
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
@@ -41,11 +53,17 @@ class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerS
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+    val enumConversion: WhyTransferTaxable => JsString = whyTransferTaxable =>
+      JsString(whyTransferTaxable.toString)
+
     val steps: Seq[TransformerStep] = Seq(
-      moveStep(internalPath, externalPath)
+      constructEnum[WhyTransferTaxable](internalPath, enumConversion),
+      moveStep(
+        internalPath,
+        externalPath
+      )
     )
 
     TransformerUtils.applyPipeline(input, steps)(identity)
   }
-
 }

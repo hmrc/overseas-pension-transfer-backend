@@ -20,7 +20,7 @@ import play.api.libs.json.{JsError, JsObject, JsPath}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
-class QropsSchemeManagerPhoneTranformer extends PathAwareTransformer {
+class QropsSchemeManagerPhoneTransformer extends PathAwareTransformer {
 
   val jsonKey = "schemeManagerPhone"
 
