@@ -62,16 +62,9 @@ case class ReportSubmittedAuditModel(
       case None               => Json.obj()
     }
 
-//  Both?
-//  "roleLoggedInAs": "PSP", // "PSP"
-//  "affinityGroup": "Organisation", // "Individual"
-//  "requesterIdentifier": "21000002", // "A2000002"
-//  "authorisingSchemeAdministratorID": "A1000002"
-
   override val detail: JsValue = Json.obj(
     "internalReportReferenceId" -> referenceId,
-    "journeyType"               -> journeyType.toString,
-    "correlationId"             -> correlationId
+    "journeyType"               -> journeyType.toString
   ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS
 }
 

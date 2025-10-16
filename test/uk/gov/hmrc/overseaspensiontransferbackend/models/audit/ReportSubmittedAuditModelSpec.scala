@@ -124,7 +124,6 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       val expectedJson = Json.obj(
         "internalReportReferenceId"                 -> "internalTransferId",
         "journeyType"                               -> "newReportSubmissionSucceeded",
-        "correlationId"                             -> "x-request-id",
         "overseasPensionTransferReportReference"    -> "QT123456",
         "member"                                    -> Json.obj(
           "foreName"               -> "Forename",
@@ -214,7 +213,6 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       val expectedJson = Json.obj(
         "internalReportReferenceId" -> "internalTransferId",
         "journeyType"               -> "reportSubmissionFailed",
-        "correlationId"             -> "x-request-id",
         "failureReason"             -> "400 - Bad request"
       )
 
