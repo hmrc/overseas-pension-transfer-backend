@@ -73,7 +73,6 @@ class TransferServiceImpl @Inject() (
                     ReportSubmittedAuditModel.build(
                       validated.saved.referenceId,
                       SubmissionSucceeded,
-                      "correlationID",
                       None,
                       Some(success.qtNumber),
                       validated.saved.data.transferringMember.get.memberDetails,
@@ -90,7 +89,6 @@ class TransferServiceImpl @Inject() (
                   ReportSubmittedAuditModel.build(
                     validated.saved.referenceId,
                     JourneySubmittedType.SubmissionFailed,
-                    "correlationID",
                     Some(err.log),
                     None,
                     None,

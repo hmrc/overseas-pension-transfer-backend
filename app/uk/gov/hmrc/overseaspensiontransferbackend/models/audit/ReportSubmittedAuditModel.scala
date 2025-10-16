@@ -23,7 +23,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 case class ReportSubmittedAuditModel(
     referenceId: String,
     journeyType: JourneySubmittedType,
-    correlationId: String,
     failureReason: Option[String],
     maybeQTNumber: Option[QtNumber],
     maybeMemberDetails: Option[MemberDetails],
@@ -73,7 +72,6 @@ object ReportSubmittedAuditModel {
   def build(
       referenceId: String,
       journeyType: JourneySubmittedType,
-      correlationId: String,
       failureReason: Option[String],
       maybeQTNumber: Option[QtNumber],
       maybeMemberDetails: Option[MemberDetails],
@@ -83,7 +81,6 @@ object ReportSubmittedAuditModel {
     ReportSubmittedAuditModel(
       referenceId,
       journeyType,
-      correlationId,
       failureReason,
       maybeQTNumber,
       maybeMemberDetails,

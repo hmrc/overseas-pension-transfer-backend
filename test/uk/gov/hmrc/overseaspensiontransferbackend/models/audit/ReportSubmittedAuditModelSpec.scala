@@ -44,7 +44,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
   "must create correct minimal json for different journey types" in {
     JourneySubmittedType.values.foreach {
       journey =>
-        val result = ReportSubmittedAuditModel.build("internalTransferId", journey, "correlationId", None, None, None, None, None)
+        val result = ReportSubmittedAuditModel.build("internalTransferId", journey, None, None, None, None, None)
         result.auditType   mustBe "overseasPensionTransferReportSubmitted"
         result.journeyType mustBe journey
     }
@@ -194,7 +194,6 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       val result = ReportSubmittedAuditModel.build(
         "internalTransferId",
         SubmissionSucceeded,
-        "x-request-id",
         None,
         Some(QtNumber("QT123456")),
         Some(memberDetails),
@@ -219,7 +218,6 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       val result = ReportSubmittedAuditModel.build(
         "internalTransferId",
         SubmissionFailed,
-        "x-request-id",
         Some("400 - Bad request"),
         None,
         None,

@@ -67,7 +67,7 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
         s"must send an event to the audit connector for $journey event type" in {
           when(mockAppConfig.appName).thenReturn(appName)
           service.audit(
-            ReportSubmittedAuditModel.build("internalTransferId", journey, "correlationId", None, None, None, None, None)
+            ReportSubmittedAuditModel.build("internalTransferId", journey, None, None, None, None, None)
           )
           val eventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
