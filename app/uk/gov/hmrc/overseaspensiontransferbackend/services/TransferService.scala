@@ -135,6 +135,25 @@ class TransferServiceImpl @Inject() (
             logger.error(s"[TransferService][getTransfer] Unable to find transferId: $transferId from save-for-later")
             Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
         }
+      case Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, versionNumber))      =>
+        repository.get(qtNumber.value) flatMap {
+          case Some(userAnswers) =>
+            Future.successful(deconstructSavedAnswers(userAnswers))
+          case None              =>
+            connector.getTransfer(pstr, qtNumber, versionNumber) flatMap {
+              case Right(value) =>
+                val savedUserAnswers = value.toSavedUserAnswers
+                repository.set(savedUserAnswers) map {
+                  case true  => deconstructSavedAnswers(savedUserAnswers)
+                  case false =>
+                    logger.error(s"[TransferService][getTransfer] Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later")
+                    Left(TransferNotFound(s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"))
+                }
+              case Left(err)    =>
+                logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+                Future.successful(Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD")))
+            }
+        }
       case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
         connector.getTransfer(pstr, qtNumber, versionNumber) map {
           case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
@@ -142,8 +161,6 @@ class TransferServiceImpl @Inject() (
             logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
-
-      case Left(transferRetrievalError) => Future.successful(Left(transferRetrievalError))
     }
   }
 

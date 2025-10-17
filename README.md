@@ -27,10 +27,13 @@ These **test-only** endpoints allow developers to insert, generate, or clear dat
 > ⚠️ These routes are **not** available in production and require starting the app with:  
 > `sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes`
 
-### 1. Seed a single in-progress record
+### 1. Seed a single in-progress/amend-in-progress record
 
 **POST** `/test-only/in-progress/seed`  
 Creates one in-progress transfer entry in the Save-For-Later collection.
+
+**POST** `/test-only/amend-in-progress/seed`
+Creates one amend-in-progress transfer entry in the Save-For-Later collection.
 
 **Request body example**
 ```json
@@ -50,10 +53,13 @@ Creates one in-progress transfer entry in the Save-For-Later collection.
 
 ---
 
-### 2. Bulk-seed multiple in-progress records
+### 2. Bulk-seed multiple in-progress/amend-in-progress records
 
 **POST** `/test-only/in-progress/bulk`  
 Accepts an array of `SeedInProgress` objects to insert several records at once.
+
+**POST** `/test-only/amend-in-progress/bulk`  
+Accepts an array of `SeedAmendInProgress` objects to insert several records at once.
 
 **Request body example**
 ```json
@@ -96,6 +102,9 @@ Accepts an array of `SeedInProgress` objects to insert several records at once.
 **POST** `/test-only/in-progress/generate/:pstr/:n`  
 Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
 
+**POST** `/test-only/amend-in-progress/generate/:pstr/:n`  
+Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
+
 **Response**
 - `201 Created` – `n` random records successfully created
 
@@ -105,6 +114,9 @@ Automatically generates `n` fake records for a given `pstr`, using random names 
 
 **DELETE** `/test-only/in-progress/clear/:pstr`  
 Removes all in-progress Save-For-Later entries matching the specified PSTR.
+
+**DELETE** `/test-only/amend-in-progress/clear/:pstr`  
+Removes all amend-in-progress Save-For-Later entries matching the specified PSTR.
 
 **Response**
 - `204 No Content` – Records deleted successfully

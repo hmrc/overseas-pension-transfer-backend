@@ -22,7 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersIt
 
 import java.time.Instant
 
-final case class SeedInProgress(
+final case class SeedAmendInProgress(
     pstr: String,
     transferReference: String,
     lastUpdated: Instant,
@@ -55,7 +55,7 @@ final case class SeedInProgress(
       memberSurname     = lastName,
       submissionDate    = None,
       lastUpdated       = Some(lastUpdated),
-      qtStatus          = Some(InProgress),
+      qtStatus          = Some(AmendInProgress),
       pstrNumber        = Some(PstrNumber(pstr)),
       qtDate            = None
     )
@@ -69,9 +69,9 @@ final case class SeedInProgress(
     )
 }
 
-object SeedInProgress {
-  implicit val format: OFormat[SeedInProgress] = Json.format[SeedInProgress]
+object SeedAmendInProgress {
+  implicit val format: OFormat[SeedAmendInProgress] = Json.format[SeedAmendInProgress]
 
-  def toItems(seeds: Seq[SeedInProgress]): Seq[AllTransfersItem] =
+  def toItems(seeds: Seq[SeedAmendInProgress]): Seq[AllTransfersItem] =
     seeds.map(_.toItem)
 }

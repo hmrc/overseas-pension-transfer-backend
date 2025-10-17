@@ -35,13 +35,13 @@ object GetSpecificTransferHandler {
       versionNumber: Option[String]
     ): Either[TransferRetrievalError, GetSpecificTransferHandler] = {
     (qtStatus, versionNumber) match {
-      case (InProgress, None)                    => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
-      case (Submitted | Compiled, Some(version)) =>
+      case (InProgress, None)                                      => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
+      case (AmendInProgress | Submitted | Compiled, Some(version)) =>
         Try(QtNumber(referenceId)) match {
           case Success(qtNumber) => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
           case _                 => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
         }
-      case _                                     =>
+      case _                                                       =>
         Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
     }
   }
