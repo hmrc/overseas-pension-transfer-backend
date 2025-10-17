@@ -22,6 +22,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.SubmissionSucceeded
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{JourneySubmittedType, ReportSubmittedAuditModel}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
@@ -48,7 +50,8 @@ class TransferServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
     transformer: UserAnswersTransformer,
-    connector: TransferConnector
+    connector: TransferConnector,
+    auditService: AuditService
   )(implicit ec: ExecutionContext
   ) extends TransferService with Logging {
 
@@ -64,9 +67,35 @@ class TransferServiceImpl @Inject() (
                 // TODO: the session store for the dashboards should be updated for the newly
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
+
+                if (validated.saved.data.transferringMember.isDefined) {
+                  auditService.audit(
+                    ReportSubmittedAuditModel.build(
+                      validated.saved.referenceId,
+                      SubmissionSucceeded,
+                      None,
+                      Some(success.qtNumber),
+                      validated.saved.data.transferringMember.get.memberDetails,
+                      validated.saved.data.transferDetails,
+                      validated.saved.data.aboutReceivingQROPS
+                    )
+                  )
+                }
+
                 Right(SubmissionResponse(success.qtNumber))
               case Left(err)      =>
                 logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
+                auditService.audit(
+                  ReportSubmittedAuditModel.build(
+                    validated.saved.referenceId,
+                    JourneySubmittedType.SubmissionFailed,
+                    Some(err.log),
+                    None,
+                    None,
+                    None,
+                    None
+                  )
+                )
                 Left(mapDownstream(err))
             }.recover { case _ => Left(SubmissionFailed) }
         }
