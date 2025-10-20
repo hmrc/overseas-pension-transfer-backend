@@ -268,6 +268,84 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           )
         }
       }
+
+      "handle GetEtmpRecord with AmendInProgress status" - {
+
+        "return Right(UserAnswersDTO) when record already exists in repo" in {
+          val qtNumber = QtNumber("QT999999")
+          val pstr     = PstrNumber("12345678AB")
+          val savedUa  = simpleSavedUserAnswers.copy(referenceId = qtNumber.value, pstr = pstr)
+          val expected = UserAnswersDTO(qtNumber.value, pstr, Json.obj(), savedUa.lastUpdated)
+
+          when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(Some(savedUa)))
+          when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
+
+          val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
+          result mustBe Right(expected)
+        }
+
+        "fetch from connector and save when repo does not have record, then return Right(UserAnswersDTO)" in {
+          val qtNumber = QtNumber("QT777777")
+          val pstr     = PstrNumber("12345678AB")
+
+          val downstream = DownstreamTransferData(
+            pstr,
+            QtDetails("001", AmendInProgress, now, qtNumber, None, None),
+            None,
+            None,
+            None
+          )
+
+          val savedUa = downstream.toSavedUserAnswers
+
+          when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(None))
+          when(mockConnector.getTransfer(eqTo(pstr), eqTo(qtNumber), eqTo("001"))(any))
+            .thenReturn(Future.successful(Right(downstream)))
+          when(mockRepo.set(eqTo(savedUa))).thenReturn(Future.successful(true))
+          when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
+
+          val expected = UserAnswersDTO(savedUa.referenceId, savedUa.pstr, Json.obj(), savedUa.lastUpdated)
+
+          val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
+          result mustBe Right(expected)
+        }
+
+        "return Left(TransferNotFound) when connector returns Right but repo.set fails" in {
+          val qtNumber = QtNumber("QT888888")
+          val pstr     = PstrNumber("12345678AB")
+
+          val downstream = DownstreamTransferData(
+            pstr,
+            QtDetails("001", AmendInProgress, now, qtNumber, None, None),
+            None,
+            None,
+            None
+          )
+
+          val savedUa = downstream.toSavedUserAnswers
+
+          when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(None))
+          when(mockConnector.getTransfer(eqTo(pstr), eqTo(qtNumber), eqTo("001"))(any))
+            .thenReturn(Future.successful(Right(downstream)))
+          when(mockRepo.set(eqTo(savedUa))).thenReturn(Future.successful(false))
+
+          val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
+          result mustBe Left(TransferNotFound(s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"))
+        }
+
+        "return Left(TransferNotFound) when connector fails to fetch record" in {
+          val qtNumber = QtNumber("QT111111")
+          val pstr     = PstrNumber("12345678AB")
+
+          when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(None))
+          when(mockConnector.getTransfer(eqTo(pstr), eqTo(qtNumber), eqTo("001"))(any))
+            .thenReturn(Future.successful(Left(ServerError)))
+
+          val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
+          result mustBe Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
+        }
+      }
+
     }
     "getAllTransfers" - {
 

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly
 
-import java.util.concurrent.ThreadLocalRandom
-
 object NameGenerator {
 
   private val firstNames: Vector[String] = Vector(

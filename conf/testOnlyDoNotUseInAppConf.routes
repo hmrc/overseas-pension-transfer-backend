@@ -25,3 +25,15 @@ POST        /test-only/in-progress/generate/:pstr/:n     uk.gov.hmrc.overseaspen
 
 # Clear by PSTR (or all if no PSTR supplied)
 DELETE      /test-only/in-progress/clear/:pstr           uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyInProgressController.clear(pstr: String)
+
+# Seed a single amend-in-progress transfer
+POST        /test-only/amend-in-progress/seed                  uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyAmendInProgressController.seed
+
+# Bulk seed (JSON array)
+POST        /test-only/amend-in-progress/bulk                  uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyAmendInProgressController.bulk
+
+# Generate N fake records for a PSTR
+POST        /test-only/amend-in-progress/generate/:pstr/:n     uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyAmendInProgressController.generate(pstr: String, n: Int)
+
+# Clear by PSTR (or all if no PSTR supplied)
+DELETE      /test-only/amend-in-progress/clear/:pstr           uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly.TestOnlyAmendInProgressController.clear(pstr: String)

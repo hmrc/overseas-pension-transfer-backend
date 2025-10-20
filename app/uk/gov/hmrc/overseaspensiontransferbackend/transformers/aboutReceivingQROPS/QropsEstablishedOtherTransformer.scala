@@ -18,7 +18,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 
 import com.google.inject.Inject
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}

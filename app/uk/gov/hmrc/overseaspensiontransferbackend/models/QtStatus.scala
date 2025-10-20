@@ -26,16 +26,19 @@ object QtStatus {
 
   def apply(input: String): QtStatus =
     input match {
-      case Compiled.downstreamValue   => Compiled
-      case Submitted.downstreamValue  => Submitted
-      case InProgress.downstreamValue => InProgress
+      case Compiled.downstreamValue        => Compiled
+      case Submitted.downstreamValue       => Submitted
+      case InProgress.downstreamValue      => InProgress
+      case AmendInProgress.downstreamValue => AmendInProgress
     }
 
   implicit val reads: Reads[QtStatus] =
     Reads {
-      case JsString("Compiled")  => JsSuccess(Compiled)
-      case JsString("Submitted") => JsSuccess(Submitted)
-      case _                     => JsError("Invalid value provided for QtStatus")
+      case JsString("Compiled")        => JsSuccess(Compiled)
+      case JsString("Submitted")       => JsSuccess(Submitted)
+      case JsString("InProgress")      => JsSuccess(InProgress)
+      case JsString("AmendInProgress") => JsSuccess(AmendInProgress)
+      case _                           => JsError("Invalid value provided for QtStatus")
     }
 
   implicit val writes: Writes[QtStatus] =
@@ -59,5 +62,10 @@ case object Submitted extends QtStatus {
 
 case object InProgress extends QtStatus {
   override def toString: String        = "InProgress"
+  override val downstreamValue: String = toString
+}
+
+case object AmendInProgress extends QtStatus {
+  override def toString: String        = "AmendInProgress"
   override val downstreamValue: String = toString
 }
