@@ -77,10 +77,11 @@ class SaveForLaterRepository @Inject() (
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
+    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
       .replaceOne(
-        filter      = byId(answers.referenceId),
-        replacement = answers,
+        filter      = byId(updatedAnswers.referenceId),
+        replacement = updatedAnswers,
         options     = ReplaceOptions().upsert(true)
       )
       .toFuture()
