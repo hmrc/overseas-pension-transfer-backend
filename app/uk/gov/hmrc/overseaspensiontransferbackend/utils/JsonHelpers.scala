@@ -121,4 +121,44 @@ trait JsonHelpers {
       case _ => Left(JsError(s"Unsupported path: $path"))
     }
   }
+
+  /** Collect JsPaths that exist in `oldJs` but are missing in `newJs` (recursive for objects). */
+  private def collectMissingPaths(oldJs: JsValue, newJs: JsValue, base: JsPath): List[JsPath] = (oldJs, newJs) match {
+    case (oldObj: JsObject, newObj: JsObject) =>
+      val newKeys     = newObj.keys
+      val missingHere =
+        oldObj.keys.diff(newKeys).toList.map(k => base \ k)
+
+      val nestedMissing =
+        oldObj.fields.flatMap {
+          case (k, oldChild: JsObject) =>
+            newObj.value.get(k) match {
+              case Some(newChild: JsObject) => collectMissingPaths(oldChild, newChild, base \ k)
+              case _                        => Nil
+            }
+          case _                       => Nil
+        }.toList
+
+      missingHere ++ nestedMissing
+
+    case _ => Nil
+  }
+
+  /** Merge with pruning: for each top-level key that the update touches, remove any nested keys from the saved JSON that are not present in the update, then
+    * deepMerge.
+    */
+  def pruneAndMerge(existing: JsObject, update: JsObject): JsObject = {
+    val touchedTop = update.keys
+
+    val prunedBase =
+      touchedTop.foldLeft(existing) { (acc, topKey) =>
+        val oldSub = (acc \ topKey).toOption.getOrElse(JsObject.empty)
+        val newSub = (update \ topKey).toOption.getOrElse(JsObject.empty)
+
+        val missing = collectMissingPaths(oldSub, newSub, JsPath \ topKey)
+        missing.foldLeft(acc) { (acc2, p) => prunePath(p)(acc2) }
+      }
+
+    prunedBase.deepMerge(update)
+  }
 }
