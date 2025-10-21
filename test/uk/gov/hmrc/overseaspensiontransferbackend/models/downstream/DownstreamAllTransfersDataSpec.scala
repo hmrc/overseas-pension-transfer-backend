@@ -145,16 +145,16 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
 
       DownstreamAllTransfersData.toAllTransferItems(pstr, data) mustBe
         List(AllTransfersItem(
-          transferReference = QtNumber("QT564321"),
-          qtVersion         = Some("001"),
-          nino              = Some("AA000000A"),
-          memberFirstName   = Some("David"),
-          memberSurname     = Some("Warne"),
-          submissionDate    = Some(Instant.parse("2025-05-09T10:10:12Z")),
-          lastUpdated       = None, // in-progress supplies lastUpdated
-          qtStatus          = Some(Compiled),
-          pstrNumber        = Some(pstr),
-          qtDate            = Some(LocalDate.parse("2025-03-14"))
+          transferId      = QtNumber("QT564321"),
+          qtVersion       = Some("001"),
+          nino            = Some("AA000000A"),
+          memberFirstName = Some("David"),
+          memberSurname   = Some("Warne"),
+          submissionDate  = Some(Instant.parse("2025-05-09T10:10:12Z")),
+          lastUpdated     = None, // in-progress supplies lastUpdated
+          qtStatus        = Some(Compiled),
+          pstrNumber      = Some(pstr),
+          qtDate          = Some(LocalDate.parse("2025-03-14"))
         ))
     }
   }

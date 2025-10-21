@@ -199,10 +199,21 @@ class TransferServiceImpl @Inject() (
       dsEither   <- downstreamEitherF
       inProgress <- inProgressF
     } yield {
+      def amendInProgressRecords = {
+        inProgress.filter(_.qtStatus.contains(AmendInProgress)).map(_.transferId)
+      }
+
       dsEither match {
         case Right(ds) =>
           val submitted = DownstreamAllTransfersData.toAllTransferItems(pstrNumber, ds)
-          Right(AllTransfersResponse(inProgress ++ submitted))
+          Right(AllTransfersResponse(inProgress.filterNot(_.qtStatus.contains(AmendInProgress)) ++ submitted.map {
+            record =>
+              if (amendInProgressRecords.contains(record.transferId)) {
+                record.copy(qtStatus = Some(AmendInProgress))
+              } else {
+                record
+              }
+          }))
         case Left(e)   =>
           logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${e.log}")
           if (inProgress.nonEmpty) {
@@ -215,5 +226,6 @@ class TransferServiceImpl @Inject() (
           }
       }
     }
+
   }
 }
