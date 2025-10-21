@@ -51,7 +51,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        referenceId = id,
+        transferId = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -86,7 +86,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        referenceId = id,
+        transferId = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -123,7 +123,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        referenceId = id,
+        transferId = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -160,7 +160,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        referenceId = id,
+        transferId = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now

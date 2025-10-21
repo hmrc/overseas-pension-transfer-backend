@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferNumber}
 
 import java.time.{Clock, Instant, ZoneOffset}
 
@@ -34,8 +34,7 @@ class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
 
   private val itemForPstr =
     AllTransfersItem(
-      transferReference = None,
-      qtReference       = None,
+      transferReference = TransferNumber(""),
       qtVersion         = None,
       nino              = None,
       memberFirstName   = None,
