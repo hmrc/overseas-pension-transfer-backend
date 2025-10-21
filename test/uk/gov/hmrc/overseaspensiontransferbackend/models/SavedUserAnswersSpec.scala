@@ -20,7 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
@@ -112,6 +112,34 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
           transferReference = TransferNumber("ref-123"),
           qtVersion         = None,
           qtStatus          = Some(InProgress),
+          nino              = Some("AA000000A"),
+          memberFirstName   = Some("Forename"),
+          memberSurname     = Some("Lastname"),
+          qtDate            = None,
+          lastUpdated       = Some(Instant.parse("2024-01-01T12:00:00Z")),
+          pstrNumber        = Some(PstrNumber("12345678AB")),
+          submissionDate    = None
+        )
+    }
+
+    "return an AmendInProgress item when the TransferId is a QtNumber" in {
+      val savedAnswers = SavedUserAnswers(
+        transferId  = QtNumber("QT123456"),
+        pstr        = PstrNumber("12345678AB"),
+        data        = AnswersData(
+          reportDetails       = None,
+          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
+          aboutReceivingQROPS = None,
+          transferDetails     = None
+        ),
+        lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
+      )
+
+      savedAnswers.toAllTransfersItem mustBe
+        AllTransfersItem(
+          transferReference = QtNumber("QT123456"),
+          qtVersion         = None,
+          qtStatus          = Some(AmendInProgress),
           nino              = Some("AA000000A"),
           memberFirstName   = Some("Forename"),
           memberSurname     = Some("Lastname"),
