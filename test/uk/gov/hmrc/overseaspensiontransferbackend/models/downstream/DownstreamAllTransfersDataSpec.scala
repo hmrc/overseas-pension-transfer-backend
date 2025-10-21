@@ -144,7 +144,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
         )
 
       DownstreamAllTransfersData.toAllTransferItems(pstr, data) mustBe
-        AllTransfersItem(
+        List(AllTransfersItem(
           transferReference = QtNumber("QT564321"),
           qtVersion         = Some("001"),
           nino              = Some("AA000000A"),
@@ -155,7 +155,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
           qtStatus          = Some(Compiled),
           pstrNumber        = Some(pstr),
           qtDate            = Some(LocalDate.parse("2025-03-14"))
-        )
+        ))
     }
   }
 }
