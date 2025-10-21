@@ -109,16 +109,16 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
       savedAnswers.toAllTransfersItem mustBe
         AllTransfersItem(
-          transferReference = TransferNumber("ref-123"),
-          qtVersion         = None,
-          qtStatus          = Some(InProgress),
-          nino              = Some("AA000000A"),
-          memberFirstName   = Some("Forename"),
-          memberSurname     = Some("Lastname"),
-          qtDate            = None,
-          lastUpdated       = Some(Instant.parse("2024-01-01T12:00:00Z")),
-          pstrNumber        = Some(PstrNumber("12345678AB")),
-          submissionDate    = None
+          transferId      = TransferNumber("ref-123"),
+          qtVersion       = None,
+          qtStatus        = Some(InProgress),
+          nino            = Some("AA000000A"),
+          memberFirstName = Some("Forename"),
+          memberSurname   = Some("Lastname"),
+          qtDate          = None,
+          lastUpdated     = Some(Instant.parse("2024-01-01T12:00:00Z")),
+          pstrNumber      = Some(PstrNumber("12345678AB")),
+          submissionDate  = None
         )
     }
 
@@ -137,16 +137,16 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
       savedAnswers.toAllTransfersItem mustBe
         AllTransfersItem(
-          transferReference = QtNumber("QT123456"),
-          qtVersion         = None,
-          qtStatus          = Some(AmendInProgress),
-          nino              = Some("AA000000A"),
-          memberFirstName   = Some("Forename"),
-          memberSurname     = Some("Lastname"),
-          qtDate            = None,
-          lastUpdated       = Some(Instant.parse("2024-01-01T12:00:00Z")),
-          pstrNumber        = Some(PstrNumber("12345678AB")),
-          submissionDate    = None
+          transferId      = QtNumber("QT123456"),
+          qtVersion       = None,
+          qtStatus        = Some(AmendInProgress),
+          nino            = Some("AA000000A"),
+          memberFirstName = Some("Forename"),
+          memberSurname   = Some("Lastname"),
+          qtDate          = None,
+          lastUpdated     = Some(Instant.parse("2024-01-01T12:00:00Z")),
+          pstrNumber      = Some(PstrNumber("12345678AB")),
+          submissionDate  = None
         )
     }
   }

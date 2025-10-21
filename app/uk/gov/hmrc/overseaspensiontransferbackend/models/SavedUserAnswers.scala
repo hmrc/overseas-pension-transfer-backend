@@ -38,16 +38,16 @@ final case class SavedUserAnswers(
     }
 
     AllTransfersItem(
-      transferReference = transferId,
-      qtVersion         = None,
-      qtStatus          = setQtStatus,
-      nino              = data.nino,
-      memberFirstName   = data.memberForeName,
-      memberSurname     = data.memberLastName,
-      qtDate            = None,
-      lastUpdated       = Some(lastUpdated),
-      pstrNumber        = Some(pstr),
-      submissionDate    = None
+      transferId      = transferId,
+      qtVersion       = None,
+      qtStatus        = setQtStatus,
+      nino            = data.nino,
+      memberFirstName = data.memberForeName,
+      memberSurname   = data.memberLastName,
+      qtDate          = None,
+      lastUpdated     = Some(lastUpdated),
+      pstrNumber      = Some(pstr),
+      submissionDate  = None
     )
   }
 }

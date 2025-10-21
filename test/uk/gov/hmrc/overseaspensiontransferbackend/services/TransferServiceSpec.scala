@@ -402,20 +402,20 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
             items must have size 2
 
             val first = items.head
-            first.transferReference mustBe QtNumber("QT564321")
-            first.qtVersion         mustBe Some("001")
-            first.qtStatus          mustBe Some(QtStatus("Compiled"))
-            first.nino              mustBe Some("AA000000A")
-            first.memberFirstName   mustBe Some("David")
-            first.memberSurname     mustBe Some("Warne")
-            first.qtDate            mustBe Some(LocalDate.parse("2025-03-14"))
-            first.pstrNumber        mustBe Some(pstr)
-            first.submissionDate    mustBe Some(submissionDate)
+            first.transferId      mustBe QtNumber("QT564321")
+            first.qtVersion       mustBe Some("001")
+            first.qtStatus        mustBe Some(QtStatus("Compiled"))
+            first.nino            mustBe Some("AA000000A")
+            first.memberFirstName mustBe Some("David")
+            first.memberSurname   mustBe Some("Warne")
+            first.qtDate          mustBe Some(LocalDate.parse("2025-03-14"))
+            first.pstrNumber      mustBe Some(pstr)
+            first.submissionDate  mustBe Some(submissionDate)
 
             val second = items(1)
-            second.transferReference mustBe QtNumber("QT564322")
-            second.memberFirstName   mustBe Some("Edith")
-            second.memberSurname     mustBe Some("Ennis-Hill")
+            second.transferId      mustBe QtNumber("QT564322")
+            second.memberFirstName mustBe Some("Edith")
+            second.memberSurname   mustBe Some("Ennis-Hill")
 
           case other =>
             fail(s"Unexpected: $other")
@@ -480,16 +480,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         )
 
         val inProg = AllTransfersItem(
-          transferReference = TransferNumber("T-1"),
-          qtVersion         = None,
-          nino              = Some("AB123456C"),
-          memberFirstName   = Some("In"),
-          memberSurname     = Some("Progress"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-03-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-1"),
+          qtVersion       = None,
+          nino            = Some("AB123456C"),
+          memberFirstName = Some("In"),
+          memberSurname   = Some("Progress"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-03-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -506,9 +506,9 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         result match {
           case Right(AllTransfersResponse(items)) =>
-            items                        must have size 2
-            items.head                 mustBe inProg
-            items(1).transferReference mustBe QtNumber("QT123456")
+            items                 must have size 2
+            items.head          mustBe inProg
+            items(1).transferId mustBe QtNumber("QT123456")
           case other                              => fail(s"Unexpected: $other")
         }
       }
@@ -517,16 +517,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         val pstr = PstrNumber("24000001AA")
 
         val inProg = AllTransfersItem(
-          transferReference = TransferNumber("T-2"),
-          qtVersion         = None,
-          nino              = None,
-          memberFirstName   = Some("Only"),
-          memberSurname     = Some("InProgress"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-04-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-2"),
+          qtVersion       = None,
+          nino            = None,
+          memberFirstName = Some("Only"),
+          memberSurname   = Some("InProgress"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-04-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -547,16 +547,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         val pstr = PstrNumber("24000001AA")
 
         val inProg = AllTransfersItem(
-          transferReference = TransferNumber("T-3"),
-          qtVersion         = None,
-          nino              = None,
-          memberFirstName   = Some("Still"),
-          memberSurname     = Some("Proceeding"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-05-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-3"),
+          qtVersion       = None,
+          nino            = None,
+          memberFirstName = Some("Still"),
+          memberSurname   = Some("Proceeding"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-05-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -610,7 +610,64 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         result match {
           case Right(AllTransfersResponse(items)) =>
-            items.map(_.transferReference) mustBe Seq(QtNumber("QT654321"))
+            items.map(_.transferId) mustBe Seq(QtNumber("QT654321"))
+          case other                              => fail(s"Unexpected: $other")
+        }
+      }
+
+      "merge AmendInProgress transfer with Submitted AllTransferItem to preserve full data" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val ds = DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "fb",
+                qtReference               = "QT654321",
+                qtVersion                 = "001",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = "Submitted",
+                nino                      = "AA777777A",
+                firstName                 = "Sue",
+                lastName                  = "Smith",
+                qtDate                    = LocalDate.parse("2025-06-01"),
+                qropsReference            = "QROPS777",
+                submissionCompilationDate = now
+              )
+            )
+          )
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(ds)))
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Seq(
+          AllTransfersItem(
+            QtNumber("QT654321"),
+            None,
+            Some(AmendInProgress),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
+          )
+        )))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+
+        result match {
+          case Right(AllTransfersResponse(items)) =>
+            items.map(_.transferId) mustBe Seq(QtNumber("QT654321"))
+            items.map(_.qtStatus)   mustBe Seq(Some(AmendInProgress))
+            items.map(_.qtVersion)  mustBe Seq(Some("001"))
           case other                              => fail(s"Unexpected: $other")
         }
       }

@@ -34,16 +34,16 @@ class GetAllTransfersDTOSpec extends AnyFreeSpec with Matchers {
 
   private val itemForPstr =
     AllTransfersItem(
-      transferReference = TransferNumber(""),
-      qtVersion         = None,
-      nino              = None,
-      memberFirstName   = None,
-      memberSurname     = None,
-      submissionDate    = None,
-      lastUpdated       = None,
-      qtStatus          = None,
-      pstrNumber        = Some(pstr),
-      qtDate            = None
+      transferId      = TransferNumber(""),
+      qtVersion       = None,
+      nino            = None,
+      memberFirstName = None,
+      memberSurname   = None,
+      submissionDate  = None,
+      lastUpdated     = None,
+      qtStatus        = None,
+      pstrNumber      = Some(pstr),
+      qtDate          = None
     )
 
   "GetAllTransfersDTO.from" - {

@@ -47,16 +47,16 @@ final case class SeedInProgress(
 
   private def toItem: AllTransfersItem =
     AllTransfersItem(
-      transferReference = transferReference,
-      qtVersion         = None,
-      nino              = nino,
-      memberFirstName   = firstName,
-      memberSurname     = lastName,
-      submissionDate    = None,
-      lastUpdated       = Some(lastUpdated),
-      qtStatus          = Some(InProgress),
-      pstrNumber        = Some(PstrNumber(pstr)),
-      qtDate            = None
+      transferId      = transferReference,
+      qtVersion       = None,
+      nino            = nino,
+      memberFirstName = firstName,
+      memberSurname   = lastName,
+      submissionDate  = None,
+      lastUpdated     = Some(lastUpdated),
+      qtStatus        = Some(InProgress),
+      pstrNumber      = Some(PstrNumber(pstr)),
+      qtDate          = None
     )
 
   def toSavedUserAnswers: SavedUserAnswers =

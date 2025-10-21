@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 import play.api.libs.json._
 import play.api.mvc.PathBindable
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Success, Try}
 
 trait TransferId {
   def value: String

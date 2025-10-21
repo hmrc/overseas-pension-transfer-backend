@@ -30,7 +30,7 @@ object AllTransfersResponse {
 }
 
 case class AllTransfersItem(
-    transferReference: TransferId,
+    transferId: TransferId,
     qtVersion: Option[String],
     qtStatus: Option[QtStatus],
     nino: Option[String],
