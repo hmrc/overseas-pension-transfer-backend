@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -34,7 +35,7 @@ class SaveForLaterController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def getAnswers(referenceId: String): Action[AnyContent] = Action.async { implicit request =>
+  def getAnswers(referenceId: TransferId): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     saveForLaterService.getAnswers(referenceId).map {
@@ -51,7 +52,7 @@ class SaveForLaterController @Inject() (
     }
   }
 
-  def saveAnswers(referenceId: String): Action[UserAnswersDTO] =
+  def saveAnswers: Action[UserAnswersDTO] =
     Action.async(parse.json[UserAnswersDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
@@ -70,7 +71,7 @@ class SaveForLaterController @Inject() (
       }
     }
 
-  def deleteAnswers(referenceId: String): Action[AnyContent] = Action.async {
+  def deleteAnswers(referenceId: TransferId): Action[AnyContent] = Action.async {
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 

@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 import java.time.Instant
@@ -95,18 +96,18 @@ trait BaseISpec
   }
 
 
-  def freshId(): String = UUID.randomUUID().toString
+  def freshId(): TransferNumber = TransferNumber(UUID.randomUUID().toString)
   def frozenNow(): Instant = Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
 
-  def dtoFrom(id: String, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
+  def dtoFrom(id: TransferNumber, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
     UserAnswersDTO(id, pstr, js, now)
 
-  def savedFrom(id: String, pstr: PstrNumber, js: JsObject, now: Instant): SavedUserAnswers =
+  def savedFrom(id: TransferNumber, pstr: PstrNumber, js: JsObject, now: Instant): SavedUserAnswers =
     SavedUserAnswers(id, pstr, js.as[AnswersData], now)
 
   def parseJson(str: String): JsObject = Json.parse(str).as[JsObject]
 
-  def withSavedDto(id: String, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
+  def withSavedDto(id: TransferNumber, pstr: PstrNumber, js: JsObject, now: Instant): UserAnswersDTO =
     UserAnswersDTO(id, pstr, js, now)
 
   def assertJson(js: JsLookupResult, expected: Map[String, String]): Unit = {

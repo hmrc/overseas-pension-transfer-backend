@@ -52,8 +52,7 @@ class GetAllTransfersControllerSpec
 
       val items: Seq[AllTransfersItem] =
         Seq(AllTransfersItem(
-          transferReference = None,
-          qtReference       = None,
+          transferReference = TransferNumber("test"),
           qtVersion         = None,
           qtStatus          = None,
           nino              = None,

@@ -20,6 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
@@ -32,7 +33,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
     "must round trip to and from JSON" in {
       val original = SavedUserAnswers(
-        referenceId = "ref-123",
+        transferId  = TransferNumber("ref-123"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
           reportDetails       = None,
@@ -57,7 +58,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferDetails     = None
       )
 
-      val obj = SavedUserAnswers("ref-456", PstrNumber("12345678AB"), data, Instant.parse("2025-01-01T10:00:00Z"))
+      val obj = SavedUserAnswers(TransferNumber("ref-456"), PstrNumber("12345678AB"), data, Instant.parse("2025-01-01T10:00:00Z"))
 
       val json = Json.toJson(obj)
 
@@ -89,6 +90,36 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
       val parsed = json.validate[AnswersDataWrapper](AnswersDataWrapper.wrapperFormat)
 
       parsed mustBe JsSuccess(encrypted)
+    }
+  }
+
+  "toAllTransfersItem" - {
+    "return an InProgress Item when TransferId is TransferNumber" in {
+      val savedAnswers = SavedUserAnswers(
+        transferId  = TransferNumber("ref-123"),
+        pstr        = PstrNumber("12345678AB"),
+        data        = AnswersData(
+          reportDetails       = None,
+          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
+          aboutReceivingQROPS = None,
+          transferDetails     = None
+        ),
+        lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
+      )
+
+      savedAnswers.toAllTransfersItem mustBe
+        AllTransfersItem(
+          transferReference = TransferNumber("ref-123"),
+          qtVersion         = None,
+          qtStatus          = Some(InProgress),
+          nino              = Some("AA000000A"),
+          memberFirstName   = Some("Forename"),
+          memberSurname     = Some("Lastname"),
+          qtDate            = None,
+          lastUpdated       = Some(Instant.parse("2024-01-01T12:00:00Z")),
+          pstrNumber        = Some(PstrNumber("12345678AB")),
+          submissionDate    = None
+        )
     }
   }
 }

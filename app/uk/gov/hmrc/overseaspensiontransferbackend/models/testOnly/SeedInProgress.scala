@@ -18,13 +18,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly
 
 import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferId}
 
 import java.time.Instant
 
 final case class SeedInProgress(
     pstr: String,
-    transferReference: String,
+    transferReference: TransferId,
     lastUpdated: Instant,
     nino: Option[String]      = None,
     firstName: Option[String] = None,
@@ -47,8 +47,7 @@ final case class SeedInProgress(
 
   private def toItem: AllTransfersItem =
     AllTransfersItem(
-      transferReference = Some(transferReference),
-      qtReference       = None,
+      transferReference = transferReference,
       qtVersion         = None,
       nino              = nino,
       memberFirstName   = firstName,
@@ -62,7 +61,7 @@ final case class SeedInProgress(
 
   def toSavedUserAnswers: SavedUserAnswers =
     SavedUserAnswers(
-      referenceId = transferReference,
+      transferId  = transferReference,
       pstr        = PstrNumber(pstr),
       data        = toAnswersData,
       lastUpdated = lastUpdated
