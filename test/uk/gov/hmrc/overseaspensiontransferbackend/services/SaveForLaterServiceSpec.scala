@@ -44,7 +44,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
   )
 
   private val validSaved = SavedUserAnswers(
-    referenceId = testId,
+    transferId  = testId,
     pstr        = pstr,
     data        = AnswersData(None, Some(TransferringMember(None)), None, None),
     lastUpdated = now
@@ -55,7 +55,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
   "SaveForLaterServiceSpec" - {
 
     "must return Right(UserAnswersDTO) when data exists and deconstruct succeeds" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
       when(mockTransformer.deconstruct(*)).thenReturn(Right(validData))
 
       val result = service.getAnswers(testId)
@@ -64,7 +64,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return Left(NotFound) when no data exists" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(None))
 
       val result = service.getAnswers(testId)
 
@@ -72,7 +72,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return Left(TransformationError) when deconstruct fails" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
       when(mockTransformer.deconstruct(*)).thenReturn(Left(JsError("deconstruct failed")))
 
       val result = service.getAnswers(testId)
@@ -84,7 +84,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must save new answers if valid" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(None))
       when(mockTransformer.construct(*)).thenReturn(Right(validData))
       when(mockRepository.set(*)).thenReturn(Future.successful(true))
 
@@ -94,7 +94,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return Left(SaveFailed) if repo.set returns false" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(None))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(None))
       when(mockTransformer.construct(*)).thenReturn(Right(validData))
       when(mockRepository.set(*)).thenReturn(Future.successful(false))
 
@@ -104,7 +104,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must merge with existing data before save" in {
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
       when(mockTransformer.construct(*)).thenReturn(Right(validData))
       when(mockRepository.set(*)).thenReturn(Future.successful(true))
 
@@ -134,7 +134,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase {
       )
 
       when(mockTransformer.construct(*)).thenReturn(Right(malformedJson))
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(validSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
       when(mockRepository.set(*)).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)

@@ -42,6 +42,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{JourneySubmittedType, ReportSubmittedAuditModel}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
@@ -67,7 +68,7 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
         s"must send an event to the audit connector for $journey event type" in {
           when(mockAppConfig.appName).thenReturn(appName)
           service.audit(
-            ReportSubmittedAuditModel.build("internalTransferId", journey, None, None, None, None, None)
+            ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None)
           )
           val eventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 

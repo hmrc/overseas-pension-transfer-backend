@@ -47,7 +47,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
           .build()
 
       running(app) {
-        val request = FakeRequest(GET, s"$routePrefix/save-for-later/$testId")
+        val request = FakeRequest(GET, s"$routePrefix/save-for-later/${testId.value}")
         val result  = route(app, request).value
 
         status(result)        mustBe OK
@@ -67,7 +67,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
           .build()
 
       running(app) {
-        val request = FakeRequest(GET, s"$routePrefix/save-for-later/$testId")
+        val request = FakeRequest(GET, s"$routePrefix/save-for-later/${testId.value}")
         val result  = route(app, request).value
 
         status(result) mustBe NOT_FOUND
@@ -77,7 +77,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
     "must return 204 NoContent if save is successful" in {
       val mockService = mock[SaveForLaterService]
 
-      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(transferId = testId)))(any))
         .thenReturn(Future.successful(Right(simpleUserAnswersDTO)))
 
       val app: Application =
@@ -86,7 +86,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
           .build()
 
       running(app) {
-        val request = FakeRequest(POST, s"$routePrefix/save-for-later/$testId")
+        val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
         val result = route(app, request).value
@@ -99,7 +99,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
     "must return 400 BadRequest on transformation error" in {
       val mockService = mock[SaveForLaterService]
 
-      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(transferId = testId)))(any))
         .thenReturn(Future.successful(Left(SaveForLaterError.TransformationError("something went wrong"))))
 
       val app: Application =
@@ -108,7 +108,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
           .build()
 
       running(app) {
-        val request = FakeRequest(POST, s"$routePrefix/save-for-later/$testId")
+        val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
         val result = route(app, request).value
@@ -121,7 +121,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
     "must return 500 InternalServerError on save failure" in {
       val mockService = mock[SaveForLaterService]
 
-      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(referenceId = testId)))(any))
+      when(mockService.saveAnswer(eqTo(simpleUserAnswersDTO.copy(transferId = testId)))(any))
         .thenReturn(Future.successful(Left(SaveForLaterError.SaveFailed)))
 
       val app: Application =
@@ -130,7 +130,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
           .build()
 
       running(app) {
-        val request = FakeRequest(POST, s"$routePrefix/save-for-later/$testId")
+        val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
         val result = route(app, request).value
@@ -153,7 +153,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
             .build()
 
         running(app) {
-          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/$testId")
+          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/${testId.value}")
 
           val result = route(app, request).value
 
@@ -174,7 +174,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
             .build()
 
         running(app) {
-          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/$testId")
+          val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/${testId.value}")
 
           val result = route(app, request).value
 

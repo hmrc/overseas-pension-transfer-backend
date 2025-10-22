@@ -1,11 +1,11 @@
 # microservice specific routes
 
-GET         /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.getAnswers(referenceId)
-POST        /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.saveAnswers(referenceId)
-DELETE      /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.deleteAnswers(referenceId)
+GET         /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.getAnswers(referenceId: TransferId)
+POST        /save-for-later                     uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.saveAnswers
+DELETE      /save-for-later/:referenceId        uk.gov.hmrc.overseaspensiontransferbackend.controllers.SaveForLaterController.deleteAnswers(referenceId: TransferId)
 
-POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitTransfer(referenceId)
+POST        /submit-declaration/:referenceId    uk.gov.hmrc.overseaspensiontransferbackend.controllers.SubmissionController.submitTransfer(referenceId: TransferId)
 
 GET         /get-all-transfers/:pstrNumber      uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetAllTransfersController.getAllTransfers(pstrNumber)
 
-GET         /get-transfer/:referenceId          uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetTransferDataController.getTransfer(referenceId: String, pstr: String, qtStatus: String, versionNumber: Option[String])
+GET         /get-transfer/:referenceId          uk.gov.hmrc.overseaspensiontransferbackend.controllers.GetTransferDataController.getTransfer(referenceId: TransferId, pstr: String, qtStatus: String, versionNumber: Option[String])

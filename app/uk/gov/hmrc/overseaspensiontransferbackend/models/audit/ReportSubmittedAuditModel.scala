@@ -18,10 +18,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId}
 
 case class ReportSubmittedAuditModel(
-    referenceId: String,
+    referenceId: TransferId,
     journeyType: JourneySubmittedType,
     failureReason: Option[String],
     maybeQTNumber: Option[QtNumber],
@@ -70,7 +70,7 @@ case class ReportSubmittedAuditModel(
 object ReportSubmittedAuditModel {
 
   def build(
-      referenceId: String,
+      referenceId: TransferId,
       journeyType: JourneySubmittedType,
       failureReason: Option[String],
       maybeQTNumber: Option[QtNumber],
