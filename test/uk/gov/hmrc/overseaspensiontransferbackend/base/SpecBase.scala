@@ -75,7 +75,6 @@ trait SpecBase
   def unquotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
     Json.obj("unquotedValue" -> BigDecimal(v), "unquotedShareTotal" -> n, "unquotedCompany" -> c, "unquotedClass" -> cls)
 
-
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
 }

@@ -259,14 +259,14 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val updateTransformed =
         Json.obj(
           "transferDetails" -> Json.obj(
-            "typeOfAssets" -> Json.obj(
+            "typeOfAssets"   -> Json.obj(
               "quotedShareAssets" -> "Yes",
               "quotedShares"      -> Json.arr(
                 quotedShare(100, 10, "Alpha PLC", "A"),
                 quotedShare(250, 25, "Beta PLC", "B")
               )
             ),
-            "transferAmount"    -> BigDecimal(9999)
+            "transferAmount" -> BigDecimal(9999)
           )
         )
 
@@ -365,7 +365,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val saved = captureSaved()
       val json  = Json.toJsObject(saved.data)
 
-      (json \ "transferDetails" \ "typeOfAssets" \ "quotedShares").toOption      mustBe None
+      (json \ "transferDetails" \ "typeOfAssets" \ "quotedShares").toOption        mustBe None
       (json \ "transferDetails" \ "typeOfAssets" \ "quotedShareAssets").as[String] mustBe "No"
 
       val uArr = (json \ "transferDetails" \ "typeOfAssets" \ "unquotedShares").as[JsArray]
@@ -378,8 +378,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
         Json.obj(
           "transferDetails" -> Json.obj(
             "typeOfAssets" -> Json.obj(
-              "quotedShareAssets" -> "Yes",
-              "quotedShares"      -> Json.arr(
+              "quotedShareAssets"   -> "Yes",
+              "quotedShares"        -> Json.arr(
                 Json.obj("quotedValue" -> 100, "quotedShareTotal" -> 10, "quotedCompany" -> "Alpha", "quotedClass" -> "A")
               ),
               "unquotedShareAssets" -> "Yes",
@@ -390,15 +390,17 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
           )
         )
 
-      val dto = validDTO.copy(data = Json.obj(
-        "transferDetails" -> Json.obj(
-          "typeOfAssets" -> Json.obj(
-            "unquotedShares"      -> Json.arr(
-              Json.obj("unquotedValue" -> 300, "unquotedShareTotal" -> 30, "unquotedCompany" -> "Gamma", "unquotedClass" -> "G")
+      val dto = validDTO.copy(data =
+        Json.obj(
+          "transferDetails" -> Json.obj(
+            "typeOfAssets" -> Json.obj(
+              "unquotedShares" -> Json.arr(
+                Json.obj("unquotedValue" -> 300, "unquotedShareTotal" -> 30, "unquotedCompany" -> "Gamma", "unquotedClass" -> "G")
+              )
             )
           )
         )
-      ))
+      )
 
       val updateTransformed =
         Json.obj(
@@ -425,14 +427,13 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val json  = Json.toJsObject(saved.data)
 
       (json \ "transferDetails" \ "typeOfAssets" \ "quotedShareAssets").as[String] mustBe "No"
-      (json \ "transferDetails" \ "typeOfAssets" \ "quotedShares").toOption mustBe None
+      (json \ "transferDetails" \ "typeOfAssets" \ "quotedShares").toOption        mustBe None
 
       (json \ "transferDetails" \ "typeOfAssets" \ "unquotedShareAssets").as[String] mustBe "Yes"
       val u = (json \ "transferDetails" \ "typeOfAssets" \ "unquotedShares").as[JsArray]
-      u.value must have size 1
+      u.value                                         must have size 1
       (u.value.head \ "unquotedCompany").as[String] mustBe "Gamma"
     }
-
 
     "must preserve unrelated transferDetails fields when only typeOfAssets is touched" in {
       val existingJson =
@@ -450,7 +451,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
         Json.obj(
           "transferDetails" -> Json.obj(
             "transferAmount" -> BigDecimal(9999),
-            "typeOfAssets" -> Json.obj(
+            "typeOfAssets"   -> Json.obj(
               "quotedShareAssets" -> "Yes",
               "quotedShares"      -> Json.arr(quotedShare(200, 20, "Beta PLC", "B"))
             )

@@ -29,10 +29,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumbe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
-import java.time.Instant
+import java.time.{Clock, Instant, ZoneOffset}
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
+import play.api.inject.bind
 
 trait BaseISpec
     extends AnyFreeSpec
@@ -57,11 +58,17 @@ trait BaseISpec
 
   protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty
 
+  val fixedInstant = Instant.parse("2025-10-22T11:53:18.911Z")
+  private val fixedClock   = Clock.fixed(fixedInstant, ZoneOffset.UTC)
+
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder()
       .in(Environment.simple(mode = Mode.Test))
       .configure(servicesConfig)
       .overrides(moduleOverrides: _*)
+      .overrides(
+        bind[Clock].toInstance(fixedClock)
+      )
       .build()
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
