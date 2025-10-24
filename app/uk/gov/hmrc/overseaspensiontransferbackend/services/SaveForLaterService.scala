@@ -21,6 +21,7 @@ import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
@@ -39,9 +40,9 @@ object SaveForLaterError {
 }
 
 trait SaveForLaterService {
-  def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
+  def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
   def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]]
-  def deleteAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]]
+  def deleteAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]]
 }
 
 @Singleton
@@ -51,12 +52,12 @@ class SaveForLaterServiceImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends SaveForLaterService with Logging with JsonHelpers {
 
-  override def getAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
-    repository.get(id).map {
+  override def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
+    repository.get(id.value).map {
       case Some(saved) =>
         deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
           case Right(deconstructed) =>
-            Right(UserAnswersDTO(saved.referenceId, saved.pstr, deconstructed, saved.lastUpdated))
+            Right(UserAnswersDTO(saved.transferId, saved.pstr, deconstructed, saved.lastUpdated))
 
           case Left(error) =>
             Left(error)
@@ -72,13 +73,13 @@ class SaveForLaterServiceImpl @Inject() (
       case Left(err)               =>
         Future.successful(Left(err))
       case Right(transformedInput) =>
-        repository.get(dto.referenceId).flatMap { maybeExisting =>
+        repository.get(dto.transferId.value).flatMap { maybeExisting =>
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
           validate(mergedJson) match {
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              val saved = SavedUserAnswers(dto.referenceId, dto.pstr, validated, dto.lastUpdated)
+              val saved = SavedUserAnswers(dto.transferId, dto.pstr, validated, dto.lastUpdated)
               repository.set(saved).map {
                 case true  => Right(())
                 case false => Left(SaveForLaterError.SaveFailed)
@@ -129,8 +130,8 @@ class SaveForLaterServiceImpl @Inject() (
     }
   }
 
-  override def deleteAnswers(id: String)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]] =
-    repository.clear(id) map {
+  override def deleteAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]] =
+    repository.clear(id.value) map {
       case true  => Right(Done)
       case false => Left(SaveForLaterError.DeleteFailed)
     }

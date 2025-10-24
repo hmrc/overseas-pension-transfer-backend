@@ -27,7 +27,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.AllTransfersItem
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferId}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}
@@ -80,7 +80,7 @@ class SaveForLaterRepository @Inject() (
     val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
       .replaceOne(
-        filter      = byId(updatedAnswers.referenceId),
+        filter      = byId(updatedAnswers.transferId.value),
         replacement = updatedAnswers,
         options     = ReplaceOptions().upsert(true)
       )
@@ -109,7 +109,7 @@ object SaveForLaterRepository {
   def encryptedFormat(encryptionService: EncryptionService): OFormat[SavedUserAnswers] = {
 
     val reads: Reads[SavedUserAnswers] = (
-      (__ \ "referenceId").read[String] and
+      (__ \ "transferId").read[TransferId] and
         (__ \ "pstr").read[PstrNumber] and
         (__ \ "data").read[String].map { enc =>
           EncryptedAnswersData(enc).decrypt(encryptionService) match {
@@ -125,7 +125,7 @@ object SaveForLaterRepository {
         DecryptedAnswersData(ua.data).encrypt(encryptionService)
 
       Json.obj(
-        "referenceId" -> ua.referenceId,
+        "transferId"  -> ua.transferId,
         "pstr"        -> ua.pstr,
         "data"        -> encrypted.encryptedString,
         "lastUpdated" -> MongoJavatimeFormats.instantFormat.writes(ua.lastUpdated)

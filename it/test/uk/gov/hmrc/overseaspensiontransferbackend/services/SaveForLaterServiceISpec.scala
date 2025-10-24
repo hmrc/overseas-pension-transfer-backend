@@ -39,8 +39,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
-      val result = await(repository.get(id)).value
-      result.referenceId mustBe id
+      val result = await(repository.get(id.value)).value
+      result.transferId mustBe id
       result.pstr mustBe pstr
       result.lastUpdated mustBe fixedInstant
 
@@ -75,7 +75,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result match {
         case Right(dto) =>
 
-          dto.referenceId mustBe id
+          dto.transferId mustBe id
           dto.pstr mustBe pstr
           dto.lastUpdated mustBe fixedInstant
           dto.data mustEqual UserAnswersTestData.fullUserAnswersExternalJson
@@ -116,8 +116,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
-      val result = await(repository.get(id)).value
-      result.referenceId mustBe id
+      val result = await(repository.get(id.value)).value
+      result.transferId mustBe id
       result.pstr mustBe pstr
       result.lastUpdated mustBe fixedInstant
 
@@ -135,8 +135,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       await(service.saveAnswer(dto)) mustBe Right(())
 
-      val result = await(repository.get(id)).value
-      result.referenceId mustBe id
+      val result = await(repository.get(id.value)).value
+      result.transferId mustBe id
       result.pstr mustBe pstr
       result.lastUpdated mustBe fixedInstant
 

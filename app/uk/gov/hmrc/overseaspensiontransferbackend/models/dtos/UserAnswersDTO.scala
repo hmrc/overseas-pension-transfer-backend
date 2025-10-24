@@ -19,11 +19,12 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 
 import java.time.Instant
 
 final case class UserAnswersDTO(
-    referenceId: String,
+    transferId: TransferId,
     pstr: PstrNumber,
     data: JsObject,
     lastUpdated: Instant
@@ -33,14 +34,14 @@ object UserAnswersDTO {
 
   implicit val format: OFormat[UserAnswersDTO] = {
     val reads: Reads[UserAnswersDTO] = (
-      (__ \ "referenceId").read[String] and
+      (__ \ "transferId").read[TransferId] and
         (__ \ "pstr").read[String].map(PstrNumber.apply) and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read[Instant]
     )(UserAnswersDTO.apply _)
 
     val writes: OWrites[UserAnswersDTO] = (
-      (__ \ "referenceId").write[String] and
+      (__ \ "transferId").write[TransferId] and
         (__ \ "pstr").write[PstrNumber] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write[Instant]

@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferNotFound, TransferRetrievalError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferId, TransferNotFound, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -33,7 +33,7 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, transferSer
     extends BackendController(cc) {
 
   def getTransfer(
-      referenceId: String,
+      referenceId: TransferId,
       pstr: String,
       qtStatus: String,
       versionNumber: Option[String]
