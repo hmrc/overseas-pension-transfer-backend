@@ -26,16 +26,18 @@ object TestAppConfig {
 
   def appConfig(): AppConfig = new AppConfig(
     Configuration(
-      "appName"                            -> "overseas-pension-transfer-backend-test",
-      "microservice.services.auth.host"    -> "localhost",
-      "microservice.services.auth.port"    -> 8500,
-      "microservice.services.hip.protocol" -> "http",
-      "microservice.services.hip.host"     -> "localhost",
-      "microservice.services.hip.port"     -> 15602,
-      "mongodb.timeToLiveInDays"           -> 30,
-      "mongodb.uri"                        -> "mongodb://localhost:27017/test-saveforlater",
-      "mongodb.localMasterKey"             -> masterKey,
-      "getAllTransfers.yearsOffset"        -> 10
+      "appName"                                -> "overseas-pension-transfer-backend-test",
+      "microservice.services.auth.host"        -> "localhost",
+      "microservice.services.auth.port"        -> 8500,
+      "microservice.services.hip.protocol"     -> "http",
+      "microservice.services.hip.host"         -> "localhost",
+      "microservice.services.hip.port"         -> 15602,
+      "microservice.services.hip.clientId"     -> "clientId",
+      "microservice.services.hip.clientSecret" -> "clientSecret",
+      "mongodb.timeToLiveInDays"               -> 30,
+      "mongodb.uri"                            -> "mongodb://localhost:27017/test-saveforlater",
+      "mongodb.localMasterKey"                 -> masterKey,
+      "getAllTransfers.yearsOffset"            -> 10
     )
   )
 

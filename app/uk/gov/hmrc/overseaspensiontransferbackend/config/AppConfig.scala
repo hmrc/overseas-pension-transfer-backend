@@ -30,4 +30,7 @@ class AppConfig @Inject() (config: Configuration) {
   val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 
   val getAllTransfersYearsOffset: Int = config.get[Int]("getAllTransfers.yearsOffset")
+
+  val clientId: String     = config.get[String]("microservice.services.hip.clientId")
+  val clientSecret: String = config.get[String]("microservice.services.hip.clientSecret")
 }
