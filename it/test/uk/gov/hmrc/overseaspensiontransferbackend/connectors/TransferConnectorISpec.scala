@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, QtDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
@@ -43,7 +43,7 @@ class TransferConnectorISpec extends BaseISpec {
   private val now = Instant.now()
   private val pstr = PstrNumber("12345678AB")
   private val answersData = AnswersData(None, None, None, None)
-  private val savedUserAnswers = SavedUserAnswers("", pstr, answersData, now)
+  private val savedUserAnswers = SavedUserAnswers(TransferNumber(""), pstr, answersData, now)
 
   private val connector = app.injector.instanceOf[TransferConnector]
 

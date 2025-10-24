@@ -25,6 +25,7 @@ import org.scalatest.matchers.must.Matchers
 import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferId, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 import java.time.{Clock, Instant, ZoneOffset}
@@ -59,7 +60,7 @@ class SaveForLaterRepositorySpec
   private val rawCollection =
     mongoComponent.database.getCollection[Document](collectionName)
 
-  private def buildUserAnswer(referenceId: String = "ref-useranswer-001", pstr: PstrNumber = PstrNumber("12345678AB")): SavedUserAnswers =
+  private def buildUserAnswer(referenceId: TransferId = TransferNumber("ref-useranswer-001"), pstr: PstrNumber = PstrNumber("12345678AB")): SavedUserAnswers =
     SavedUserAnswers(
       referenceId,
       pstr,
@@ -115,11 +116,11 @@ class SaveForLaterRepositorySpec
   "SaveForLaterRepository" - {
 
     "must save and retrieve simple record with encryption" in {
-      val simpleSaved = SavedUserAnswers("ref-simple", PstrNumber("12345678AB"), AnswersData(None, None, None, None), now)
+      val simpleSaved = SavedUserAnswers(TransferNumber("ref-simple"), PstrNumber("12345678AB"), AnswersData(None, None, None, None), now)
       repository.set(simpleSaved).futureValue mustBe true
 
       val retrieved = repository.get("ref-simple").futureValue.value
-      retrieved.referenceId mustBe "ref-simple"
+      retrieved.transferId  mustBe TransferNumber("ref-simple")
       retrieved.data        mustBe simpleSaved.data
       retrieved.lastUpdated mustBe now
 
@@ -131,7 +132,7 @@ class SaveForLaterRepositorySpec
       val saved = buildUserAnswer()
       repository.set(saved).futureValue mustBe true
 
-      val retrieved = repository.get(saved.referenceId).futureValue.value
+      val retrieved = repository.get(saved.transferId.value).futureValue.value
       retrieved mustBe saved
 
       val propertyAsset = retrieved.data.transferDetails.value.typeOfAssets.value.propertyAssets.value.head.propertyAddress.get
@@ -141,28 +142,28 @@ class SaveForLaterRepositorySpec
     }
 
     "must produce different ciphertexts for the same userAnswer input" in {
-      val saved1 = buildUserAnswer("ref1")
-      val saved2 = buildUserAnswer("ref2")
+      val saved1 = buildUserAnswer(TransferNumber("ref1"))
+      val saved2 = buildUserAnswer(TransferNumber("ref2"))
 
       repository.set(saved1).futureValue mustBe true
       repository.set(saved2).futureValue mustBe true
 
       val rawDocs = rawCollection.find().collect().toFuture().futureValue
-      val enc1    = rawDocs.find(_.get("referenceId").get.asString().getValue == "ref1").get.get("data").get.asString().getValue
-      val enc2    = rawDocs.find(_.get("referenceId").get.asString().getValue == "ref2").get.get("data").get.asString().getValue
+      val enc1    = rawDocs.find(_.get("transferId").get.asString().getValue == "ref1").get.get("data").get.asString().getValue
+      val enc2    = rawDocs.find(_.get("transferId").get.asString().getValue == "ref2").get.get("data").get.asString().getValue
 
       enc1 must not be enc2
     }
 
     "must delete a record by referenceId" in {
-      val saved = buildUserAnswer("ref-delete")
+      val saved = buildUserAnswer(TransferNumber("ref-delete"))
       repository.set(saved).futureValue          mustBe true
       repository.clear("ref-delete").futureValue mustBe true
       repository.get("ref-delete").futureValue   mustBe None
     }
 
     "must delete all records with clear" in {
-      val saved = buildUserAnswer("ref-clear")
+      val saved = buildUserAnswer(TransferNumber("ref-clear"))
       repository.set(saved).futureValue       mustBe true
       repository.clear.futureValue            mustBe Done
       repository.get("ref-clear").futureValue mustBe None
@@ -183,11 +184,11 @@ class SaveForLaterRepositorySpec
     }
 
     "must handle empty referenceId gracefully" in {
-      val saved = buildUserAnswer("")
-      repository.set(saved).futureValue                mustBe true
-      repository.get("").futureValue.value.referenceId mustBe ""
-      repository.clear("").futureValue                 mustBe true
-      repository.get("").futureValue                   mustBe None
+      val saved = buildUserAnswer(TransferNumber(""))
+      repository.set(saved).futureValue               mustBe true
+      repository.get("").futureValue.value.transferId mustBe TransferNumber("")
+      repository.clear("").futureValue                mustBe true
+      repository.get("").futureValue                  mustBe None
     }
   }
 }

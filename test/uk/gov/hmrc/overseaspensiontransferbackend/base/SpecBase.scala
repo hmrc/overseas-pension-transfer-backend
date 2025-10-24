@@ -21,10 +21,11 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 
 import java.time.Instant
@@ -44,9 +45,9 @@ trait SpecBase
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val mockAppConfig: AppConfig  = mock[AppConfig]
 
-  val testId: String   = "test-id"
-  val pstr: PstrNumber = PstrNumber("12345678AB")
-  val now: Instant     = Instant.parse("2025-04-11T12:00:00Z")
+  val testId: TransferNumber = TransferNumber("test-id")
+  val pstr: PstrNumber       = PstrNumber("12345678AB")
+  val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
     reportDetails       = None,
@@ -56,18 +57,24 @@ trait SpecBase
   )
 
   val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(
-    referenceId = testId,
+    transferId  = testId,
     pstr        = pstr,
     data        = sampleAnswersData,
     lastUpdated = now
   )
 
   val simpleUserAnswersDTO: UserAnswersDTO = UserAnswersDTO(
-    referenceId = testId,
+    transferId  = testId,
     pstr        = pstr,
     data        = Json.obj("someField" -> "someIncomingValue"),
     lastUpdated = now
   )
+
+  def quotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
+    Json.obj("quotedValue" -> BigDecimal(v), "quotedShareTotal" -> n, "quotedCompany" -> c, "quotedClass" -> cls)
+
+  def unquotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
+    Json.obj("unquotedValue" -> BigDecimal(v), "unquotedShareTotal" -> n, "unquotedCompany" -> c, "unquotedClass" -> cls)
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

@@ -101,7 +101,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   "TransferServiceImpl" - {
     "submitTransfer" - {
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
-        when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+        when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
         when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
           .thenReturn(Future.successful(Right(downstreamSuccess)))
@@ -113,18 +113,18 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
       }
 
       "must return Left(SubmissionTransformationError) when no prepared submission found" in {
-        when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
+        when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(None))
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
         result match {
           case Left(SubmissionTransformationError(msg)) =>
-            msg must include(testId)
+            msg must include(testId.value)
           case other                                    => fail(s"Unexpected: $other")
         }
       }
 
       "must return Left(SubmissionTransformationError) when validator fails" in {
-        when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+        when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Left(ValidationError("boom")))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
@@ -141,7 +141,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           UnsupportedMedia
         )
 
-        when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+        when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
@@ -173,7 +173,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           Unexpected(777, "<body>")
         )
 
-        when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+        when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
 
         infra.foreach { ue =>
@@ -190,7 +190,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         "searching for GetSaveForLaterRecord" in {
           val userAnswers = UserAnswersDTO(testId, PstrNumber("12345678AB"), Json.obj(), now)
 
-          when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+          when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
           val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
@@ -207,7 +207,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
               None,
               None
             )
-            val userAnswers = UserAnswersDTO("QT123456", PstrNumber("12345678AB"), Json.obj(), now)
+            val userAnswers = UserAnswersDTO(QtNumber("QT123456"), PstrNumber("12345678AB"), Json.obj(), now)
 
             when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Right(saved)))
             when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
@@ -221,7 +221,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
       "return Left TransferNotFound" - {
         "qtStatus is InProgress and Repo returns None" in {
-          when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(None))
+          when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(None))
 
           val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
 
@@ -239,7 +239,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
       "return Left TransferDeoncstructionError" - {
         "qtStatus is InProgress and deconstruct returns an error" in {
-          when(mockRepo.get(eqTo(testId))).thenReturn(Future.successful(Some(saved)))
+          when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
           when(mockTransformer.deconstruct(any)).thenReturn(Left(JsError("Error")))
 
           val result = await(service.getTransfer(Right(GetSaveForLaterRecord(testId, PstrNumber("12345678AB"), InProgress))))
@@ -274,8 +274,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         "return Right(UserAnswersDTO) when record already exists in repo" in {
           val qtNumber = QtNumber("QT999999")
           val pstr     = PstrNumber("12345678AB")
-          val savedUa  = simpleSavedUserAnswers.copy(referenceId = qtNumber.value, pstr = pstr)
-          val expected = UserAnswersDTO(qtNumber.value, pstr, Json.obj(), savedUa.lastUpdated)
+          val savedUa  = simpleSavedUserAnswers.copy(transferId = qtNumber, pstr = pstr)
+          val expected = UserAnswersDTO(qtNumber, pstr, Json.obj(), savedUa.lastUpdated)
 
           when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(Some(savedUa)))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
@@ -304,7 +304,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           when(mockRepo.set(eqTo(savedUa))).thenReturn(Future.successful(true))
           when(mockTransformer.deconstruct(any)).thenReturn(Right(Json.obj()))
 
-          val expected = UserAnswersDTO(savedUa.referenceId, savedUa.pstr, Json.obj(), savedUa.lastUpdated)
+          val expected = UserAnswersDTO(savedUa.transferId, savedUa.pstr, Json.obj(), savedUa.lastUpdated)
 
           val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
           result mustBe Right(expected)
@@ -404,19 +404,18 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
             items must have size 2
 
             val first = items.head
-            first.transferReference mustBe None
-            first.qtReference       mustBe Some(QtNumber("QT564321"))
-            first.qtVersion         mustBe Some("001")
-            first.qtStatus          mustBe Some(QtStatus("Compiled"))
-            first.nino              mustBe Some("AA000000A")
-            first.memberFirstName   mustBe Some("David")
-            first.memberSurname     mustBe Some("Warne")
-            first.qtDate            mustBe Some(LocalDate.parse("2025-03-14"))
-            first.pstrNumber        mustBe Some(pstr)
-            first.submissionDate    mustBe Some(submissionDate)
+            first.transferId      mustBe QtNumber("QT564321")
+            first.qtVersion       mustBe Some("001")
+            first.qtStatus        mustBe Some(QtStatus("Compiled"))
+            first.nino            mustBe Some("AA000000A")
+            first.memberFirstName mustBe Some("David")
+            first.memberSurname   mustBe Some("Warne")
+            first.qtDate          mustBe Some(LocalDate.parse("2025-03-14"))
+            first.pstrNumber      mustBe Some(pstr)
+            first.submissionDate  mustBe Some(submissionDate)
 
             val second = items(1)
-            second.qtReference     mustBe Some(QtNumber("QT564322"))
+            second.transferId      mustBe QtNumber("QT564322")
             second.memberFirstName mustBe Some("Edith")
             second.memberSurname   mustBe Some("Ennis-Hill")
 
@@ -483,17 +482,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         )
 
         val inProg = AllTransfersItem(
-          transferReference = Some("T-1"),
-          qtReference       = None,
-          qtVersion         = None,
-          nino              = Some("AB123456C"),
-          memberFirstName   = Some("In"),
-          memberSurname     = Some("Progress"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-03-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-1"),
+          qtVersion       = None,
+          nino            = Some("AB123456C"),
+          memberFirstName = Some("In"),
+          memberSurname   = Some("Progress"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-03-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -510,9 +508,9 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         result match {
           case Right(AllTransfersResponse(items)) =>
-            items                               must have size 2
-            items.head                        mustBe inProg
-            items(1).qtReference.map(_.value) mustBe Some("QT123456")
+            items                 must have size 2
+            items.head          mustBe inProg
+            items(1).transferId mustBe QtNumber("QT123456")
           case other                              => fail(s"Unexpected: $other")
         }
       }
@@ -521,17 +519,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         val pstr = PstrNumber("24000001AA")
 
         val inProg = AllTransfersItem(
-          transferReference = Some("T-2"),
-          qtReference       = None,
-          qtVersion         = None,
-          nino              = None,
-          memberFirstName   = Some("Only"),
-          memberSurname     = Some("InProgress"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-04-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-2"),
+          qtVersion       = None,
+          nino            = None,
+          memberFirstName = Some("Only"),
+          memberSurname   = Some("InProgress"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-04-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -552,17 +549,16 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         val pstr = PstrNumber("24000001AA")
 
         val inProg = AllTransfersItem(
-          transferReference = Some("T-3"),
-          qtReference       = None,
-          qtVersion         = None,
-          nino              = None,
-          memberFirstName   = Some("Still"),
-          memberSurname     = Some("Proceeding"),
-          submissionDate    = None,
-          lastUpdated       = Some(Instant.parse("2025-05-01T00:00:00Z")),
-          qtStatus          = Some(QtStatus("InProgress")),
-          pstrNumber        = Some(pstr),
-          qtDate            = None
+          transferId      = TransferNumber("T-3"),
+          qtVersion       = None,
+          nino            = None,
+          memberFirstName = Some("Still"),
+          memberSurname   = Some("Proceeding"),
+          submissionDate  = None,
+          lastUpdated     = Some(Instant.parse("2025-05-01T00:00:00Z")),
+          qtStatus        = Some(QtStatus("InProgress")),
+          pstrNumber      = Some(pstr),
+          qtDate          = None
         )
 
         val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
@@ -616,7 +612,64 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         result match {
           case Right(AllTransfersResponse(items)) =>
-            items.map(_.qtReference.map(_.value)) mustBe Seq(Some("QT654321"))
+            items.map(_.transferId) mustBe Seq(QtNumber("QT654321"))
+          case other                              => fail(s"Unexpected: $other")
+        }
+      }
+
+      "merge AmendInProgress transfer with Submitted AllTransferItem to preserve full data" in {
+        val pstr = PstrNumber("24000001AA")
+
+        val ds = DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "fb",
+                qtReference               = "QT654321",
+                qtVersion                 = "001",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = "Submitted",
+                nino                      = "AA777777A",
+                firstName                 = "Sue",
+                lastName                  = "Smith",
+                qtDate                    = LocalDate.parse("2025-06-01"),
+                qropsReference            = "QROPS777",
+                submissionCompilationDate = now
+              )
+            )
+          )
+        )
+
+        val toDate: LocalDate   = LocalDate.now(ZoneOffset.UTC)
+        val fromDate: LocalDate = toDate.minusYears(10)
+
+        when(mockConnector.getAllTransfers(eqTo(pstr), eqTo(fromDate), eqTo(toDate), eqTo(None))(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Right(ds)))
+
+        when(mockRepo.getRecords(eqTo(pstr))).thenReturn(Future.successful(Seq(
+          AllTransfersItem(
+            QtNumber("QT654321"),
+            None,
+            Some(AmendInProgress),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
+          )
+        )))
+
+        when(mockAppConfig.getAllTransfersYearsOffset).thenReturn(10)
+
+        val result = service.getAllTransfers(pstr).futureValue
+
+        result match {
+          case Right(AllTransfersResponse(items)) =>
+            items.map(_.transferId) mustBe Seq(QtNumber("QT654321"))
+            items.map(_.qtStatus)   mustBe Seq(Some(AmendInProgress))
+            items.map(_.qtVersion)  mustBe Seq(Some("001"))
           case other                              => fail(s"Unexpected: $other")
         }
       }

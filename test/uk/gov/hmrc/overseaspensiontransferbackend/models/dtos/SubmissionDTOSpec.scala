@@ -33,7 +33,7 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
     "must round-trip (serialize/deserialize) a PsaSubmissionDTO" in {
       val dto: SubmissionDTO =
         PsaSubmissionDTO(
-          referenceId = "ref-X",
+          referenceId = TransferNumber("ref-X"),
           userId      = PsaId("A1234567"),
           lastUpdated = ts
         )
@@ -47,7 +47,7 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
     "must round-trip (serialize/deserialize) a PspSubmissionDTO" in {
       val dto: SubmissionDTO =
         PspSubmissionDTO(
-          referenceId = "ref-Y",
+          referenceId = TransferNumber("ref-Y"),
           userId      = PspId("X9999999"),
           psaId       = PsaId("A7654321"),
           lastUpdated = ts
@@ -69,7 +69,7 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
 
       val parsed = json.validate[SubmissionDTO]
       parsed     mustBe a[JsSuccess[_]]
-      parsed.get mustBe PsaSubmissionDTO("ignored", Psa, PsaId("A1234567"), ts)
+      parsed.get mustBe PsaSubmissionDTO(TransferNumber("ignored"), Psa, PsaId("A1234567"), ts)
     }
 
     "must read a PSP payload into PspSubmissionDTO via discriminator" in {
@@ -83,20 +83,20 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
 
       val parsed = json.validate[SubmissionDTO]
       parsed     mustBe a[JsSuccess[_]]
-      parsed.get mustBe PspSubmissionDTO("ignored", Psp, PspId("X9999999"), PsaId("A7654321"), ts)
+      parsed.get mustBe PspSubmissionDTO(TransferNumber("ignored"), Psp, PspId("X9999999"), PsaId("A7654321"), ts)
     }
 
     "normalise must map PSA -> PsaSubmitter and psaId = userId, and override referenceId" in {
       val dto =
         PsaSubmissionDTO(
-          referenceId = "will-be-overridden",
+          referenceId = TransferNumber("will-be-overridden"),
           userId      = PsaId("A1234567"),
           lastUpdated = ts
         )
 
-      val normalised = dto.normalise(withReferenceId = "path-ref")
+      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
       normalised mustBe NormalisedSubmission(
-        referenceId = "path-ref",
+        referenceId = TransferNumber("path-ref"),
         submitter   = PsaSubmitter(PsaId("A1234567")),
         psaId       = PsaId("A1234567"),
         lastUpdated = ts
@@ -106,15 +106,15 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
     "normalise must map PSP -> PspSubmitter and keep psaId from payload, and override referenceId" in {
       val dto =
         PspSubmissionDTO(
-          referenceId = "will-be-overridden",
+          referenceId = TransferNumber("will-be-overridden"),
           userId      = PspId("X9999999"),
           psaId       = PsaId("A7654321"),
           lastUpdated = ts
         )
 
-      val normalised = dto.normalise(withReferenceId = "path-ref")
+      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
       normalised mustBe NormalisedSubmission(
-        referenceId = "path-ref",
+        referenceId = TransferNumber("path-ref"),
         submitter   = PspSubmitter(PspId("X9999999")),
         psaId       = PsaId("A7654321"),
         lastUpdated = ts

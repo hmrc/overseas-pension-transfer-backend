@@ -30,7 +30,7 @@ case class DownstreamTransferData(
 
   def toSavedUserAnswers: SavedUserAnswers =
     SavedUserAnswers(
-      qtDetails.qtReference.value,
+      qtDetails.qtReference,
       pstr,
       AnswersData(
         Some(ReportDetails(Some(pstr.value), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),

@@ -45,17 +45,16 @@ object DownstreamAllTransfersData {
   def toAllTransferItems(pstrNumber: PstrNumber, d: DownstreamAllTransfersData): Seq[AllTransfersItem] =
     d.success.qropsTransferOverview.map { r =>
       AllTransfersItem(
-        transferReference = None,
-        qtReference       = Some(QtNumber(r.qtReference)),
-        qtVersion         = Some(r.qtVersion),
-        nino              = Some(r.nino),
-        memberFirstName   = Some(r.firstName),
-        memberSurname     = Some(r.lastName),
-        submissionDate    = Some(r.submissionCompilationDate),
-        lastUpdated       = None, // in-progress supplies lastUpdated
-        qtStatus          = Some(QtStatus(r.qtStatus)),
-        pstrNumber        = Some(pstrNumber),
-        qtDate            = Some(r.qtDate)
+        transferId      = QtNumber(r.qtReference),
+        qtVersion       = Some(r.qtVersion),
+        nino            = Some(r.nino),
+        memberFirstName = Some(r.firstName),
+        memberSurname   = Some(r.lastName),
+        submissionDate  = Some(r.submissionCompilationDate),
+        lastUpdated     = None, // in-progress supplies lastUpdated
+        qtStatus        = Some(QtStatus(r.qtStatus)),
+        pstrNumber      = Some(pstrNumber),
+        qtDate          = Some(r.qtDate)
       )
     }
 

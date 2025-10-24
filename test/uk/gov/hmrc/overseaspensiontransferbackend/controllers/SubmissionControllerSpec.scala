@@ -44,7 +44,7 @@ class SubmissionControllerSpec
       val mockService = mock[TransferService]
 
       val psaDto           = PsaSubmissionDTO(
-        referenceId = "to-be-overridden",
+        referenceId = TransferNumber("to-be-overridden"),
         userId      = PsaId("A1234567"),
         lastUpdated = now
       )
@@ -75,7 +75,7 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe testRefId
+        captured.referenceId mustBe TransferNumber(testRefId)
         captured.submitter   mustBe Submitter.PsaSubmitter(PsaId("A1234567"))
         captured.psaId       mustBe PsaId("A1234567")
         captured.lastUpdated mustBe now
@@ -86,7 +86,7 @@ class SubmissionControllerSpec
       val mockService = mock[TransferService]
 
       val pspDto           = PspSubmissionDTO(
-        referenceId = "to-be-overridden",
+        referenceId = TransferNumber("to-be-overridden"),
         userId      = PspId("X9999999"),
         psaId       = PsaId("A7654321"),
         lastUpdated = now
@@ -118,7 +118,7 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe testRefId
+        captured.referenceId mustBe TransferNumber(testRefId)
         captured.submitter   mustBe Submitter.PspSubmitter(PspId("X9999999"))
         captured.psaId       mustBe PsaId("A7654321")
         captured.lastUpdated mustBe now
@@ -137,7 +137,7 @@ class SubmissionControllerSpec
           .build()
 
       val payload: JsValue = Json.toJson(
-        PsaSubmissionDTO("ignored", userId = PsaId("A1234567"), lastUpdated = now)
+        PsaSubmissionDTO(TransferNumber("ignored"), userId = PsaId("A1234567"), lastUpdated = now)
       )
 
       running(app) {
@@ -164,7 +164,7 @@ class SubmissionControllerSpec
           .build()
 
       val payload: JsValue = Json.toJson(
-        PspSubmissionDTO("ignored", userId = PspId("X9999999"), psaId = PsaId("A7654321"), lastUpdated = now)
+        PspSubmissionDTO(TransferNumber("ignored"), userId = PspId("X9999999"), psaId = PsaId("A7654321"), lastUpdated = now)
       )
 
       running(app) {

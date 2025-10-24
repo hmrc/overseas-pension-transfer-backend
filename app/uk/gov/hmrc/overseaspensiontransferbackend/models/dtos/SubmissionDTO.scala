@@ -24,21 +24,21 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import java.time.Instant
 
 sealed trait SubmissionDTO {
-  def referenceId: String
+  def referenceId: TransferId
   def userType: UserType
   def lastUpdated: Instant
 
-  def normalise(withReferenceId: String): NormalisedSubmission
+  def normalise(withReferenceId: TransferId): NormalisedSubmission
 }
 
 final case class PsaSubmissionDTO(
-    referenceId: String,
+    referenceId: TransferId,
     userType: UserType = Psa,
     userId: PsaId,
     lastUpdated: Instant
   ) extends SubmissionDTO {
 
-  override def normalise(withReferenceId: String): NormalisedSubmission =
+  override def normalise(withReferenceId: TransferId): NormalisedSubmission =
     NormalisedSubmission(
       referenceId = withReferenceId,
       submitter   = PsaSubmitter(userId),
@@ -49,14 +49,14 @@ final case class PsaSubmissionDTO(
 object PsaSubmissionDTO { implicit val format: OFormat[PsaSubmissionDTO] = Json.format }
 
 final case class PspSubmissionDTO(
-    referenceId: String,
+    referenceId: TransferId,
     userType: UserType = Psp,
     userId: PspId,
     psaId: PsaId,
     lastUpdated: Instant
   ) extends SubmissionDTO {
 
-  override def normalise(withReferenceId: String): NormalisedSubmission =
+  override def normalise(withReferenceId: TransferId): NormalisedSubmission =
     NormalisedSubmission(
       referenceId = withReferenceId,
       submitter   = PspSubmitter(userId),
