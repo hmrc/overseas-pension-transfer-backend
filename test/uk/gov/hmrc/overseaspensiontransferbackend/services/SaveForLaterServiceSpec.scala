@@ -220,7 +220,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
@@ -272,7 +272,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
@@ -315,7 +315,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
@@ -356,7 +356,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
@@ -417,7 +417,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
@@ -460,7 +460,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
-      when(mockRepository.get(testId)).thenReturn(Future.successful(Some(existingSaved)))
+      when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
       when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
       when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
 
