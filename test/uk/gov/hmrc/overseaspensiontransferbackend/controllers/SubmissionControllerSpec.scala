@@ -29,6 +29,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO,
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
+import java.time.Instant
 import scala.concurrent.Future
 
 class SubmissionControllerSpec
@@ -50,7 +51,7 @@ class SubmissionControllerSpec
       )
       val psaJson: JsValue = Json.toJson(psaDto)
 
-      val expectedResponse = SubmissionResponse(QtNumber("QT123456"))
+      val expectedResponse = SubmissionResponse(QtNumber("QT123456"), Instant.now)
 
       when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))
@@ -93,7 +94,7 @@ class SubmissionControllerSpec
       )
       val pspJson: JsValue = Json.toJson(pspDto)
 
-      val expectedResponse = SubmissionResponse(QtNumber("QT999999"))
+      val expectedResponse = SubmissionResponse(QtNumber("QT999999"), Instant.now)
 
       when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))

@@ -64,8 +64,6 @@ class TransferServiceImpl @Inject() (
           case Right(validated) =>
             connector.submitTransfer(validated).map {
               case Right(success) =>
-                // TODO: the session store for the dashboards should be updated for the newly
-                //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId)
 
                 if (validated.saved.data.transferringMember.isDefined) {
@@ -82,7 +80,7 @@ class TransferServiceImpl @Inject() (
                   )
                 }
 
-                Right(SubmissionResponse(success.qtNumber))
+                Right(SubmissionResponse(success.qtNumber, success.processingDate))
               case Left(err)      =>
                 logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 auditService.audit(

@@ -29,6 +29,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumbe
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
+import java.time.Instant
+
 class TransferServiceISpec extends BaseISpec {
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
@@ -76,7 +78,7 @@ class TransferServiceISpec extends BaseISpec {
 
       val result = await(service.submitTransfer(normalised))
 
-      result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
+      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.now))
     }
 
     "returns a SubmissionResponse with QT number when PSP submits and data is valid" in {
@@ -112,7 +114,7 @@ class TransferServiceISpec extends BaseISpec {
 
       val result = await(service.submitTransfer(normalised))
 
-      result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
+      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.now))
     }
 
 

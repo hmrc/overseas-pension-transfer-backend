@@ -34,7 +34,7 @@ class SubmissionController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def submitTransfer(referenceId: String): Action[SubmissionDTO] =
+  def submitTransfer(referenceId: String): Action[SubmissionDTO] = {
     Action.async(parse.json[SubmissionDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
@@ -54,4 +54,5 @@ class SubmissionController @Inject() (
           InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
+  }
 }
