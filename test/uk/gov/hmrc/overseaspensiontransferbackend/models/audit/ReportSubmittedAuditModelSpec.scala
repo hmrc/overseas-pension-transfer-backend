@@ -35,7 +35,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{
   TransferDetails
 }
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.{SubmissionFailed, SubmissionSucceeded}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferNumber}
 
 import java.time.LocalDate
 
@@ -44,7 +44,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
   "must create correct minimal json for different journey types" in {
     JourneySubmittedType.values.foreach {
       journey =>
-        val result = ReportSubmittedAuditModel.build("internalTransferId", journey, None, None, None, None, None)
+        val result = ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None)
         result.auditType   mustBe "overseasPensionTransferReportSubmitted"
         result.journeyType mustBe journey
     }
@@ -192,7 +192,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       )
 
       val result = ReportSubmittedAuditModel.build(
-        "internalTransferId",
+        TransferNumber("internalTransferId"),
         SubmissionSucceeded,
         None,
         Some(QtNumber("QT123456")),
@@ -216,7 +216,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with Matchers {
       )
 
       val result = ReportSubmittedAuditModel.build(
-        "internalTransferId",
+        TransferNumber("internalTransferId"),
         SubmissionFailed,
         Some("400 - Bad request"),
         None,

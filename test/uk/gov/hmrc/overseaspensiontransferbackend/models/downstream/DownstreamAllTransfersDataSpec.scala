@@ -19,9 +19,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.Compiled
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber}
+
 import java.time.{Instant, LocalDate}
 
-class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers {
+class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with SpecBase {
 
   "DownstreamAllTransfersData JSON formats" - {
 
@@ -113,6 +117,45 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers {
 
       backIn                                                          mustBe in
       (jsonOut \ "success" \ "qropsTransferOverview").as[JsArray].value must have size 1
+    }
+  }
+
+  "toAllTransfersItem" - {
+    "Convert to AllTransfersItem" in {
+      val data =
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "123456000023",
+                qtReference               = "QT564321",
+                qtVersion                 = "001",
+                qtStatus                  = "Compiled",
+                qtDigitalStatus           = "Complied",
+                nino                      = "AA000000A",
+                firstName                 = "David",
+                lastName                  = "Warne",
+                qtDate                    = LocalDate.parse("2025-03-14"),
+                qropsReference            = "QROPS654321",
+                submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
+              )
+            )
+          )
+        )
+
+      DownstreamAllTransfersData.toAllTransferItems(pstr, data) mustBe
+        List(AllTransfersItem(
+          transferId      = QtNumber("QT564321"),
+          qtVersion       = Some("001"),
+          nino            = Some("AA000000A"),
+          memberFirstName = Some("David"),
+          memberSurname   = Some("Warne"),
+          submissionDate  = Some(Instant.parse("2025-05-09T10:10:12Z")),
+          lastUpdated     = None, // in-progress supplies lastUpdated
+          qtStatus        = Some(Compiled),
+          pstrNumber      = Some(pstr),
+          qtDate          = Some(LocalDate.parse("2025-03-14"))
+        ))
     }
   }
 }

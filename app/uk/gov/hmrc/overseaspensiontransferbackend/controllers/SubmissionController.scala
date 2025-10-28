@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{SubmissionFailed, SubmissionTransformationError}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{SubmissionFailed, SubmissionTransformationError, TransferId}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -34,7 +34,7 @@ class SubmissionController @Inject() (
   )(implicit ec: ExecutionContext
   ) extends AbstractController(cc) {
 
-  def submitTransfer(referenceId: String): Action[SubmissionDTO] =
+  def submitTransfer(referenceId: TransferId): Action[SubmissionDTO] =
     Action.async(parse.json[SubmissionDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 

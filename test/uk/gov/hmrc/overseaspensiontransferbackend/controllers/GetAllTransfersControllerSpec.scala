@@ -52,17 +52,16 @@ class GetAllTransfersControllerSpec
 
       val items: Seq[AllTransfersItem] =
         Seq(AllTransfersItem(
-          transferReference = None,
-          qtReference       = None,
-          qtVersion         = None,
-          qtStatus          = None,
-          nino              = None,
-          memberFirstName   = None,
-          memberSurname     = None,
-          qtDate            = None,
-          lastUpdated       = None,
-          pstrNumber        = None,
-          submissionDate    = None
+          transferId      = TransferNumber("test"),
+          qtVersion       = None,
+          qtStatus        = None,
+          nino            = None,
+          memberFirstName = None,
+          memberSurname   = None,
+          qtDate          = None,
+          lastUpdated     = None,
+          pstrNumber      = None,
+          submissionDate  = None
         ))
 
       when(
