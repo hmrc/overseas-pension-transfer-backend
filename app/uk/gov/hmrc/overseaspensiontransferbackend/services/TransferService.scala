@@ -56,7 +56,7 @@ class TransferServiceImpl @Inject() (
   ) extends TransferService with Logging {
 
   override def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
-    repository.get(submission.referenceId).flatMap {
+    repository.get(submission.referenceId.value).flatMap {
       case Some(saved) =>
         validator.validate(saved) match {
           case Left(err)        =>
@@ -64,12 +64,14 @@ class TransferServiceImpl @Inject() (
           case Right(validated) =>
             connector.submitTransfer(validated).map {
               case Right(success) =>
-                repository.clear(referenceId = submission.referenceId)
+                // TODO: the session store for the dashboards should be updated for the newly
+                //  received QT Reference & QT status = submitted (when this repo is implemented)
+                repository.clear(referenceId = submission.referenceId.value)
 
                 if (validated.saved.data.transferringMember.isDefined) {
                   auditService.audit(
                     ReportSubmittedAuditModel.build(
-                      validated.saved.referenceId,
+                      validated.saved.transferId,
                       SubmissionSucceeded,
                       None,
                       Some(success.qtNumber),
@@ -85,7 +87,7 @@ class TransferServiceImpl @Inject() (
                 logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 auditService.audit(
                   ReportSubmittedAuditModel.build(
-                    validated.saved.referenceId,
+                    validated.saved.transferId,
                     JourneySubmittedType.SubmissionFailed,
                     Some(err.log),
                     None,
@@ -126,7 +128,7 @@ class TransferServiceImpl @Inject() (
     ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
     transferType match {
       case Right(GetSaveForLaterRecord(transferId, _, InProgress))                   =>
-        repository.get(transferId) map {
+        repository.get(transferId.value) map {
           case Some(userAnswers) =>
             deconstructSavedAnswers(userAnswers)
           case None              =>
@@ -164,9 +166,9 @@ class TransferServiceImpl @Inject() (
 
   private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
-      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.referenceId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
+      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.transferId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
       case Left(jsError)   =>
-        logger.error(s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.referenceId} json with error: ${jsError.errors}")
+        logger.error(s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.transferId} json with error: ${jsError.errors}")
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }
   }
