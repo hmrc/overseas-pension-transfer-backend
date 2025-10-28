@@ -26,7 +26,7 @@ object Submitter {
 }
 
 final case class NormalisedSubmission(
-    referenceId: String,
+    referenceId: TransferId,
     submitter: Submitter,
     psaId: PsaId,
     lastUpdated: Instant
