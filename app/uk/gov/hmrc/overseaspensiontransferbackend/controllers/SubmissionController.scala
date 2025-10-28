@@ -54,5 +54,4 @@ class SubmissionController @Inject() (
           InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
-  }
 }

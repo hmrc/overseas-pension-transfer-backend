@@ -78,7 +78,7 @@ class TransferServiceISpec extends BaseISpec {
 
       val result = await(service.submitTransfer(normalised))
 
-      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.now))
+      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), now))
     }
 
     "returns a SubmissionResponse with QT number when PSP submits and data is valid" in {
@@ -114,7 +114,7 @@ class TransferServiceISpec extends BaseISpec {
 
       val result = await(service.submitTransfer(normalised))
 
-      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.now))
+      result mustBe Right(SubmissionResponse(QtNumber("QT123456"), now))
     }
 
 
