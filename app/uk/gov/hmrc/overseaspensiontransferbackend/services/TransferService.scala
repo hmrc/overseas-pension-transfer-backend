@@ -82,7 +82,7 @@ class TransferServiceImpl @Inject() (
                   )
                 }
 
-                Right(SubmissionResponse(success.qtNumber))
+                Right(SubmissionResponse(success.qtNumber, success.processingDate))
               case Left(err)      =>
                 logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 auditService.audit(

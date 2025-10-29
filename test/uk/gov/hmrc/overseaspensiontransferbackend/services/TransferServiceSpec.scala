@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
-import org.mockito.{ArgumentCaptor, Mockito}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsError, Json}
@@ -26,11 +24,11 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.validators._
@@ -108,7 +106,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
-        result mustBe Right(SubmissionResponse(QtNumber("QT123456")))
+        result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.parse("2025-04-11T12:00:00Z")))
         verify(mockAuditService, times(1)).audit(any[JsonAuditModel])(any[HeaderCarrier])
       }
 
