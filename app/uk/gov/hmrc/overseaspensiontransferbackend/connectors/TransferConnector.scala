@@ -20,9 +20,10 @@ import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logging
 import play.api.http.Status.CREATED
 import play.api.libs.json._
+import uk.gov.hmrc.http.HeaderNames.authorisation
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
@@ -32,6 +33,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
+import java.util.Base64
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -81,6 +83,7 @@ class TransferConnectorImpl @Inject() (
     httpClientV2
       .post(url)
       .setHeader(
+        authorisation           -> authorization(),
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "FileQROPSTransfer",
         "X-Originating-System"  -> "MDTP",
@@ -115,6 +118,7 @@ class TransferConnectorImpl @Inject() (
     httpClientV2
       .get(url)
       .setHeader(
+        authorisation           -> authorization(),
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "GetQROPSTransfer",
         "X-Originating-System"  -> "MDTP",
@@ -157,6 +161,7 @@ class TransferConnectorImpl @Inject() (
       .get(url)
       .transform(_.addQueryStringParameters(params: _*))
       .setHeader(
+        authorisation           -> authorization(),
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "GetQTReportOverview",
         "X-Originating-System"  -> "MDTP",
@@ -167,4 +172,13 @@ class TransferConnectorImpl @Inject() (
       .execute[HttpResponse]
       .map(resp => handleResponse[DownstreamAllTransfersData](resp))
   }
+
+  private def authorization(): String = {
+    val clientId = appConfig.clientId
+    val secret   = appConfig.clientSecret
+
+    val encoded = Base64.getEncoder.encodeToString(s"$clientId:$secret".getBytes("UTF-8"))
+    s"Basic $encoded"
+  }
+
 }
