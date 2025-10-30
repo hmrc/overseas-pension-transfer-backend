@@ -30,7 +30,7 @@ object ParserHelpers {
       case status if status == successStatus =>
         resp.json.validate[A]
           .asEither
-          .left.map(_ => Unexpected(successStatus, resp.body.take(MaxSnippet)))
+          .left.map(_ => Unexpected(successStatus, resp.body))
 
       case BAD_REQUEST =>
         Left(parseHipEnvelope(resp))
@@ -40,7 +40,7 @@ object ParserHelpers {
           resp.json.validate[EtmpValidationError]
             .asOpt
             .map(mapEtmp422)
-            .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body.take(MaxSnippet)))
+            .getOrElse(Unexpected(UNPROCESSABLE_ENTITY, resp.body))
         )
 
       case INTERNAL_SERVER_ERROR =>
@@ -62,7 +62,7 @@ object ParserHelpers {
         Left(UnsupportedMedia)
 
       case other =>
-        Left(Unexpected(other, resp.body.take(MaxSnippet)))
+        Left(Unexpected(other, resp.body))
     }
 
   private def mapEtmp422(ev: EtmpValidationError): DownstreamError =
@@ -74,15 +74,15 @@ object ParserHelpers {
   /** HIP envelopes (400/500/503): try error-object, then failures-array; trim long strings */
   private def parseHipEnvelope(resp: HttpResponse): DownstreamError =
     resp.json.validate[HipBadRequest].asOpt
-      .map(hb => hb.copy(message = hb.message.take(MaxSnippet)))
+      .map(hb => hb.copy(message = hb.message))
       .orElse {
         resp.json.validate[HipOriginFailures].asOpt.map { hf =>
           hf.copy(failures =
             hf.failures.map(f =>
-              f.copy(reason = f.reason.take(MaxSnippet))
+              f.copy(reason = f.reason)
             )
           )
         }
       }
-      .getOrElse(Unexpected(resp.status, resp.body.take(MaxSnippet)))
+      .getOrElse(Unexpected(resp.status, resp.body))
 }

@@ -96,6 +96,6 @@ case object ServerError        extends DownstreamError { override def log: Strin
 case object ServiceUnavailable extends DownstreamError { override def log: String = "503 ServiceUnavailable" }
 
 // ---------- Fallback ----------
-final case class Unexpected(status: Int, bodySnippet: String) extends DownstreamError {
-  override def log: String = s"$status Unexpected body='$bodySnippet'"
+final case class Unexpected(status: Int, body: String) extends DownstreamError {
+  override def log: String = s"$status Unexpected body='$body'"
 }
