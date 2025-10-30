@@ -48,18 +48,13 @@ class TransferConnectorISpec extends BaseISpec {
   private val connector = app.injector.instanceOf[TransferConnector]
 
   "submit" - {
-    "return an exception when X-Request-Id is missing" in {
-      intercept[Exception](connector.submitTransfer(ValidatedSubmission(savedUserAnswers))).getMessage mustBe
-        "Header X-Request-ID missing"
-    }
-
     "send correlationId as header when RequestId is present" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       connector.submitTransfer(ValidatedSubmission(savedUserAnswers))
 
+      val correlationIdRegex = "^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$".r
+
       verify(postRequestedFor(urlEqualTo("/etmp/RESTAdapter/pods/reports/qrops-transfer"))
-        .withHeader("correlationid", equalTo("id"))
+        .withHeader("correlationid", matching(correlationIdRegex.toString()))
       )
     }
 
@@ -166,8 +161,6 @@ class TransferConnectorISpec extends BaseISpec {
 
   "getTransfer" - {
     "return Right DownstreamTransferData when 200 and valid data is returned from downstream" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
           "pstr" -> "12345678AB",
@@ -203,8 +196,6 @@ class TransferConnectorISpec extends BaseISpec {
     }
 
     "return HipBadRequest when 400 is returned with valid payload" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       val downstreamPayload = Json.obj(
         "origin" -> "HIP",
         "response" -> Json.obj(
@@ -224,8 +215,6 @@ class TransferConnectorISpec extends BaseISpec {
     }
 
     "return EtmpValidationError when 422 is returned with valid payload" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       val downstreamPayload = Json.obj(
         "errors" -> Json.obj(
           "processingDate" -> now,
@@ -242,8 +231,6 @@ class TransferConnectorISpec extends BaseISpec {
     }
 
     "return HipBadRequest when 500 is returned with valid payload" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       val downstreamPayload = Json.obj(
         "origin" -> "HoD",
         "response" -> Json.obj(
@@ -263,8 +250,6 @@ class TransferConnectorISpec extends BaseISpec {
     }
 
     "return HipOriginFailures when 503 is returned with valid payload" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
       val downstreamPayload = Json.obj(
         "origin" -> "HoD",
         "response" -> Json.obj(
@@ -314,15 +299,7 @@ class TransferConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-    "throw when X-Request-ID is missing" in {
-      intercept[Exception] {
-        await(connector.getAllTransfers(pstr, fromDate, toDate, None))
-      }.getMessage mustBe "Header X-Request-ID missing"
-    }
-
     "send correlationId header and required query params (without qtRef)" in {
-      implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("corr-id")))
-
       stubFor(
         get(urlPathEqualTo(basePath))
           .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
@@ -333,9 +310,11 @@ class TransferConnectorISpec extends BaseISpec {
 
       await(connector.getAllTransfers(pstr, fromDate, toDate, None))
 
+      val correlationIdRegex = "^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$".r
+
       verify(
         getRequestedFor(urlPathEqualTo(basePath))
-          .withHeader("correlationid", equalTo("corr-id"))
+          .withHeader("correlationid", matching(correlationIdRegex.toString()))
           .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
           .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
           .withQueryParam("pstr", equalTo(pstr.normalised))

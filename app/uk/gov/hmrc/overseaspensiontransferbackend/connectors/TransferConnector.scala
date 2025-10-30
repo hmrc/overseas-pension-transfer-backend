@@ -33,7 +33,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
-import java.util.Base64
+import java.util.{Base64, UUID}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,14 +71,9 @@ class TransferConnectorImpl @Inject() (
     val payload: JsValue = Json.toJson(validated.saved.data)
 
     // Required headers from the spec
-    val correlationId = hc.requestId.fold {
-      logger.error("[TransferConnector][submit]: Request is missing X-Request-ID header")
-      throw new Exception("Header X-Request-ID missing")
-    } {
-      requestId =>
-        requestId.value
-    }
-    val receiptDate   = Instant.now().toString // UTC ISO-8601 per spec
+    val correlationId = UUID.randomUUID().toString
+
+    val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
 
     httpClientV2
       .post(url)
@@ -105,13 +100,7 @@ class TransferConnectorImpl @Inject() (
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
-    val correlationId     = hc.requestId.fold {
-      logger.error("[TransferConnector][getTransfer]: Request is missing X-Request-ID header")
-      throw new Exception("Header X-Request-ID missing")
-    } {
-      requestId =>
-        requestId.value
-    }
+    val correlationId     = UUID.randomUUID().toString
     val receiptDate       = Instant.now().toString
     val queryStringParams = Seq("pstr" -> pstr.value, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
 
@@ -141,10 +130,7 @@ class TransferConnectorImpl @Inject() (
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
 
-    val correlationId = hc.requestId.fold {
-      logger.error("[TransferConnector][getAllTransfers]: Request is missing X-Request-ID header")
-      throw new Exception("Header X-Request-ID missing")
-    }(_.value)
+    val correlationId = UUID.randomUUID().toString
 
     val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
 
