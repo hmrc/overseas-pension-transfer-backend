@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.requests
+package uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions
 
-import play.api.mvc.{Request, WrappedRequest}
+import play.api.mvc._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.AuthenticatedUser
+import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 
-final case class IdentifierRequest[A](request: Request[A], authenticatedUser: AuthenticatedUser)
-    extends WrappedRequest[A](request)
+import scala.concurrent.{ExecutionContext, Future}
+
+class FakeIdentifierActionWithUserType(
+    user: AuthenticatedUser,
+    val parser: BodyParser[AnyContent]
+  )(implicit val executionContext: ExecutionContext
+  ) extends IdentifierAction {
+
+  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
+    block(IdentifierRequest(request, user))
+  }
+}

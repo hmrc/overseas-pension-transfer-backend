@@ -22,11 +22,15 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PensionSchemeDetails, PstrNumber, SavedUserAnswers, SrnNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -70,6 +74,26 @@ trait SpecBase
     lastUpdated = now
   )
 
+  val psaId: PsaId = PsaId("A123456")
+
+  val psaUser: PsaUser = PsaUser(psaId, internalId = "id", affinityGroup = Individual)
+
+  val schemeDetails = PensionSchemeDetails(
+    SrnNumber("S1234567"),
+    PstrNumber("12345678AB"),
+    "SchemeName"
+  )
+
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
+
+  def fakeIdentifierRequest[A](
+      fakeRequest: FakeRequest[A],
+      authenticatedUser: AuthenticatedUser = psaUser.updatePensionSchemeDetails(schemeDetails)
+    ): IdentifierRequest[A] =
+    IdentifierRequest(fakeRequest, authenticatedUser)
+
+  implicit val testIdentifierRequest: IdentifierRequest[_] =
+    IdentifierRequest(FakeRequest(), psaUser.updatePensionSchemeDetails(schemeDetails))
+
 }
