@@ -22,7 +22,7 @@ object UserAnswersTestData {
 
   val reportDetailsJson = Json.obj("reportDetails" -> Json.obj(
     "pstr" -> "12345678AB",
-    "qtStatus" -> "Compiled"
+    "qtStatus" -> "Submitted"
   ))
 
   val memberDetailsExternalJson: JsObject = Json.obj(
