@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Compiled, PstrNumber, ReportDetails, SavedUserAnswers}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -50,7 +50,7 @@ trait SpecBase
   val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
-    reportDetails       = None,
+    reportDetails       = Some(ReportDetails(Some(pstr.value), Some(Compiled), None, None)),
     transferringMember  = None,
     aboutReceivingQROPS = None,
     transferDetails     = None
