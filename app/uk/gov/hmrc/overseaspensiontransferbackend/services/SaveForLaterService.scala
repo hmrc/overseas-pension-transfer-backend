@@ -25,6 +25,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +50,7 @@ class SaveForLaterServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     userAnswersTransformer: UserAnswersTransformer
   )(implicit ec: ExecutionContext
-  ) extends SaveForLaterService with Logging {
+  ) extends SaveForLaterService with Logging with JsonHelpers {
 
   override def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
     repository.get(id.value).map {
@@ -121,8 +122,12 @@ class SaveForLaterServiceImpl @Inject() (
 
   private def mergeWithExisting(existing: Option[SavedUserAnswers], update: JsObject): JsObject = {
     existing match {
-      case Some(existingData) => Json.toJsObject(existingData.data).deepMerge(update)
-      case None               => update
+      case Some(existingData) =>
+        val base: JsObject = Json.toJsObject(existingData.data)
+        pruneAndMerge(base, update)
+//        Json.toJsObject(existingData.data).deepMerge(update)
+      case None               =>
+        update
     }
   }
 
