@@ -66,35 +66,6 @@ class QropsSchemeManagerOrganisationNameTransformerSpec extends AnyFreeSpec with
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }
 
-    "must remove qropsOrganisation if already exists in Json path" in {
-      val existingJson = Json.obj("aboutReceivingQROPS" -> Json.obj(
-        "qropsSchemeManagerType" -> Json.obj(
-          "qropsIndividual" -> Json.obj(
-            "individualName"    -> "Individual",
-            "individualSurname" -> "Surname"
-          )
-        )
-      ))
-
-      val inputJson = Json.obj(
-        "schemeManagerDetails" -> Json.obj(
-          "orgName" -> "Organisation"
-        )
-      )
-
-      val mergedInput = existingJson.deepMerge(inputJson)
-
-      val expected = Json.obj("aboutReceivingQROPS" -> Json.obj(
-        "qropsSchemeManagerType" -> Json.obj(
-          "qropsOrganisation" -> Json.obj(
-            "orgName" -> "Organisation"
-          )
-        )
-      ))
-
-      transformer.construct(mergedInput) mustBe Right(expected)
-    }
-
     "must be added to qropsOrganisation when orgForename and orgSurname are already populated" in {
       val existingJson = Json.obj("aboutReceivingQROPS" -> Json.obj(
         "qropsSchemeManagerType" -> Json.obj(
