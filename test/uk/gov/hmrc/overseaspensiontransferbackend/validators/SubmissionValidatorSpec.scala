@@ -21,11 +21,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, SavedUserAnswers}
 
-class DummySubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
+class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
 
-  "DummySubmissionValidatorImpl" - {
+  "SubmissionValidatorImpl" - {
 
-    "must always return Right(ValidatedSubmission) containing the given SavedUserAnswers" in {
+    "must return Right(ValidatedSubmission) when data contains reportDetails" in {
       val saved = SavedUserAnswers(
         transferId  = TransferNumber("ref-123"),
         pstr        = PstrNumber("12345678AB"),
@@ -33,11 +33,26 @@ class DummySubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
         lastUpdated = now
       )
 
-      val validator = new DummySubmissionValidatorImpl()
+      val validator = new SubmissionValidatorImpl()
 
       val result = validator.validate(saved)
 
       result mustBe Right(ValidatedSubmission(saved))
+    }
+
+    "must return an Left of ValidationError when data is missing reportDetails" in {
+      val saved = SavedUserAnswers(
+        transferId  = TransferNumber("ref-123"),
+        pstr        = PstrNumber("12345678AB"),
+        data        = sampleAnswersData.copy(reportDetails = None),
+        lastUpdated = now
+      )
+
+      val validator = new SubmissionValidatorImpl()
+
+      val result = validator.validate(saved)
+
+      result mustBe Left(ValidationError("Report Details missing invalid payload"))
     }
   }
 }

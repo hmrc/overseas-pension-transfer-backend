@@ -21,8 +21,8 @@ import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Compiled, ReportDetails, SavedUserAnswers, Submitted}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 
@@ -78,7 +78,23 @@ class SaveForLaterServiceImpl @Inject() (
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              val saved = SavedUserAnswers(dto.transferId, dto.pstr, validated, dto.lastUpdated)
+              val saved = if (validated.reportDetails.isEmpty) {
+                val qtStatus        = dto.transferId match {
+                  case QtNumber(_)       => Some(Submitted)
+                  case TransferNumber(_) => Some(Compiled)
+                }
+                val maybeQtRefernce = dto.transferId match {
+                  case QtNumber(value) => Some(value)
+                  case _               => None
+                }
+
+                val reportDetails = Some(ReportDetails(Some(dto.pstr.value), qtStatus, maybeQtRefernce, None))
+
+                SavedUserAnswers(dto.transferId, dto.pstr, validated.copy(reportDetails = reportDetails), dto.lastUpdated)
+              } else {
+                SavedUserAnswers(dto.transferId, dto.pstr, validated, dto.lastUpdated)
+              }
+
               repository.set(saved).map {
                 case true  => Right(())
                 case false => Left(SaveForLaterError.SaveFailed)

@@ -19,10 +19,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 import com.google.inject.{AbstractModule, Provides, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.overseaspensiontransferbackend.services._
-import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterService, SaveForLaterServiceImpl, TransferService, TransferServiceImpl}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
 
 import java.time.Clock
 
@@ -31,9 +29,7 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
-    // TODO: These must be bound to the actual version in production
     bind(classOf[TransferService]).to(classOf[TransferServiceImpl])
-    bind(classOf[SubmissionValidator]).to(classOf[DummySubmissionValidatorImpl])
     bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }
 

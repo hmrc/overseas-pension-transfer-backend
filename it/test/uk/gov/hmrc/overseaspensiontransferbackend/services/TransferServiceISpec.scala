@@ -27,9 +27,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO,
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.{DummySubmissionValidatorImpl, SubmissionValidator}
-
-import java.time.Instant
 
 class TransferServiceISpec extends BaseISpec {
 
@@ -37,7 +34,6 @@ class TransferServiceISpec extends BaseISpec {
 
   override protected def moduleOverrides: Seq[GuiceableModule] = Seq(
     inject.bind[TransferService].to[TransferServiceImpl],
-    inject.bind[SubmissionValidator].to[DummySubmissionValidatorImpl],
     inject.bind[TransferConnector].to[TransferConnectorImpl]
   )
 
