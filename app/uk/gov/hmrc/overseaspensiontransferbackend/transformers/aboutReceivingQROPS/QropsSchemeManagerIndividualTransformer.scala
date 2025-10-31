@@ -33,10 +33,6 @@ class QropsSchemeManagerIndividualTransformer extends PathAwareTransformer with 
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      conditionalPruneStep(
-        externalPath,
-        qropsSchemeManagerOrganisationPath
-      ),
       moveStep(
         externalPath,
         internalPath \ "name"
