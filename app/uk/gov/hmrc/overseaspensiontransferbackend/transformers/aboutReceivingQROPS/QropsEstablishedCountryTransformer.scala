@@ -43,13 +43,9 @@ class QropsEstablishedCountryTransformer @Inject() (countryCodeReader: CountryCo
     val enumConversion: Country => JsValue = country => JsString(country.code)
 
     val steps: Seq[TransformerStep] = Seq(
-      conditionalPruneStep(
-        onlyIfSetAt = externalPath,
-        pruneTarget = qropsEstablishedOtherPath
-      ),
       moveStep(
-        from        = externalPath,
-        to          = internalPath
+        from = externalPath,
+        to   = internalPath
       ),
       constructEnum[Country](internalPath, enumConversion)
     )

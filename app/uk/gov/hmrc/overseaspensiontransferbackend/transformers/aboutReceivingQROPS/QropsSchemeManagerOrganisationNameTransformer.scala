@@ -17,7 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{conditionalPruneStep, moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class QropsSchemeManagerOrganisationNameTransformer extends PathAwareTransformer {
@@ -34,10 +34,6 @@ class QropsSchemeManagerOrganisationNameTransformer extends PathAwareTransformer
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      conditionalPruneStep(
-        externalPath,
-        qropsSchemeManagerIndividualPath
-      ),
       moveStep(
         externalPath,
         internalPath

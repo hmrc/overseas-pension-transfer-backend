@@ -42,11 +42,21 @@ trait NameTransformerStep extends JsonHelpers {
           lastNameOpt.map(lastNameKey -> JsString(_))
         ).flatten
 
-        val nameObject = JsObject(nameFields)
+        if (nameFields.isEmpty) {
+          Right(json)
+        } else {
+          val nameObject = JsObject(nameFields)
 
-        val parentPath = JsPath(path.path.dropRight(1))
+          val parentPath               = JsPath(path.path.dropRight(1))
+          val existingParent: JsObject =
+            parentPath.asSingleJson(json).asOpt[JsObject].getOrElse(Json.obj())
 
-        setPath(parentPath, nameObject, json)
+          val mergedParent: JsObject = nameObject.deepMerge(existingParent)
+
+          setPath(parentPath, mergedParent, json).map { withMerged =>
+            prunePath(path)(withMerged)
+          }
+        }
 
       case None =>
         Right(json)

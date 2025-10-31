@@ -27,16 +27,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.helpers.WireMockHelper
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
-import java.time.Instant
+import java.time.{Clock, Instant, ZoneOffset}
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
+import play.api.inject.bind
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 
 trait BaseISpec
-    extends AnyFreeSpec
+  extends AnyFreeSpec
     with Matchers
     with OptionValues
     with BeforeAndAfterAll
@@ -58,11 +59,17 @@ trait BaseISpec
 
   protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty
 
+  val fixedInstant = Instant.parse("2025-10-22T11:53:18.911Z")
+  private val fixedClock   = Clock.fixed(fixedInstant, ZoneOffset.UTC)
+
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder()
       .in(Environment.simple(mode = Mode.Test))
       .configure(servicesConfig)
       .overrides(moduleOverrides: _*)
+      .overrides(
+        bind[Clock].toInstance(fixedClock)
+      )
       .build()
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -99,5 +99,145 @@ class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers {
         result mustBe input
       }
     }
+
+    "pruneAndMerge" - {
+
+      "must delete missing nested fields inside a touched top-level section and keep provided fields" in {
+        val existing =
+          Json.obj(
+            "transferringMember" -> Json.obj(
+              "memberDetails" -> Json.obj(
+                "foreName" -> "Old",
+                "lastName" -> "Name",
+                "nino"     -> "AA123456A"
+              ),
+              "otherKey"      -> "keepMe"
+            ),
+            "reportDetails"      -> Json.obj("foo" -> "bar")
+          )
+
+        val update =
+          Json.obj(
+            "transferringMember" -> Json.obj(
+              "memberDetails" -> Json.obj(
+                "foreName" -> "New",
+                "lastName" -> "Name"
+              ),
+              "otherKey"      -> "keepMe"
+            ),
+            "reportDetails"      -> Json.obj("foo" -> "bar")
+          )
+
+        val result = pruneAndMerge(existing.as[JsObject], update.as[JsObject])
+
+        (result \ "transferringMember" \ "memberDetails" \ "foreName").as[String] mustBe "New"
+        (result \ "transferringMember" \ "memberDetails" \ "lastName").as[String] mustBe "Name"
+        (result \ "transferringMember" \ "memberDetails" \ "nino").toOption       mustBe None
+
+        (result \ "reportDetails" \ "foo").as[String] mustBe "bar"
+
+        (result \ "transferringMember" \ "otherKey").as[String] mustBe "keepMe"
+      }
+
+      "must replace arrays wholesale when present in the update" in {
+        val existing =
+          Json.obj(
+            "transferDetails" -> Json.obj(
+              "unquotedShares" -> Json.arr(
+                Json.obj("amount" -> 100),
+                Json.obj("amount" -> 200)
+              )
+            )
+          )
+
+        val update =
+          Json.obj(
+            "transferDetails" -> Json.obj(
+              "unquotedShares" -> Json.arr(Json.obj("amount" -> 999))
+            )
+          )
+
+        val result = pruneAndMerge(existing.as[JsObject], update.as[JsObject])
+
+        val arr = (result \ "transferDetails" \ "unquotedShares").as[JsArray]
+        arr.value                             must have size 1
+        (arr.value.head \ "amount").as[Int] mustBe 999
+      }
+
+      "must clear a subtree if the update provides an empty object for that top-level section" in {
+        val existing =
+          Json.obj(
+            "transferringMember" -> Json.obj(
+              "memberDetails" -> Json.obj("foreName" -> "Old", "lastName" -> "Name")
+            ),
+            "reportDetails"      -> Json.obj("foo" -> "bar")
+          )
+
+        val update =
+          Json.obj(
+            "transferringMember" -> Json.obj()
+          )
+
+        val result = pruneAndMerge(existing.as[JsObject], update.as[JsObject])
+
+        (result \ "transferringMember" \ "memberDetails").toOption mustBe None
+
+        (result \ "reportDetails" \ "foo").as[String] mustBe "bar"
+      }
+
+      "must be a no-op if update is empty" in {
+        val existing =
+          Json.obj(
+            "reportDetails"      -> Json.obj("foo" -> "bar"),
+            "transferringMember" -> Json.obj(
+              "memberDetails" -> Json.obj("foreName" -> "Old")
+            )
+          )
+
+        val update = Json.obj()
+
+        val result = pruneAndMerge(existing.as[JsObject], update.as[JsObject])
+
+        result mustBe existing
+      }
+
+      "must delete deeply nested keys across multiple levels" in {
+        val existing =
+          Json.obj(
+            "a"     -> Json.obj(
+              "b" -> Json.obj(
+                "c1" -> Json.obj(
+                  "d1" -> "keep",
+                  "d2" -> "remove"
+                ),
+                "c2" -> "keepC2"
+              ),
+              "x" -> "keepX"
+            ),
+            "other" -> "untouched"
+          )
+
+        val update =
+          Json.obj(
+            "a" -> Json.obj(
+              "b" -> Json.obj(
+                "c1" -> Json.obj(
+                  "d1" -> "keep"
+                )
+              )
+            )
+          )
+
+        val result = pruneAndMerge(existing.as[JsObject], update.as[JsObject])
+
+        (result \ "a" \ "b" \ "c1" \ "d1").as[String] mustBe "keep"
+
+        (result \ "a" \ "b" \ "c1" \ "d2").toOption mustBe None
+        (result \ "a" \ "b" \ "c2").toOption        mustBe None
+        (result \ "a" \ "x").toOption               mustBe None
+
+        (result \ "other").as[String] mustBe "untouched"
+      }
+    }
   }
 }
