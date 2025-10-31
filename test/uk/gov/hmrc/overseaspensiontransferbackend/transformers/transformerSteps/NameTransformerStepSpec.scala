@@ -32,7 +32,7 @@ class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransfo
 
     "must flatten name with firstName and lastName to foreName and lastName and leave all other fields untouched" in {
       val input    = Json.obj("memberDetails" -> Json.obj("name" -> Json.obj("firstName" -> "Alice", "lastName" -> "Smith"), "otherField" -> "leave"))
-      val expected = Json.obj("memberDetails" -> Json.obj("foreName" -> "Alice", "lastName" -> "Smith"), "otherField" -> "leave")
+      val expected = Json.obj("memberDetails" -> Json.obj("foreName" -> "Alice", "lastName" -> "Smith", "otherField" -> "leave"))
 
       flattenName(__ \ "memberDetails" \ "name")(input) mustBe Right(expected)
     }
