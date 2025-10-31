@@ -40,7 +40,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
           |        "qtReference": "QT564321",
           |        "qtVersion": "001",
           |        "qtStatus": "Compiled",
-          |        "qtDigitalStatus": "Complied",
+          |        "qtDigitalStatus": "Compiled",
           |        "nino": "AA000000A",
           |        "firstName": "David",
           |        "lastName": "Warne",
@@ -53,12 +53,6 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
           |        "qtReference": "QT564322",
           |        "qtVersion": "003",
           |        "qtStatus": "Submitted",
-          |        "qtDigitalStatus": "Submitted",
-          |        "nino": "AA000001A",
-          |        "firstName": "Edith",
-          |        "lastName": "Ennis-Hill",
-          |        "qtDate": "2025-01-01",
-          |        "qropsReference": "QROPS654322",
           |        "submissionCompilationDate": "2025-05-09T19:10:12Z"
           |      }
           |    ]
@@ -77,17 +71,23 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
       first.qtReference               mustBe "QT564321"
       first.qtVersion                 mustBe "001"
       first.qtStatus                  mustBe "Compiled"
-      first.qtDigitalStatus           mustBe "Complied"
-      first.nino                      mustBe "AA000000A"
-      first.firstName                 mustBe "David"
-      first.lastName                  mustBe "Warne"
-      first.qtDate                    mustBe LocalDate.parse("2025-03-14")
-      first.qropsReference            mustBe "QROPS654321"
+      first.qtDigitalStatus           mustBe Some("Compiled")
+      first.nino                      mustBe Some("AA000000A")
+      first.firstName                 mustBe Some("David")
+      first.lastName                  mustBe Some("Warne")
+      first.qtDate                    mustBe Some(LocalDate.parse("2025-03-14"))
+      first.qropsReference            mustBe Some("QROPS654321")
       first.submissionCompilationDate mustBe Instant.parse("2025-05-09T10:10:12Z")
 
       val second = items(1)
       second.qtReference               mustBe "QT564322"
       second.qtStatus                  mustBe "Submitted"
+      second.qtDigitalStatus           mustBe None
+      second.nino                      mustBe None
+      second.firstName                 mustBe None
+      second.lastName                  mustBe None
+      second.qtDate                    mustBe None
+      second.qropsReference            mustBe None
       second.submissionCompilationDate mustBe Instant.parse("2025-05-09T19:10:12Z")
     }
 
@@ -100,12 +100,12 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
               qtReference               = "QT564321",
               qtVersion                 = "001",
               qtStatus                  = "Compiled",
-              qtDigitalStatus           = "Complied",
-              nino                      = "AA000000A",
-              firstName                 = "David",
-              lastName                  = "Warne",
-              qtDate                    = LocalDate.parse("2025-03-14"),
-              qropsReference            = "QROPS654321",
+              qtDigitalStatus           = Some("Compiled"),
+              nino                      = Some("AA000000A"),
+              firstName                 = Some("David"),
+              lastName                  = Some("Warne"),
+              qtDate                    = Some(LocalDate.parse("2025-03-14")),
+              qropsReference            = Some("QROPS654321"),
               submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
             )
           )
@@ -131,12 +131,12 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
                 qtReference               = "QT564321",
                 qtVersion                 = "001",
                 qtStatus                  = "Compiled",
-                qtDigitalStatus           = "Complied",
-                nino                      = "AA000000A",
-                firstName                 = "David",
-                lastName                  = "Warne",
-                qtDate                    = LocalDate.parse("2025-03-14"),
-                qropsReference            = "QROPS654321",
+                qtDigitalStatus           = Some("Compiled"),
+                nino                      = Some("AA000000A"),
+                firstName                 = Some("David"),
+                lastName                  = Some("Warne"),
+                qtDate                    = Some(LocalDate.parse("2025-03-14")),
+                qropsReference            = Some("QROPS654321"),
                 submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
               )
             )

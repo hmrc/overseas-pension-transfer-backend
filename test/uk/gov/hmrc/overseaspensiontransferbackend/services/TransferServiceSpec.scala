@@ -359,12 +359,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT564321",
                 qtVersion                 = "001",
                 qtStatus                  = "Compiled",
-                qtDigitalStatus           = "Complied",
-                nino                      = "AA000000A",
-                firstName                 = "David",
-                lastName                  = "Warne",
-                qtDate                    = LocalDate.parse("2025-03-14"),
-                qropsReference            = "QROPS654321",
+                qtDigitalStatus           = Some("Complied"),
+                nino                      = Some("AA000000A"),
+                firstName                 = Some("David"),
+                lastName                  = Some("Warne"),
+                qtDate                    = Some(LocalDate.parse("2025-03-14")),
+                qropsReference            = Some("QROPS654321"),
                 submissionCompilationDate = submissionDate
               ),
               DownstreamAllTransfersData.OverviewItem(
@@ -372,12 +372,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT564322",
                 qtVersion                 = "003",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA000001A",
-                firstName                 = "Edith",
-                lastName                  = "Ennis-Hill",
-                qtDate                    = LocalDate.parse("2025-01-01"),
-                qropsReference            = "QROPS654322",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000001A"),
+                firstName                 = Some("Edith"),
+                lastName                  = Some("Ennis-Hill"),
+                qtDate                    = Some(LocalDate.parse("2025-01-01")),
+                qropsReference            = Some("QROPS654322"),
                 submissionCompilationDate = submissionDate
               )
             )
@@ -467,12 +467,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT123456",
                 qtVersion                 = "002",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA000002A",
-                firstName                 = "Alice",
-                lastName                  = "Liddell",
-                qtDate                    = LocalDate.parse("2025-02-02"),
-                qropsReference            = "QROPS9",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000002A"),
+                firstName                 = Some("Alice"),
+                lastName                  = Some("Liddell"),
+                qtDate                    = Some(LocalDate.parse("2025-02-02")),
+                qropsReference            = Some("QROPS9"),
                 submissionCompilationDate = now
               )
             )
@@ -584,12 +584,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT654321",
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA777777A",
-                firstName                 = "Sue",
-                lastName                  = "Smith",
-                qtDate                    = LocalDate.parse("2025-06-01"),
-                qropsReference            = "QROPS777",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA777777A"),
+                firstName                 = Some("Sue"),
+                lastName                  = Some("Smith"),
+                qtDate                    = Some(LocalDate.parse("2025-06-01")),
+                qropsReference            = Some("QROPS777"),
                 submissionCompilationDate = now
               )
             )
@@ -626,12 +626,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT654321",
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA777777A",
-                firstName                 = "Sue",
-                lastName                  = "Smith",
-                qtDate                    = LocalDate.parse("2025-06-01"),
-                qropsReference            = "QROPS777",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA777777A"),
+                firstName                 = Some("Sue"),
+                lastName                  = Some("Smith"),
+                qtDate                    = Some(LocalDate.parse("2025-06-01")),
+                qropsReference            = Some("QROPS777"),
                 submissionCompilationDate = now
               )
             )

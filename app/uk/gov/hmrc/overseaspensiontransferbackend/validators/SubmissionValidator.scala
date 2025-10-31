@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
+import com.google.inject.ImplementedBy
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SavedUserAnswers
 
 import javax.inject.{Inject, Singleton}
@@ -24,13 +25,18 @@ sealed trait ValidationResponse
 final case class ValidatedSubmission(saved: SavedUserAnswers) extends ValidationResponse
 final case class ValidationError(message: String)             extends ValidationResponse
 
+@ImplementedBy(classOf[SubmissionValidatorImpl])
 trait SubmissionValidator {
   def validate(prepared: SavedUserAnswers): Either[ValidationError, ValidatedSubmission]
 }
 
 @Singleton
-class DummySubmissionValidatorImpl @Inject() extends SubmissionValidator {
+class SubmissionValidatorImpl @Inject() extends SubmissionValidator {
 
   override def validate(prepared: SavedUserAnswers): Either[ValidationError, ValidatedSubmission] =
-    Right(ValidatedSubmission(prepared))
+    if (prepared.data.reportDetails.isEmpty) {
+      Left(ValidationError("Report Details missing invalid payload"))
+    } else {
+      Right(ValidatedSubmission(prepared))
+    }
 }

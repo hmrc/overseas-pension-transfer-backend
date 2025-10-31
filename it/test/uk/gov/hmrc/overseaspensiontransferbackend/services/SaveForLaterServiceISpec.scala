@@ -32,7 +32,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
   "SaveForLaterService" - {
 
-    "transform and persist full data correctly" in {
+    "transform and persist full data correctly with reportDetails present" in {
 
       val rawJson = UserAnswersTestData.fullUserAnswersExternalJson
 
@@ -47,6 +47,21 @@ class SaveForLaterServiceISpec extends BaseISpec {
 
       result mustBe SavedUserAnswers(id, pstr, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
 
+    }
+
+    "transform and create reportDetails to persist full data correctly" in {
+      val rawJson = UserAnswersTestData.userAnswersExternalJsonMissingReportDetails
+
+      val dto = withSavedDto(id, pstr, rawJson, now)
+
+      await(service.saveAnswer(dto)) mustBe Right(())
+
+      val result = await(repository.get(id.value)).value
+      result.transferId mustBe id
+      result.pstr mustBe pstr
+      result.lastUpdated mustBe now
+
+      result mustBe SavedUserAnswers(id, pstr, UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData], now)
     }
 
     "retrieve and transform full data" in {
@@ -151,15 +166,14 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result.pstr mustBe pstr
       result.lastUpdated mustBe now
 
-      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
-        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
+      val expectedInternal = UserAnswersTestData.reportDetailsJson.deepMerge(UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson))
 
       result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], now)
     }
 
     "transform and persist qropsEstablishedOther correctly" in {
-      val rawJson = UserAnswersTestData.memberDetailsExternalJson
-        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
+      val rawJson = UserAnswersTestData.memberDetailsExternalJson.deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherExternalJson)
 
       val dto = withSavedDto(id, pstr, rawJson, now)
 
@@ -170,8 +184,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result.pstr mustBe pstr
       result.lastUpdated mustBe now
 
-      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
-        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
+      val expectedInternal = UserAnswersTestData.reportDetailsJson.deepMerge(UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson))
 
       result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], now)
     }
