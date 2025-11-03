@@ -33,10 +33,6 @@ class QropsSchemeManagerOrganisationContactNameTransformer extends PathAwareTran
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      conditionalPruneStep(
-        externalPath,
-        qropsSchemeManagerIndividualPath
-      ),
       moveStep(
         externalPath,
         internalPath \ "name"

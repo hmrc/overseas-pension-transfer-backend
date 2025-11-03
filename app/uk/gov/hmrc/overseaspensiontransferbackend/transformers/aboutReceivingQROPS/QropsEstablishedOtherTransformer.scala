@@ -39,13 +39,9 @@ class QropsEstablishedOtherTransformer @Inject() (countryCodeReader: CountryCode
     */
   override def construct(json: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
-      conditionalPruneStep(
-        onlyIfSetAt = externalPath,
-        pruneTarget = qropsEstablishedPath
-      ),
       moveStep(
-        from        = externalPath,
-        to          = internalPath
+        from = externalPath,
+        to   = internalPath
       )
     )
     TransformerUtils.applyPipeline(json, steps)(identity)

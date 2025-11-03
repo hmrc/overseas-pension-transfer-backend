@@ -31,6 +31,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersI
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.{Clock, Instant}
+import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,10 +78,11 @@ class SaveForLaterRepository @Inject() (
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
+    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
     collection
       .replaceOne(
-        filter      = byId(answers.transferId.value),
-        replacement = answers,
+        filter      = byId(updatedAnswers.transferId.value),
+        replacement = updatedAnswers,
         options     = ReplaceOptions().upsert(true)
       )
       .toFuture()
