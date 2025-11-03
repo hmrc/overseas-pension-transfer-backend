@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json._
+import play.api.libs.json.{Format, Json}
 
-final case class PsaId(value: String)
+case class Declaration(
+    declaration1: Boolean,
+    declaration2: Boolean
+  )
 
-object PsaId {
-  implicit val format: OFormat[PsaId] = Json.format[PsaId]
-}
-
-final case class PspId(value: String)
-
-object PspId {
-  implicit val format: OFormat[PspId] = Json.format[PspId]
+object Declaration {
+  implicit val format: Format[Declaration] = Json.format
 }

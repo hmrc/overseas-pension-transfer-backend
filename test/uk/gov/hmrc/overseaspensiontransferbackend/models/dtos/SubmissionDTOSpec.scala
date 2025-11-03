@@ -97,8 +97,8 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
       val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
       normalised mustBe NormalisedSubmission(
         referenceId = TransferNumber("path-ref"),
-        submitter   = PsaSubmitter(PsaId("A1234567")),
-        psaId       = PsaId("A1234567"),
+        userId      = PsaId("A1234567"),
+        psaId       = None,
         lastUpdated = ts
       )
     }
@@ -115,8 +115,8 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
       val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
       normalised mustBe NormalisedSubmission(
         referenceId = TransferNumber("path-ref"),
-        submitter   = PspSubmitter(PspId("X9999999")),
-        psaId       = PsaId("A7654321"),
+        userId      = PspId("X9999999"),
+        psaId       = Some(PsaId("A7654321")),
         lastUpdated = ts
       )
     }
