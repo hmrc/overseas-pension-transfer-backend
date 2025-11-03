@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models
+package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
 
-case class ReportDetails(
-    pstr: String,
-    qtStatus: QtStatus,
-    qtReference: Option[String],
-    qtDigitalStatus: Option[String]
+import java.time.Instant
+
+final case class NormalisedSubmission(
+    referenceId: TransferId,
+    userId: Submitter,
+    psaId: Option[PsaId],
+    lastUpdated: Instant
   )
-
-object ReportDetails {
-  implicit val format: OFormat[ReportDetails] = Json.format[ReportDetails]
-}

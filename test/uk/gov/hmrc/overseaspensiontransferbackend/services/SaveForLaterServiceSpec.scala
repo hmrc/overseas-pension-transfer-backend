@@ -48,7 +48,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
   private val validSaved = SavedUserAnswers(
     transferId  = testId,
     pstr        = pstr,
-    data        = AnswersData(None, Some(TransferringMember(None)), None, None),
+    data        = AnswersData(Some(TransferringMember(None)), None, None, None),
     lastUpdated = now
   )
 

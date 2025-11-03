@@ -65,7 +65,6 @@ class SaveForLaterRepositorySpec
       referenceId,
       pstr,
       AnswersData(
-        reportDetails       = None,
         transferringMember  = None,
         aboutReceivingQROPS = None,
         transferDetails     = Some(
@@ -108,7 +107,8 @@ class SaveForLaterRepositorySpec
               )
             )
           )
-        )
+        ),
+        None
       ),
       now
     )

@@ -25,8 +25,19 @@ import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Compiled, PstrNumber, ReportDetails, SavedUserAnswers}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, Psp, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{
+  AnswersData,
+  Compiled,
+  Declaration,
+  PstrNumber,
+  QtDeclaration,
+  ReportDetails,
+  SavedUserAnswers,
+  Submitted
+}
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -50,10 +61,38 @@ trait SpecBase
   val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
-    reportDetails       = Some(ReportDetails(Some(pstr.value), Some(Compiled), None, None)),
     transferringMember  = None,
     aboutReceivingQROPS = None,
-    transferDetails     = None
+    transferDetails     = None,
+    submitToHMRC        = Some(true)
+  )
+
+  val samplePsaSubmission: Submission = Submission(
+    ReportDetails(pstr.value, Submitted, None, None),
+    None,
+    None,
+    None,
+    QtDeclaration(
+      Psa,
+      PsaId("A1234567"),
+      None
+    ),
+    Some(Declaration(declaration1 = true, declaration2 = true)),
+    None
+  )
+
+  val samplePspSubmission: Submission = Submission(
+    ReportDetails(pstr.value, Submitted, None, None),
+    None,
+    None,
+    None,
+    QtDeclaration(
+      Psp,
+      PspId("12345678"),
+      Some(PsaId("A1234567"))
+    ),
+    None,
+    Some(Declaration(declaration1 = true, declaration2 = true))
   )
 
   val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(

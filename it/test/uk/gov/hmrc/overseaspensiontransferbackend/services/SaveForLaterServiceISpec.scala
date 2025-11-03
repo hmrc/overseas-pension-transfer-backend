@@ -121,8 +121,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result.pstr mustBe pstr
       result.lastUpdated mustBe fixedInstant
 
-      val expectedInternal = UserAnswersTestData.reportDetailsJson.deepMerge(UserAnswersTestData.transferringMemberInternalJson
-        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson))
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedInternalJson)
 
       result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], fixedInstant)
     }
@@ -140,8 +140,8 @@ class SaveForLaterServiceISpec extends BaseISpec {
       result.pstr mustBe pstr
       result.lastUpdated mustBe fixedInstant
 
-      val expectedInternal = UserAnswersTestData.reportDetailsJson.deepMerge(UserAnswersTestData.transferringMemberInternalJson
-        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson))
+      val expectedInternal = UserAnswersTestData.transferringMemberInternalJson
+        .deepMerge(UserAnswersTestData.qropsDetailsEstablishedOtherInternalJson)
 
       result mustBe SavedUserAnswers(id, pstr, expectedInternal.as[AnswersData], fixedInstant)
     }

@@ -36,10 +36,10 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferId  = TransferNumber("ref-123"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
-          reportDetails       = None,
           transferringMember  = Some(TransferringMember(None)),
           aboutReceivingQROPS = None,
-          transferDetails     = None
+          transferDetails     = None,
+          None
         ),
         lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
       )
@@ -52,10 +52,10 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
     "must flatten AnswersData to JsObject in writes" in {
       val data = AnswersData(
-        reportDetails       = None,
         transferringMember  = Some(TransferringMember(Some(MemberDetails(foreName = Some("Jane"))))),
         aboutReceivingQROPS = None,
-        transferDetails     = None
+        transferDetails     = None,
+        None
       )
 
       val obj = SavedUserAnswers(TransferNumber("ref-456"), PstrNumber("12345678AB"), data, Instant.parse("2025-01-01T10:00:00Z"))
@@ -71,7 +71,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
     "must serialise and deserialize DecryptedAnswersData" in {
       val decrypted: AnswersDataWrapper = DecryptedAnswersData(
-        AnswersData(None, Some(TransferringMember(None)), None, None)
+        AnswersData(Some(TransferringMember(None)), None, None, None)
       )
 
       val json   = Json.toJson(decrypted)(AnswersDataWrapper.wrapperFormat)
@@ -82,7 +82,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
 
     "must serialise and deserialize EncryptedAnswersData" in {
       val decrypted                     = DecryptedAnswersData(
-        AnswersData(None, Some(TransferringMember(None)), None, None)
+        AnswersData(Some(TransferringMember(None)), None, None, None)
       )
       val encrypted: AnswersDataWrapper = decrypted.encrypt
 
@@ -99,10 +99,10 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferId  = TransferNumber("ref-123"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
-          reportDetails       = None,
           transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
           aboutReceivingQROPS = None,
-          transferDetails     = None
+          transferDetails     = None,
+          None
         ),
         lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
       )
@@ -127,10 +127,10 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferId  = QtNumber("QT123456"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
-          reportDetails       = None,
           transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
           aboutReceivingQROPS = None,
-          transferDetails     = None
+          transferDetails     = None,
+          None
         ),
         lastUpdated = Instant.parse("2024-01-01T12:00:00Z")
       )

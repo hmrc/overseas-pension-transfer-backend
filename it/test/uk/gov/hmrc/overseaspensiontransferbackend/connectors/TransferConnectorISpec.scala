@@ -25,10 +25,10 @@ import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, QtDetails, SavedUserAnswers, Submitted}
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
@@ -42,14 +42,21 @@ class TransferConnectorISpec extends BaseISpec {
 
   private val now = Instant.now()
   private val pstr = PstrNumber("12345678AB")
-  private val answersData = AnswersData(None, None, None, None)
-  private val savedUserAnswers = SavedUserAnswers(TransferNumber(""), pstr, answersData, now)
+  private val submission = Submission(
+    ReportDetails(pstr.value, Submitted, None, None),
+    None,
+    None,
+    None,
+    QtDeclaration(Psa, PsaId("A1234567"), None),
+    Some(Declaration(true, declaration2 = true)),
+    None
+  )
 
   private val connector = app.injector.instanceOf[TransferConnector]
 
   "submit" - {
     "send correlationId as header when RequestId is present" in {
-      connector.submitTransfer(ValidatedSubmission(savedUserAnswers))
+      connector.submitTransfer(submission)
 
       val correlationIdRegex = "^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$".r
 
@@ -71,7 +78,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
 
       result mustBe Right(DownstreamSuccess(QtNumber("QT123456"), now, "123"))
     }
@@ -92,7 +99,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -110,7 +117,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
 
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
@@ -131,7 +138,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -153,7 +160,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(ValidatedSubmission(savedUserAnswers)))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }

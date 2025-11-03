@@ -26,6 +26,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
@@ -77,8 +78,8 @@ class SubmissionControllerSpec
         val captured = captor.getValue
 
         captured.referenceId mustBe TransferNumber(testRefId)
-        captured.submitter   mustBe Submitter.PsaSubmitter(PsaId("A1234567"))
-        captured.psaId       mustBe PsaId("A1234567")
+        captured.userId      mustBe PsaId("A1234567")
+        captured.psaId       mustBe None
         captured.lastUpdated mustBe now
       }
     }
@@ -120,8 +121,8 @@ class SubmissionControllerSpec
         val captured = captor.getValue
 
         captured.referenceId mustBe TransferNumber(testRefId)
-        captured.submitter   mustBe Submitter.PspSubmitter(PspId("X9999999"))
-        captured.psaId       mustBe PsaId("A7654321")
+        captured.userId      mustBe PspId("X9999999")
+        captured.psaId       mustBe Some(PsaId("A7654321"))
         captured.lastUpdated mustBe now
       }
     }

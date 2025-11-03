@@ -81,18 +81,7 @@ class SaveForLaterServiceImpl @Inject() (
             case Left(err) => Future.successful(Left(err))
 
             case Right(validated) =>
-              val saved = if (validated.reportDetails.isEmpty) {
-                val maybeQtRefernce = dto.transferId match {
-                  case QtNumber(value) => Some(value)
-                  case _               => None
-                }
-
-                val reportDetails = Some(ReportDetails(Some(dto.pstr.value), Some(Submitted), maybeQtRefernce, None))
-
-                SavedUserAnswers(dto.transferId, dto.pstr, validated.copy(reportDetails = reportDetails), dto.lastUpdated)
-              } else {
-                SavedUserAnswers(dto.transferId, dto.pstr, validated, dto.lastUpdated)
-              }
+              val saved = SavedUserAnswers(dto.transferId, dto.pstr, validated, dto.lastUpdated)
 
               repository.set(saved).map {
                 case true  => Right(())

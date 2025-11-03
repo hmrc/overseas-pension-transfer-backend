@@ -29,7 +29,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.ValidatedSubmission
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[TransferConnectorImpl])
 trait TransferConnector {
-  def submitTransfer(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
+  def submitTransfer(validated: Submission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
       pstr: PstrNumber,
@@ -64,11 +64,11 @@ class TransferConnectorImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends TransferConnector with Logging {
 
-  override def submitTransfer(validated: ValidatedSubmission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+  override def submitTransfer(validated: Submission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
-    val payload: JsValue = Json.toJson(validated.saved.data)
+    val payload: JsValue = Json.toJson(validated)
 
     // Required headers from the spec
     val correlationId = UUID.randomUUID().toString
