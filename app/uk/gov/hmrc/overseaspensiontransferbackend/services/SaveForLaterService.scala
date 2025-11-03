@@ -82,16 +82,12 @@ class SaveForLaterServiceImpl @Inject() (
 
             case Right(validated) =>
               val saved = if (validated.reportDetails.isEmpty) {
-                val qtStatus        = dto.transferId match {
-                  case QtNumber(_)       => Some(Submitted)
-                  case TransferNumber(_) => Some(Compiled)
-                }
                 val maybeQtRefernce = dto.transferId match {
                   case QtNumber(value) => Some(value)
                   case _               => None
                 }
 
-                val reportDetails = Some(ReportDetails(Some(dto.pstr.value), qtStatus, maybeQtRefernce, None))
+                val reportDetails = Some(ReportDetails(Some(dto.pstr.value), Some(Submitted), maybeQtRefernce, None))
 
                 SavedUserAnswers(dto.transferId, dto.pstr, validated.copy(reportDetails = reportDetails), dto.lastUpdated)
               } else {
