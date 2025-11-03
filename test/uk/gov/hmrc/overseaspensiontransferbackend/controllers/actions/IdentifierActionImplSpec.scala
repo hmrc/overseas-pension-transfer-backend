@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions
 
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Results.Ok
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -91,13 +92,12 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
       val result = action.invokeBlock(
         fakeRequest,
-        { request: IdentifierRequest[AnyContent] =>
-          ???
+        { _: IdentifierRequest[AnyContent] =>
+          Future.successful(Ok(s"OK"))
         }
       )
 
       status(result) mustBe OK
-      ???
     }
 
     "must not allow access without affinityGroup" in {
@@ -107,42 +107,39 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
       val result = action.invokeBlock(
         fakeRequest,
-        ???
+        { request: IdentifierRequest[AnyContent] =>
+          Future.successful(Ok(s"OK - ${request.authenticatedUser.internalId} - ${request.authenticatedUser}"))
+        }
       )
 
-      status(result) mustBe SEE_OTHER
-      ???
+      status(result) mustBe UNAUTHORIZED
     }
 
-    "must redirect to login if no active session" in {
+    "must return internal server error result if no active session" in {
       stubAuthoriseFails(new BearerTokenExpired)
 
       val result             = action.invokeBlock(fakeRequest, (_: IdentifierRequest[AnyContent]) => fail("Should not reach block"))
-      val redirectedLocation = java.net.URLDecoder.decode(redirectLocation(result).get, "UTF-8")
 
-      status(result) mustBe SEE_OTHER
-      ???
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
 
-    "must redirect to unauthorised page on InsufficientEnrolments" in {
+    "must not allow access on InsufficientEnrolments" in {
       stubAuthoriseFails(new InsufficientEnrolments)
 
       val result = action.invokeBlock(fakeRequest, (_: IdentifierRequest[AnyContent]) => fail("Should not reach block"))
 
-      status(result) mustBe SEE_OTHER
-      ???
+      status(result) mustBe UNAUTHORIZED
     }
 
-    "must redirect to unauthorised page on unexpected error" in {
+    "must not allow access on unexpected error" in {
       stubAuthoriseFails(new RuntimeException("Unexpected error"))
 
       val result = action.invokeBlock(fakeRequest, (_: IdentifierRequest[AnyContent]) => fail("Should not reach block"))
 
-      status(result) mustBe SEE_OTHER
-      ???
+      status(result) mustBe UNAUTHORIZED
     }
 
-    "must redirect to unauthorised page for users with Agent affinity group" in {
+    "must not allow access for users with Agent affinity group" in {
       val expectedRetrieval = Some(internalIdValue) and Enrolments(Set(enrolment)) and Some(AffinityGroup.Agent)
       stubAuthoriseReturns(expectedRetrieval)
 
@@ -151,8 +148,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
         (_: IdentifierRequest[AnyContent]) => fail("Should not reach block")
       )
 
-      status(result) mustBe SEE_OTHER
-      ???
+      status(result) mustBe UNAUTHORIZED
     }
   }
 }
