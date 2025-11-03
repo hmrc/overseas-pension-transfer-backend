@@ -48,7 +48,7 @@ class TestOnlyControllerSpec extends AnyFreeSpec with Matchers with SpecBase wit
 
       val request = FakeRequest(DELETE, "/test-only/reset-test-data")
 
-      val result = controller.resetDatabase(request)
+      val result = controller.resetDatabase(fakeIdentifierRequest(request))
 
       status(result) mustBe NO_CONTENT
     }

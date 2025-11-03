@@ -118,7 +118,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
     "must return internal server error result if no active session" in {
       stubAuthoriseFails(new BearerTokenExpired)
 
-      val result             = action.invokeBlock(fakeRequest, (_: IdentifierRequest[AnyContent]) => fail("Should not reach block"))
+      val result = action.invokeBlock(fakeRequest, (_: IdentifierRequest[AnyContent]) => fail("Should not reach block"))
 
       status(result) mustBe INTERNAL_SERVER_ERROR
     }

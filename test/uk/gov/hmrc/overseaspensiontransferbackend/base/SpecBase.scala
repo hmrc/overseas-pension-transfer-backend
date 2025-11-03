@@ -20,12 +20,14 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PensionSchemeDetails, PstrNumber, SavedUserAnswers, SrnNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
@@ -85,7 +87,9 @@ trait SpecBase
   )
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
+    new GuiceApplicationBuilder().overrides(
+      bind[IdentifierAction].to[FakeIdentifierAction]
+    )
 
   def fakeIdentifierRequest[A](
       fakeRequest: FakeRequest[A],

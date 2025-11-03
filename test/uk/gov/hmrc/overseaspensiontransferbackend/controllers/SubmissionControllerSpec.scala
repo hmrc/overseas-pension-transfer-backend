@@ -65,7 +65,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(psaJson)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(expectedResponse)
@@ -108,7 +108,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(pspJson)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(expectedResponse)
@@ -145,7 +145,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(payload)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)                               mustBe BAD_REQUEST
         (contentAsJson(result) \ "error").as[String] mustBe "Transformation failed"
@@ -172,7 +172,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(payload)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }

@@ -48,7 +48,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       running(app) {
         val request = FakeRequest(GET, s"$routePrefix/save-for-later/${testId.value}")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(simpleUserAnswersDTO)
@@ -68,7 +68,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       running(app) {
         val request = FakeRequest(GET, s"$routePrefix/save-for-later/${testId.value}")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe NOT_FOUND
       }
@@ -89,7 +89,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)          mustBe NO_CONTENT
         contentAsString(result) mustBe empty
@@ -111,7 +111,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)                             mustBe BAD_REQUEST
         (contentAsJson(result) \ "error").as[String] must include("Transformation failed")
@@ -133,7 +133,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val request = FakeRequest(POST, s"$routePrefix/save-for-later")
           .withJsonBody(Json.toJson(simpleUserAnswersDTO))
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -155,7 +155,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         running(app) {
           val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/${testId.value}")
 
-          val result = route(app, request).value
+          val result = route(app, fakeIdentifierRequest(request)).value
 
           status(result) mustBe NO_CONTENT
         }
@@ -176,7 +176,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         running(app) {
           val request = FakeRequest(DELETE, s"$routePrefix/save-for-later/${testId.value}")
 
-          val result = route(app, request).value
+          val result = route(app, fakeIdentifierRequest(request)).value
 
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
