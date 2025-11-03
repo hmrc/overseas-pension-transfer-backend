@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions
 
 import com.google.inject.Inject
 import play.api.Logging
+import play.api.mvc.Results.{InternalServerError, Unauthorized}
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -46,7 +47,7 @@ class IdentifierActionImpl @Inject() (
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     authorised(predicate).retrieve(internalId and allEnrolments and affinityGroup) {
       case optInternalId ~ enrolments ~ Some(affinityGroup) =>
@@ -61,15 +62,15 @@ class IdentifierActionImpl @Inject() (
 
   private def handleAuthException: PartialFunction[Throwable, Result] = {
     case _: NoActiveSession =>
-      ???
+      InternalServerError
 
     case AgentAffinityGroupNotAllowed =>
       logger.warn("Agent users are not permitted to access this service")
-      ???
+      Unauthorized
 
     case e =>
       logger.error("Unexpected error during authorisation", e)
-      ???
+      Unauthorized
   }
 
   private case object AgentAffinityGroupNotAllowed extends RuntimeException("Agent affinity group is not supported")
