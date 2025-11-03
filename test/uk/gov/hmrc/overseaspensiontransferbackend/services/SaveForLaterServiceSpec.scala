@@ -192,11 +192,6 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
                 )
               )
             )
-          ),
-          "reportDetails"      -> Json.obj(
-            "pstr"            -> "12345678AA",
-            "qtReference"     -> "QTR-0001",
-            "qtDigitalStatus" -> "InProgress"
           )
         )
 
@@ -210,11 +205,6 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
                 "memUkResident" -> "true"
               )
             )
-          ),
-          "reportDetails"      -> Json.obj(
-            "pstr"            -> "12345678AA",
-            "qtReference"     -> "QTR-0001",
-            "qtDigitalStatus" -> "InProgress"
           )
         )
 
@@ -234,10 +224,6 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       (json \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "memUkResident").as[String]         mustBe "true"
       (json \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "memEverUkResident").toOption       mustBe None
       (json \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails").toOption mustBe None
-
-      (json \ "reportDetails" \ "pstr").as[String]            mustBe "12345678AA"
-      (json \ "reportDetails" \ "qtReference").as[String]     mustBe "QTR-0001"
-      (json \ "reportDetails" \ "qtDigitalStatus").as[String] mustBe "InProgress"
     }
 
   }
