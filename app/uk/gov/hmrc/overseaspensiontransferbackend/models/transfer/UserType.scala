@@ -27,14 +27,14 @@ object UserType {
   implicit val format: Format[UserType] = new Format[UserType] {
 
     def reads(js: JsValue): JsResult[UserType] = js.validate[String].flatMap {
-      case "Psa" => JsSuccess(Psa)
-      case "Psp" => JsSuccess(Psp)
-      case other => JsError(s"Invalid userType: $other")
+      case "Psa" | "PSA" => JsSuccess(Psa)
+      case "Psp" | "PSP" => JsSuccess(Psp)
+      case other         => JsError(s"Invalid userType: $other")
     }
 
     def writes(ut: UserType): JsValue = JsString(ut match {
-      case Psa => "Psa"
-      case Psp => "Psp"
+      case Psa => "PSA"
+      case Psp => "PSP"
     })
   }
 }
