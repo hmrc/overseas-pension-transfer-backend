@@ -28,11 +28,12 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaUser}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, Psp, TransferNumber}
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -119,7 +120,6 @@ trait SpecBase
 
   def unquotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
     Json.obj("unquotedValue" -> BigDecimal(v), "unquotedShareTotal" -> n, "unquotedCompany" -> c, "unquotedClass" -> cls)
-
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder().overrides(

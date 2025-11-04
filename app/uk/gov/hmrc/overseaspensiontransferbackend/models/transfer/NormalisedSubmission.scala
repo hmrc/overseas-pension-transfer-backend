@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, Submitter}
 
 import java.time.Instant
 

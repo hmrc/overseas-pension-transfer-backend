@@ -18,10 +18,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpResponse
-import play.api.http.Status._
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.MaxSnippet
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 
 class ParserHelpersSpec extends AnyFreeSpec with Matchers {

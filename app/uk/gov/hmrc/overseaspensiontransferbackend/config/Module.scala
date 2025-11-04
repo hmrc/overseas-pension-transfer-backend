@@ -22,6 +22,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{Identifie
 import uk.gov.hmrc.overseaspensiontransferbackend.services._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
 import java.time.Clock
 
@@ -32,7 +33,6 @@ class Module extends AbstractModule {
     bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
     bind(classOf[TransferService]).to(classOf[TransferServiceImpl])
     bind(classOf[IdentifierAction]).to(classOf[IdentifierActionImpl]).asEagerSingleton()
-    bind(classOf[SubmissionValidator]).to(classOf[DummySubmissionValidatorImpl])
     bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }
 

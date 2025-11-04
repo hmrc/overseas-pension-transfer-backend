@@ -18,9 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Format, JsPath, Reads, Writes}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId.downstreamFormat
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Submitter, UserType}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.PsaId.downstreamFormat
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, Submitter, UserType}
 
 case class QtDeclaration(
     submittedBy: UserType,

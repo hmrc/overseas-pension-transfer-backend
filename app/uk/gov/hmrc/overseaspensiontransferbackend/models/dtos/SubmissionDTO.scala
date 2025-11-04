@@ -18,7 +18,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 
 import java.time.Instant

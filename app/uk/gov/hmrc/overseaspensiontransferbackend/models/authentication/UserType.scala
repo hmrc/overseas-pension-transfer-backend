@@ -24,15 +24,17 @@ case object Psp extends UserType
 
 object UserType {
 
-  implicit val format: Format[UserType] = Format(
-    Reads {
-      case JsString("Psa") => JsSuccess(Psa)
-      case JsString("Psp") => JsSuccess(Psp)
-      case _               => JsError("Unknown UserType")
-    },
-    Writes {
-      case Psa => JsString("Psa")
-      case Psp => JsString("Psp")
+  implicit val format: Format[UserType] = new Format[UserType] {
+
+    def reads(js: JsValue): JsResult[UserType] = js.validate[String].flatMap {
+      case "Psa" | "PSA" => JsSuccess(Psa)
+      case "Psp" | "PSP" => JsSuccess(Psp)
+      case other         => JsError(s"Invalid userType: $other")
     }
-  )
+
+    def writes(ut: UserType): JsValue = JsString(ut match {
+      case Psa => "PSA"
+      case Psp => "PSP"
+    })
+  }
 }

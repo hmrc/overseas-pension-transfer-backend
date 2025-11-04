@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
 
 import play.api.libs.json._
 
@@ -37,22 +37,5 @@ object Submitter {
       case PsaId(value) => value
       case PspId(value) => value
     })
-  }
-
-  final case class PsaId(value: String) extends Submitter {
-    override val userType: UserType = Psa
-  }
-
-  object PsaId {
-    implicit val format: Format[PsaId]  = Json.format[PsaId]
-    val downstreamFormat: Format[PsaId] = Json.valueFormat
-  }
-
-  final case class PspId(value: String) extends Submitter {
-    override val userType: UserType = Psp
-  }
-
-  object PspId {
-    implicit val format: Format[PspId] = Json.format[PspId]
   }
 }
