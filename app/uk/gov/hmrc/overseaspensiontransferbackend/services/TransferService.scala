@@ -29,7 +29,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, Ge
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.{Submission, SubmissionValidator}
 
 import java.time.{LocalDate, ZoneOffset}
 import javax.inject.{Inject, Singleton}
@@ -58,7 +58,7 @@ class TransferServiceImpl @Inject() (
   override def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId.value).flatMap {
       case Some(saved) =>
-        validator.validate(saved) match {
+        validator.validate(Submission(saved, submission)) match {
           case Left(err)        =>
             Future.successful(Left(SubmissionTransformationError(err.message)))
           case Right(validated) =>
@@ -68,16 +68,16 @@ class TransferServiceImpl @Inject() (
                 //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId.value)
 
-                if (validated.saved.data.transferringMember.isDefined) {
+                if (validated.transferringMember.isDefined) {
                   auditService.audit(
                     ReportSubmittedAuditModel.build(
-                      validated.saved.transferId,
+                      saved.transferId,
                       SubmissionSucceeded,
                       None,
                       Some(success.qtNumber),
-                      validated.saved.data.transferringMember.get.memberDetails,
-                      validated.saved.data.transferDetails,
-                      validated.saved.data.aboutReceivingQROPS
+                      validated.transferringMember.get.memberDetails,
+                      validated.transferDetails,
+                      validated.aboutReceivingQROPS
                     )
                   )
                 }
@@ -87,7 +87,7 @@ class TransferServiceImpl @Inject() (
                 logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
                 auditService.audit(
                   ReportSubmittedAuditModel.build(
-                    validated.saved.transferId,
+                    saved.transferId,
                     JourneySubmittedType.SubmissionFailed,
                     Some(err.log),
                     None,

@@ -71,7 +71,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
 
       actual                                                       mustBe a[Left[_, _]]
       actual.left.toOption.get                                     mustBe a[HipBadRequest]
-      actual.left.toOption.get.asInstanceOf[HipBadRequest].message mustBe message.take(MaxSnippet)
+      actual.left.toOption.get.asInstanceOf[HipBadRequest].message mustBe message
     }
 
     "maps 400 to HipOriginFailures when failures array present" in {

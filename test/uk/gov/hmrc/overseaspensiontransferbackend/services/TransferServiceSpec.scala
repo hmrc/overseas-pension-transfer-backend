@@ -28,6 +28,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
@@ -54,8 +55,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
   private val normalisedSubmission = NormalisedSubmission(
     referenceId = testId,
-    submitter   = Submitter.PsaSubmitter(PsaId("A1234567")),
-    psaId       = PsaId("A1234567"),
+    userId      = PspId("12345678"),
+    psaId       = Some(PsaId("A1234567")),
     lastUpdated = now
   )
 
@@ -83,6 +84,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   )
   private val saved: SavedUserAnswers = simpleSavedUserAnswers.copy(data = newData)
 
+  private val submission = Submission(saved, normalisedSubmission)
+
   private val downstreamSuccess = DownstreamSuccess(
     qtNumber         = QtNumber("QT123456"),
     processingDate   = now,
@@ -100,9 +103,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
     "submitTransfer" - {
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
-        when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
-        when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
-          .thenReturn(Future.successful(Right(downstreamSuccess)))
+        when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
+        when(mockConnector.submitTransfer(eqTo(submission))(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -123,7 +125,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
       "must return Left(SubmissionTransformationError) when validator fails" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
-        when(mockValidator.validate(eqTo(saved))).thenReturn(Left(ValidationError("boom")))
+        when(mockValidator.validate(eqTo(submission))).thenReturn(Left(ValidationError("boom")))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -140,12 +142,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         )
 
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
-        when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
+        when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         downstreamErrors.foreach { ue =>
           Mockito.reset(mockAuditService)
-          when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
+          when(mockConnector.submitTransfer(eqTo(submission))(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -172,10 +174,10 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         )
 
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
-        when(mockValidator.validate(eqTo(saved))).thenReturn(Right(ValidatedSubmission(saved)))
+        when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
 
         infra.foreach { ue =>
-          when(mockConnector.submitTransfer(eqTo(ValidatedSubmission(saved)))(any))
+          when(mockConnector.submitTransfer(eqTo(submission))(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -359,12 +361,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT564321",
                 qtVersion                 = "001",
                 qtStatus                  = "Compiled",
-                qtDigitalStatus           = "Complied",
-                nino                      = "AA000000A",
-                firstName                 = "David",
-                lastName                  = "Warne",
-                qtDate                    = LocalDate.parse("2025-03-14"),
-                qropsReference            = "QROPS654321",
+                qtDigitalStatus           = Some("Complied"),
+                nino                      = Some("AA000000A"),
+                firstName                 = Some("David"),
+                lastName                  = Some("Warne"),
+                qtDate                    = Some(LocalDate.parse("2025-03-14")),
+                qropsReference            = Some("QROPS654321"),
                 submissionCompilationDate = submissionDate
               ),
               DownstreamAllTransfersData.OverviewItem(
@@ -372,12 +374,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT564322",
                 qtVersion                 = "003",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA000001A",
-                firstName                 = "Edith",
-                lastName                  = "Ennis-Hill",
-                qtDate                    = LocalDate.parse("2025-01-01"),
-                qropsReference            = "QROPS654322",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000001A"),
+                firstName                 = Some("Edith"),
+                lastName                  = Some("Ennis-Hill"),
+                qtDate                    = Some(LocalDate.parse("2025-01-01")),
+                qropsReference            = Some("QROPS654322"),
                 submissionCompilationDate = submissionDate
               )
             )
@@ -467,12 +469,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT123456",
                 qtVersion                 = "002",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA000002A",
-                firstName                 = "Alice",
-                lastName                  = "Liddell",
-                qtDate                    = LocalDate.parse("2025-02-02"),
-                qropsReference            = "QROPS9",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000002A"),
+                firstName                 = Some("Alice"),
+                lastName                  = Some("Liddell"),
+                qtDate                    = Some(LocalDate.parse("2025-02-02")),
+                qropsReference            = Some("QROPS9"),
                 submissionCompilationDate = now
               )
             )
@@ -584,12 +586,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT654321",
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA777777A",
-                firstName                 = "Sue",
-                lastName                  = "Smith",
-                qtDate                    = LocalDate.parse("2025-06-01"),
-                qropsReference            = "QROPS777",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA777777A"),
+                firstName                 = Some("Sue"),
+                lastName                  = Some("Smith"),
+                qtDate                    = Some(LocalDate.parse("2025-06-01")),
+                qropsReference            = Some("QROPS777"),
                 submissionCompilationDate = now
               )
             )
@@ -626,12 +628,12 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtReference               = "QT654321",
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
-                qtDigitalStatus           = "Submitted",
-                nino                      = "AA777777A",
-                firstName                 = "Sue",
-                lastName                  = "Smith",
-                qtDate                    = LocalDate.parse("2025-06-01"),
-                qropsReference            = "QROPS777",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA777777A"),
+                firstName                 = Some("Sue"),
+                lastName                  = Some("Smith"),
+                qtDate                    = Some(LocalDate.parse("2025-06-01")),
+                qropsReference            = Some("QROPS777"),
                 submissionCompilationDate = now
               )
             )

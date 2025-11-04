@@ -36,50 +36,6 @@ class QropsEstablishedOtherTransformerSpec extends AnyFreeSpec with Matchers wit
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
-    "must remove qropsEstablished if qropsEstablishedOther is being set" in {
-      val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Scotland")
-      )
-
-      val existingInternalJson = Json.obj(
-        "aboutReceivingQROPS" -> Json.obj(
-          "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
-          )
-        )
-      )
-
-      val mergedInput = existingInternalJson.deepMerge(incomingFrontendJson)
-
-      val expected = Json.obj(
-        "aboutReceivingQROPS" -> Json.obj(
-          "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablishedOther" -> "Scotland"
-          )
-        )
-      )
-
-      transformer.construct(mergedInput) mustBe Right(expected)
-    }
-
-    "must preserve qropsEstablished if qropsEstablishedOther is NOT being set" in {
-      val incomingFrontendJson = Json.obj(
-        "qropsDetails" -> Json.obj()
-      )
-
-      val existingInternalJson = Json.obj(
-        "aboutReceivingQROPS" -> Json.obj(
-          "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished" -> Json.obj("code" -> "FR", "name" -> "France")
-          )
-        )
-      )
-
-      val mergedInput = existingInternalJson.deepMerge(incomingFrontendJson)
-
-      transformer.construct(mergedInput) mustBe Right(mergedInput)
-    }
-
     "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablishedOther if value is already set" in {
       val incomingFrontendJson = Json.obj(
         "qropsDetails" -> Json.obj("qropsEstablishedOther" -> "Northern Ireland")

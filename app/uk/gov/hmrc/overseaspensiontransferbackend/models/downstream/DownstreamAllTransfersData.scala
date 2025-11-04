@@ -33,12 +33,12 @@ object DownstreamAllTransfersData {
       qtReference: String,
       qtVersion: String,
       qtStatus: String,
-      qtDigitalStatus: String,
-      nino: String,
-      firstName: String,
-      lastName: String,
-      qtDate: LocalDate,
-      qropsReference: String,
+      qtDigitalStatus: Option[String],
+      nino: Option[String],
+      firstName: Option[String],
+      lastName: Option[String],
+      qtDate: Option[LocalDate],
+      qropsReference: Option[String],
       submissionCompilationDate: Instant
     )
 
@@ -47,14 +47,14 @@ object DownstreamAllTransfersData {
       AllTransfersItem(
         transferId      = QtNumber(r.qtReference),
         qtVersion       = Some(r.qtVersion),
-        nino            = Some(r.nino),
-        memberFirstName = Some(r.firstName),
-        memberSurname   = Some(r.lastName),
+        nino            = r.nino,
+        memberFirstName = r.firstName,
+        memberSurname   = r.lastName,
         submissionDate  = Some(r.submissionCompilationDate),
         lastUpdated     = None, // in-progress supplies lastUpdated
         qtStatus        = Some(QtStatus(r.qtStatus)),
         pstrNumber      = Some(pstrNumber),
-        qtDate          = Some(r.qtDate)
+        qtDate          = r.qtDate
       )
     }
 

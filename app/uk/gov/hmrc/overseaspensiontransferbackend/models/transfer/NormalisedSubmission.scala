@@ -16,25 +16,13 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
 
-sealed trait UserType
-case object Psa extends UserType
-case object Psp extends UserType
+import java.time.Instant
 
-object UserType {
-
-  implicit val format: Format[UserType] = new Format[UserType] {
-
-    def reads(js: JsValue): JsResult[UserType] = js.validate[String].flatMap {
-      case "Psa" | "PSA" => JsSuccess(Psa)
-      case "Psp" | "PSP" => JsSuccess(Psp)
-      case other         => JsError(s"Invalid userType: $other")
-    }
-
-    def writes(ut: UserType): JsValue = JsString(ut match {
-      case Psa => "PSA"
-      case Psp => "PSP"
-    })
-  }
-}
+final case class NormalisedSubmission(
+    referenceId: TransferId,
+    userId: Submitter,
+    psaId: Option[PsaId],
+    lastUpdated: Instant
+  )

@@ -16,18 +16,43 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import java.time.Instant
+import play.api.libs.json._
 
-sealed trait Submitter
-
-object Submitter {
-  final case class PsaSubmitter(id: PsaId) extends Submitter
-  final case class PspSubmitter(id: PspId) extends Submitter
+trait Submitter {
+  val value: String
+  val userType: UserType
 }
 
-final case class NormalisedSubmission(
-    referenceId: TransferId,
-    submitter: Submitter,
-    psaId: PsaId,
-    lastUpdated: Instant
-  )
+object Submitter {
+
+  implicit val format: Format[Submitter] = new Format[Submitter] {
+
+    def reads(js: JsValue): JsResult[Submitter] = js.validate[String].flatMap {
+      case value @ s"A$digits" if digits.matches("/d{7}") => JsSuccess(PsaId(value))
+      case value if value.matches("/d{8}")                => JsSuccess(PspId(value))
+      case other                                          => JsError(s"Invalid userType: $other")
+    }
+
+    def writes(submitter: Submitter): JsValue = JsString(submitter match {
+      case PsaId(value) => value
+      case PspId(value) => value
+    })
+  }
+
+  final case class PsaId(value: String) extends Submitter {
+    override val userType: UserType = Psa
+  }
+
+  object PsaId {
+    implicit val format: Format[PsaId]  = Json.format[PsaId]
+    val downstreamFormat: Format[PsaId] = Json.valueFormat
+  }
+
+  final case class PspId(value: String) extends Submitter {
+    override val userType: UserType = Psp
+  }
+
+  object PspId {
+    implicit val format: Format[PspId] = Json.format[PspId]
+  }
+}

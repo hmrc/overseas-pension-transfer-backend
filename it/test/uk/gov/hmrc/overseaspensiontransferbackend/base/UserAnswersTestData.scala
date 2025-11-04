@@ -20,6 +20,10 @@ import play.api.libs.json._
 
 object UserAnswersTestData {
 
+  val submitToHMRC = Json.obj(
+    "submitToHMRC" -> true
+  )
+
   val memberDetailsExternalJson: JsObject = Json.obj(
     "memberDetails" -> Json.obj(
       "name"                    -> Json.obj(
@@ -154,7 +158,7 @@ object UserAnswersTestData {
   )
 
   val fullUserAnswersExternalJson: JsObject =
-    transferDetailsExternalJson.deepMerge(memberDetailsExternalJson).deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetailsExternalJson)
+    submitToHMRC.deepMerge(transferDetailsExternalJson.deepMerge(memberDetailsExternalJson).deepMerge(qropsDetailsExternalJson).deepMerge(schemeManagerDetailsExternalJson))
 
   val transferringMemberInternalJson: JsObject = Json.obj(
     "transferringMember" -> Json.obj(
@@ -286,7 +290,7 @@ object UserAnswersTestData {
   )
 
   val fullUserAnswersInternalJson: JsObject =
-    transferringMemberInternalJson.deepMerge(qropsDetailsInternalJson).deepMerge(transferDetailsInternalJson)
+  submitToHMRC.deepMerge(transferringMemberInternalJson.deepMerge(qropsDetailsInternalJson).deepMerge(transferDetailsInternalJson))
 
   val memberDetailsExternalUpdateJson: JsObject = Json.obj(
     "memberDetails" -> Json.obj(

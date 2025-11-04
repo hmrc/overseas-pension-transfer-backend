@@ -22,17 +22,17 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PensionSchemeDetails, PstrNumber, SavedUserAnswers, SrnNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, Psp, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
@@ -56,10 +56,38 @@ trait SpecBase
   val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
 
   val sampleAnswersData: AnswersData = AnswersData(
-    reportDetails       = None,
     transferringMember  = None,
     aboutReceivingQROPS = None,
-    transferDetails     = None
+    transferDetails     = None,
+    submitToHMRC        = Some(true)
+  )
+
+  val samplePsaSubmission: Submission = Submission(
+    ReportDetails(pstr.value, Submitted, None, None),
+    None,
+    None,
+    None,
+    QtDeclaration(
+      Psa,
+      PsaId("A1234567"),
+      None
+    ),
+    Some(Declaration(declaration1 = true, declaration2 = true)),
+    None
+  )
+
+  val samplePspSubmission: Submission = Submission(
+    ReportDetails(pstr.value, Submitted, None, None),
+    None,
+    None,
+    None,
+    QtDeclaration(
+      Psp,
+      PspId("12345678"),
+      Some(PsaId("A1234567"))
+    ),
+    None,
+    Some(Declaration(declaration1 = true, declaration2 = true))
   )
 
   val simpleSavedUserAnswers: SavedUserAnswers = SavedUserAnswers(
@@ -85,6 +113,13 @@ trait SpecBase
     PstrNumber("12345678AB"),
     "SchemeName"
   )
+
+  def quotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
+    Json.obj("quotedValue" -> BigDecimal(v), "quotedShareTotal" -> n, "quotedCompany" -> c, "quotedClass" -> cls)
+
+  def unquotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
+    Json.obj("unquotedValue" -> BigDecimal(v), "unquotedShareTotal" -> n, "unquotedCompany" -> c, "unquotedClass" -> cls)
+
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder().overrides(

@@ -33,10 +33,10 @@ case class DownstreamTransferData(
       qtDetails.qtReference,
       pstr,
       AnswersData(
-        Some(ReportDetails(Some(pstr.value), Some(qtDetails.qtStatus), Some(qtDetails.qtReference.value), qtDetails.qtDigitalStatus)),
         transferringMember,
         aboutReceivingQROPS,
-        transferDetails
+        transferDetails,
+        None
       ),
       qtDetails.receiptDate
     )

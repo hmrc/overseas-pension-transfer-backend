@@ -18,7 +18,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaSubmitter, PspSubmitter}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 
 import java.time.Instant
@@ -41,8 +41,8 @@ final case class PsaSubmissionDTO(
   override def normalise(withReferenceId: TransferId): NormalisedSubmission =
     NormalisedSubmission(
       referenceId = withReferenceId,
-      submitter   = PsaSubmitter(userId),
-      psaId       = userId,
+      userId      = userId,
+      psaId       = None,
       lastUpdated = lastUpdated
     )
 }
@@ -59,8 +59,8 @@ final case class PspSubmissionDTO(
   override def normalise(withReferenceId: TransferId): NormalisedSubmission =
     NormalisedSubmission(
       referenceId = withReferenceId,
-      submitter   = PspSubmitter(userId),
-      psaId       = psaId,
+      userId      = userId,
+      psaId       = Some(psaId),
       lastUpdated = lastUpdated
     )
 }

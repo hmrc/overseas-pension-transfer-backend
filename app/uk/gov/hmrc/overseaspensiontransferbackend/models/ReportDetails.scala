@@ -19,8 +19,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.json.{Json, OFormat}
 
 case class ReportDetails(
-    pstr: Option[String],
-    qtStatus: Option[QtStatus],
+    pstr: String,
+    qtStatus: QtStatus,
     qtReference: Option[String],
     qtDigitalStatus: Option[String]
   )
