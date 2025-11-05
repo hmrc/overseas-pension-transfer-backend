@@ -24,12 +24,14 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AffinityGroup
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.AuditUserInfo
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId, PspUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
@@ -109,6 +111,10 @@ trait SpecBase
 
   val psaUser: PsaUser = PsaUser(psaId, internalId = "id", affinityGroup = Individual)
 
+  val pspId: PspId = PspId("A123456")
+
+  val pspUser: PspUser = PspUser(pspId, internalId = "id", affinityGroup = Individual)
+
   val schemeDetails = PensionSchemeDetails(
     SrnNumber("S1234567"),
     PstrNumber("12345678AB"),
@@ -135,4 +141,6 @@ trait SpecBase
   implicit val testIdentifierRequest: IdentifierRequest[_] =
     IdentifierRequest(FakeRequest(), psaUser.updatePensionSchemeDetails(schemeDetails))
 
+  val sampleAuditUserInfoPsa = AuditUserInfo(Psa, AffinityGroup.Individual, psaId, None)
+  val sampleAuditUserInfoPsp = AuditUserInfo(Psp, AffinityGroup.Individual, pspId, Some(psaId))
 }

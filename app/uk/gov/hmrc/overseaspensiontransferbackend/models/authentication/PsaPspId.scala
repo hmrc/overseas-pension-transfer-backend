@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
 import play.api.libs.json.{Format, JsError, JsResult, JsString, JsSuccess, JsValue, Json}
 
 sealed trait PsaPspId {
+  val value: String
   val userType: UserType
 }
 

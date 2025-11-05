@@ -32,25 +32,22 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
-import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import org.mockito.{ArgumentCaptor, Mockito}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{JourneySubmittedType, ReportSubmittedAuditModel}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
-class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+class AuditServiceSpec extends AnyFreeSpec with Matchers with SpecBase with BeforeAndAfterEach {
   private val mockAuditConnector: AuditConnector    = mock[AuditConnector]
-  private val mockAppConfig                         = mock[AppConfig]
   implicit private val headerCarrier: HeaderCarrier = HeaderCarrier()
   private val appName                               = "audit-source"
 
@@ -68,11 +65,12 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with MockitoSugar with 
         s"must send an event to the audit connector for $journey event type" in {
           when(mockAppConfig.appName).thenReturn(appName)
           service.audit(
-            ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None, ???)
+            ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None, Some(sampleAuditUserInfoPsa))
           )
           val eventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
-          verify(mockAuditConnector, times(1)).sendExtendedEvent(eventCaptor.capture())(any(), any())
+          verify(mockAuditConnector, times(1))
+            .sendExtendedEvent(eventCaptor.capture())(any[HeaderCarrier], any[ExecutionContext])
 
           val event = eventCaptor.getValue
           event.auditSource mustEqual appName

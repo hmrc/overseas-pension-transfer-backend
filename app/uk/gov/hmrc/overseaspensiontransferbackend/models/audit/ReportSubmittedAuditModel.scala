@@ -17,10 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.auth.core.AffinityGroup
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId, UserType}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.PsaPspId
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
 
 case class ReportSubmittedAuditModel(
     referenceId: TransferId,
@@ -30,10 +29,7 @@ case class ReportSubmittedAuditModel(
     maybeMemberDetails: Option[MemberDetails],
     maybeTransferDetails: Option[TransferDetails],
     maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
-    roleLoggedInAs: UserType,
-    affinityGroup: AffinityGroup,
-    requesterIdentifier: PsaPspId,
-    maybeAuthorisingSchemeAdministratorID: Option[PsaId]
+    maybeUserInfo: Option[AuditUserInfo]
   ) extends JsonAuditModel {
   override val auditType: String = "overseasPensionTransferReportSubmitted"
 
@@ -67,20 +63,29 @@ case class ReportSubmittedAuditModel(
       case None               => Json.obj()
     }
 
-  private val authorisingSchemeAdministratorID: JsObject =
-    maybeAuthorisingSchemeAdministratorID match {
+  private def authorisingSchemeAdministratorID(maybeSchemeAdminId: Option[PsaPspId]): JsObject =
+    maybeSchemeAdminId match {
       case Some(id) => Json.obj("authorisingSchemeAdministratorID" -> id)
       case None     => Json.obj()
+    }
+
+  private val userInfo: JsObject =
+    maybeUserInfo match {
+      case Some(userInfo) => {
+        Json.obj(
+          "roleLoggedInAs"      -> userInfo.roleLoggedInAs,
+          "affinityGroup"       -> userInfo.affinityGroup,
+          "requesterIdentifier" -> userInfo.requesterIdentifier.value
+        ) ++
+          authorisingSchemeAdministratorID(userInfo.maybeAuthorisingSchemeAdministratorID)
+      }
+      case None           => Json.obj()
     }
 
   override val detail: JsValue = Json.obj(
     "internalReportReferenceId" -> referenceId,
     "journeyType"               -> journeyType.toString
-  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS ++ Json.obj(
-    "roleLoggedInAs"      -> roleLoggedInAs,
-    "affinityGroup"       -> affinityGroup,
-    "requesterIdentifier" -> requesterIdentifier.toString
-  ) ++ authorisingSchemeAdministratorID
+  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS ++ userInfo
 }
 
 object ReportSubmittedAuditModel {
@@ -93,7 +98,7 @@ object ReportSubmittedAuditModel {
       maybeMemberDetails: Option[MemberDetails],
       maybeTransferDetails: Option[TransferDetails],
       maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
-      userInfo: AuditUserInfo
+      maybeUserInfo: Option[AuditUserInfo]
     ): ReportSubmittedAuditModel =
     ReportSubmittedAuditModel(
       referenceId,
@@ -103,9 +108,6 @@ object ReportSubmittedAuditModel {
       maybeMemberDetails,
       maybeTransferDetails,
       maybeAboutReceivingQROPS,
-      userInfo.roleLoggedInAs,
-      userInfo.affinityGroup,
-      userInfo.requesterIdentifier,
-      userInfo.maybeAuthorisingSchemeAdministratorID
+      maybeUserInfo
     )
 }

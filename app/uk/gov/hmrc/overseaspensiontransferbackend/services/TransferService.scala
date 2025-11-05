@@ -23,7 +23,8 @@ import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.SubmissionSucceeded
-import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{JourneySubmittedType, ReportSubmittedAuditModel}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{AuditUserInfo, JourneySubmittedType, ReportSubmittedAuditModel}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaUser, PspUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
@@ -64,8 +65,6 @@ class TransferServiceImpl @Inject() (
           case Right(validated) =>
             connector.submitTransfer(validated).map {
               case Right(success) =>
-                // TODO: the session store for the dashboards should be updated for the newly
-                //  received QT Reference & QT status = submitted (when this repo is implemented)
                 repository.clear(referenceId = submission.referenceId.value)
 
                 if (validated.transferringMember.isDefined) {
@@ -78,7 +77,7 @@ class TransferServiceImpl @Inject() (
                       validated.transferringMember.get.memberDetails,
                       validated.transferDetails,
                       validated.aboutReceivingQROPS,
-                      ???
+                      Some(getAuditUserInfo(submission))
                     )
                   )
                 }
@@ -95,7 +94,7 @@ class TransferServiceImpl @Inject() (
                     None,
                     None,
                     None,
-                    ???
+                    None
                   )
                 )
                 Left(mapDownstream(err))
@@ -107,6 +106,19 @@ class TransferServiceImpl @Inject() (
           s"No prepared submission for referenceId ${submission.referenceId}"
         )))
     }
+
+  private def getAuditUserInfo(submission: NormalisedSubmission): AuditUserInfo = {
+    val (affinityGroup, userId, userType) = submission.authenticatedUser match {
+      case u @ PsaUser(psaId, _, _, affinityGroup) => (affinityGroup, psaId, u.userType)
+      case u @ PspUser(pspId, _, _, affinityGroup) => (affinityGroup, pspId, u.userType)
+    }
+    AuditUserInfo(
+      userType,
+      affinityGroup,
+      userId,
+      submission.maybeAssociatedPsaId
+    )
+  }
 
   private def mapDownstream(e: DownstreamError): SubmissionError = e match {
     case EtmpValidationError(_, _, _) |
