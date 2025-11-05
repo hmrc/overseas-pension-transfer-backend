@@ -17,6 +17,8 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import play.api.libs.json.{JsObject, JsValue, Json}
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId, UserType}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId}
 
@@ -27,7 +29,11 @@ case class ReportSubmittedAuditModel(
     maybeQTNumber: Option[QtNumber],
     maybeMemberDetails: Option[MemberDetails],
     maybeTransferDetails: Option[TransferDetails],
-    maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
+    maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
+    roleLoggedInAs: UserType,
+    affinityGroup: AffinityGroup,
+    requesterIdentifier: PsaPspId,
+    maybeAuthorisingSchemeAdministratorID: Option[PsaId]
   ) extends JsonAuditModel {
   override val auditType: String = "overseasPensionTransferReportSubmitted"
 
@@ -61,10 +67,20 @@ case class ReportSubmittedAuditModel(
       case None               => Json.obj()
     }
 
+  private val authorisingSchemeAdministratorID: JsObject =
+    maybeAuthorisingSchemeAdministratorID match {
+      case Some(id) => Json.obj("authorisingSchemeAdministratorID" -> id)
+      case None     => Json.obj()
+    }
+
   override val detail: JsValue = Json.obj(
     "internalReportReferenceId" -> referenceId,
     "journeyType"               -> journeyType.toString
-  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS
+  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS ++ Json.obj(
+    "roleLoggedInAs"      -> roleLoggedInAs,
+    "affinityGroup"       -> affinityGroup,
+    "requesterIdentifier" -> requesterIdentifier.toString
+  ) ++ authorisingSchemeAdministratorID
 }
 
 object ReportSubmittedAuditModel {
@@ -76,7 +92,8 @@ object ReportSubmittedAuditModel {
       maybeQTNumber: Option[QtNumber],
       maybeMemberDetails: Option[MemberDetails],
       maybeTransferDetails: Option[TransferDetails],
-      maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
+      maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
+      userInfo: AuditUserInfo
     ): ReportSubmittedAuditModel =
     ReportSubmittedAuditModel(
       referenceId,
@@ -85,6 +102,10 @@ object ReportSubmittedAuditModel {
       maybeQTNumber,
       maybeMemberDetails,
       maybeTransferDetails,
-      maybeAboutReceivingQROPS
+      maybeAboutReceivingQROPS,
+      userInfo.roleLoggedInAs,
+      userInfo.affinityGroup,
+      userInfo.requesterIdentifier,
+      userInfo.maybeAuthorisingSchemeAdministratorID
     )
 }

@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
+package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
-import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId, UserType}
 
-sealed trait PsaPspId
-
-final case class PsaId(value: String) extends PsaPspId with Submitter {
-  override val userType: UserType = Psa
-}
-
-object PsaId {
-  implicit val format: Format[PsaId]  = Json.format[PsaId]
-  val downstreamFormat: Format[PsaId] = Json.valueFormat
-}
-
-final case class PspId(value: String) extends PsaPspId with Submitter {
-  override val userType: UserType = Psp
-}
-
-object PspId {
-  implicit val format: Format[PspId] = Json.format[PspId]
-}
+case class AuditUserInfo(
+    roleLoggedInAs: UserType,
+    affinityGroup: AffinityGroup,
+    requesterIdentifier: PsaPspId,
+    maybeAuthorisingSchemeAdministratorID: Option[PsaId]
+  )
