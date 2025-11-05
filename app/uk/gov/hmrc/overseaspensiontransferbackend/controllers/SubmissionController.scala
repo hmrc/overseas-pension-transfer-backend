@@ -41,7 +41,7 @@ class SubmissionController @Inject() (
     identify.async(parse.json[SubmissionDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      val normalised: NormalisedSubmission = request.body.normalise(referenceId)
+      val normalised: NormalisedSubmission = request.body.normalise(referenceId, request.authenticatedUser)
 
       transferService.submitTransfer(normalised).map {
         case Right(submissionResponse)                =>

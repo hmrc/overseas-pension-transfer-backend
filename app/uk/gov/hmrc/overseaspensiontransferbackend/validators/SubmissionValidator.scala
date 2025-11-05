@@ -56,7 +56,7 @@ object Submission {
       QtDeclaration(
         normalised.userId.userType,
         normalised.userId,
-        normalised.psaId
+        normalised.maybeAssociatedPsaId
       )
 
     val (psaDeclaration, pspDeclaration): (Option[Declaration], Option[Declaration]) = {

@@ -19,12 +19,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId, Psp, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 
 import java.time.Instant
 
-class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
+class SubmissionDTOSpec extends AnyFreeSpec with SpecBase {
 
   private val ts = Instant.parse("2025-08-01T12:00:00Z")
 
@@ -94,12 +95,13 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
           lastUpdated = ts
         )
 
-      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
+      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"), psaUser)
       normalised mustBe NormalisedSubmission(
-        referenceId = TransferNumber("path-ref"),
-        userId      = PsaId("A1234567"),
-        psaId       = None,
-        lastUpdated = ts
+        referenceId          = TransferNumber("path-ref"),
+        userId               = PsaId("A1234567"),
+        maybeAssociatedPsaId = None,
+        lastUpdated          = ts,
+        authenticatedUser    = psaUser
       )
     }
 
@@ -112,12 +114,13 @@ class SubmissionDTOSpec extends AnyFreeSpec with Matchers {
           lastUpdated = ts
         )
 
-      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"))
+      val normalised = dto.normalise(withReferenceId = TransferNumber("path-ref"), psaUser)
       normalised mustBe NormalisedSubmission(
-        referenceId = TransferNumber("path-ref"),
-        userId      = PspId("X9999999"),
-        psaId       = Some(PsaId("A7654321")),
-        lastUpdated = ts
+        referenceId          = TransferNumber("path-ref"),
+        userId               = PspId("X9999999"),
+        maybeAssociatedPsaId = Some(PsaId("A7654321")),
+        lastUpdated          = ts,
+        authenticatedUser    = psaUser
       )
     }
 

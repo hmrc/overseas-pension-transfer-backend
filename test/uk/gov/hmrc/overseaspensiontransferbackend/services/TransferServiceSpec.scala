@@ -54,10 +54,11 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   )
 
   private val normalisedSubmission = NormalisedSubmission(
-    referenceId = testId,
-    userId      = PspId("12345678"),
-    psaId       = Some(PsaId("A1234567")),
-    lastUpdated = now
+    referenceId          = testId,
+    userId               = PspId("12345678"),
+    maybeAssociatedPsaId = Some(PsaId("A1234567")),
+    lastUpdated          = now,
+    authenticatedUser    = psaUser
   )
 
   private val newData                 = sampleAnswersData.copy(transferringMember =

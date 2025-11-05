@@ -20,10 +20,11 @@ import play.api.http.Status.{CREATED, INTERNAL_SERVER_ERROR}
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{TransferConnector, TransferConnectorImpl}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PspId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaUser, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, PstrNumber, SavedUserAnswers}
@@ -39,7 +40,10 @@ class TransferServiceISpec extends BaseISpec {
   )
 
   private lazy val repository: SaveForLaterRepository = app.injector.instanceOf[SaveForLaterRepository]
-  private lazy val service: TransferService         = app.injector.instanceOf[TransferService]
+  private lazy val service: TransferService           = app.injector.instanceOf[TransferService]
+
+  private val psaId: PsaId     = PsaId("A123456")
+  private val psaUser: PsaUser = PsaUser(psaId, internalId = "id", affinityGroup = Individual)
 
   "TransferService" - {
 
@@ -48,7 +52,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        transferId = id,
+        transferId  = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -61,12 +65,12 @@ class TransferServiceISpec extends BaseISpec {
         lastUpdated = now
       )
 
-      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id, authenticatedUser = psaUser)
 
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
-          "qtReference" -> "QT123456",
-          "processingDate" -> now.toString,
+          "qtReference"      -> "QT123456",
+          "processingDate"   -> now.toString,
           "formBundleNumber" -> "123"
         )
       ).toString()
@@ -83,7 +87,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        transferId = id,
+        transferId  = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -97,12 +101,12 @@ class TransferServiceISpec extends BaseISpec {
         lastUpdated = now
       )
 
-      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id, authenticatedUser = psaUser)
 
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
-          "qtReference" -> "QT123456",
-          "processingDate" -> now.toString,
+          "qtReference"      -> "QT123456",
+          "processingDate"   -> now.toString,
           "formBundleNumber" -> "123"
         )
       ).toString()
@@ -114,13 +118,12 @@ class TransferServiceISpec extends BaseISpec {
       result mustBe Right(SubmissionResponse(QtNumber("QT123456"), now))
     }
 
-
     "returns SubmissionTransformationError when there is no prepared submission saved for ref" in {
       val id  = freshId()
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        transferId = id,
+        transferId  = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -133,15 +136,15 @@ class TransferServiceISpec extends BaseISpec {
         lastUpdated = now
       )
 
-      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id, authenticatedUser = psaUser)
 
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -149,7 +152,7 @@ class TransferServiceISpec extends BaseISpec {
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
       val result = await(service.submitTransfer(normalised))
-     result mustBe Left(SubmissionTransformationError("Submission failed validation"))
+      result mustBe Left(SubmissionTransformationError("Submission failed validation"))
     }
 
     "returns SubmissionFailed when there is an downstream error" in {
@@ -157,7 +160,7 @@ class TransferServiceISpec extends BaseISpec {
       val now = frozenNow()
 
       val saved = SavedUserAnswers(
-        transferId = id,
+        transferId  = id,
         pstr        = PstrNumber("12345678AB"),
         data        = UserAnswersTestData.fullUserAnswersInternalJson.as[AnswersData],
         lastUpdated = now
@@ -170,15 +173,15 @@ class TransferServiceISpec extends BaseISpec {
         lastUpdated = now
       )
 
-      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id)
+      val normalised: NormalisedSubmission = dto.normalise(withReferenceId = id, authenticatedUser = psaUser)
 
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -187,7 +190,7 @@ class TransferServiceISpec extends BaseISpec {
 
       val result = await(service.submitTransfer(normalised))
 
-     result mustBe Left(SubmissionFailed)
+      result mustBe Left(SubmissionFailed)
     }
   }
 }

@@ -77,10 +77,10 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe TransferNumber(testRefId)
-        captured.userId      mustBe PsaId("A1234567")
-        captured.psaId       mustBe None
-        captured.lastUpdated mustBe now
+        captured.referenceId          mustBe TransferNumber(testRefId)
+        captured.userId               mustBe PsaId("A1234567")
+        captured.maybeAssociatedPsaId mustBe None
+        captured.lastUpdated          mustBe now
       }
     }
 
@@ -120,10 +120,10 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe TransferNumber(testRefId)
-        captured.userId      mustBe PspId("X9999999")
-        captured.psaId       mustBe Some(PsaId("A7654321"))
-        captured.lastUpdated mustBe now
+        captured.referenceId          mustBe TransferNumber(testRefId)
+        captured.userId               mustBe PspId("X9999999")
+        captured.maybeAssociatedPsaId mustBe Some(PsaId("A7654321"))
+        captured.lastUpdated          mustBe now
       }
     }
 

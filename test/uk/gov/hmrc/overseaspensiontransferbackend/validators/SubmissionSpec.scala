@@ -33,7 +33,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         TransferNumber(UUID.randomUUID().toString),
         PsaId("A1234567"),
         None,
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(
@@ -58,7 +59,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         QtNumber("QT123456"),
         PspId("12345678"),
         Some(PsaId("A1234567")),
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(
@@ -83,7 +85,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         QtNumber("QT123456"),
         PspId("12345678"),
         Some(PsaId("A1234567")),
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(
