@@ -24,6 +24,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, M
 case class ReportSubmittedAuditModel(
     referenceId: TransferId,
     journeyType: JourneySubmittedType,
+    correlationId: String,
     failureReason: Option[String],
     maybeQTNumber: Option[QtNumber],
     maybeMemberDetails: Option[MemberDetails],
@@ -71,20 +72,20 @@ case class ReportSubmittedAuditModel(
 
   private val userInfo: JsObject =
     maybeUserInfo match {
-      case Some(userInfo) => {
+      case Some(userInfo) =>
         Json.obj(
           "roleLoggedInAs"      -> userInfo.roleLoggedInAs,
           "affinityGroup"       -> userInfo.affinityGroup,
           "requesterIdentifier" -> userInfo.requesterIdentifier.value
         ) ++
           authorisingSchemeAdministratorID(userInfo.maybeAuthorisingSchemeAdministratorID)
-      }
       case None           => Json.obj()
     }
 
   override val detail: JsValue = Json.obj(
     "internalReportReferenceId" -> referenceId,
-    "journeyType"               -> journeyType.toString
+    "journeyType"               -> journeyType.toString,
+    "correlationId"             -> correlationId
   ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS ++ userInfo
 }
 
@@ -93,6 +94,7 @@ object ReportSubmittedAuditModel {
   def build(
       referenceId: TransferId,
       journeyType: JourneySubmittedType,
+      correlationId: String,
       failureReason: Option[String],
       maybeQTNumber: Option[QtNumber],
       maybeMemberDetails: Option[MemberDetails],
@@ -103,6 +105,7 @@ object ReportSubmittedAuditModel {
     ReportSubmittedAuditModel(
       referenceId,
       journeyType,
+      correlationId,
       failureReason,
       maybeQTNumber,
       maybeMemberDetails,

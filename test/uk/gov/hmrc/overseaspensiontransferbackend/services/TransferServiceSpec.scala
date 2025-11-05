@@ -105,7 +105,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
-        when(mockConnector.submitTransfer(eqTo(submission))(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
+        when(mockConnector.submitTransfer(eqTo(submission), any[String])(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -136,8 +136,13 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
       "must map validation-type downstream errors to SubmissionTransformationError and audit correctly" in {
         val downstreamErrors: List[DownstreamError] = List(
-          EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
-          HipBadRequest(origin               = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
+          EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text = "Request could not be processed"),
+          HipBadRequest(
+            origin                           = "HoD",
+            code                             = "400",
+            message                          = "Invalid JSON",
+            logId                            = Some("ABCDEF0123456789ABCDEF0123456789")
+          ),
           HipOriginFailures(origin           = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
           UnsupportedMedia
         )
@@ -148,7 +153,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         downstreamErrors.foreach { ue =>
           Mockito.reset(mockAuditService)
-          when(mockConnector.submitTransfer(eqTo(submission))(any))
+          when(mockConnector.submitTransfer(eqTo(submission), any[String])(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -178,7 +183,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
 
         infra.foreach { ue =>
-          when(mockConnector.submitTransfer(eqTo(submission))(any))
+          when(mockConnector.submitTransfer(eqTo(submission), any[String])(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue

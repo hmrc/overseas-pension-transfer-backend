@@ -69,12 +69,10 @@ class SaveForLaterServiceImpl @Inject() (
   }
 
   override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
-    logger.info(s"Before construct: ${Json.prettyPrint(Json.toJson(dto.data))}")
     constructSavedAnswers(dto.data) match {
       case Left(err)               =>
         Future.successful(Left(err))
       case Right(transformedInput) =>
-        logger.info(s"After construct: ${Json.prettyPrint(Json.toJson(transformedInput))}")
         repository.get(dto.transferId.value).flatMap { maybeExisting =>
           val mergedJson = mergeWithExisting(maybeExisting, transformedInput)
           validate(mergedJson) match {

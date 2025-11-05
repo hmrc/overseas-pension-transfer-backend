@@ -143,4 +143,6 @@ trait SpecBase
 
   val sampleAuditUserInfoPsa = AuditUserInfo(Psa, AffinityGroup.Individual, psaId, None)
   val sampleAuditUserInfoPsp = AuditUserInfo(Psp, AffinityGroup.Individual, pspId, Some(psaId))
+
+  val correlationId = "e470d658-99f7-4292-a4a1-ed12c72f1337"
 }

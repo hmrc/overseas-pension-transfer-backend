@@ -114,8 +114,19 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
   "must create correct minimal json for different journey types" in {
     JourneySubmittedType.values.foreach {
       journey =>
-        val result = ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None, Some(sampleAuditUserInfoPsa))
-        result.auditType   mustBe "overseasPensionTransferReportSubmitted"
+        val result =
+          ReportSubmittedAuditModel.build(
+            referenceId              = TransferNumber("internalTransferId"),
+            journeyType              = journey,
+            correlationId            = correlationId,
+            failureReason            = None,
+            maybeQTNumber            = None,
+            maybeMemberDetails       = None,
+            maybeTransferDetails     = None,
+            maybeAboutReceivingQROPS = None,
+            maybeUserInfo            = Some(sampleAuditUserInfoPsa)
+          )
+        result.auditType mustBe "overseasPensionTransferReportSubmitted"
         result.journeyType mustBe journey
     }
   }
@@ -126,6 +137,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
       val expectedJson = Json.obj(
         "internalReportReferenceId"                 -> "internalTransferId",
         "journeyType"                               -> "newReportSubmissionSucceeded",
+        "correlationId"                             -> correlationId,
         "overseasPensionTransferReportReference"    -> "QT123456",
         "member"                                    -> Json.obj(
           "foreName"               -> "Forename",
@@ -197,17 +209,18 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
       )
 
       val result = ReportSubmittedAuditModel.build(
-        TransferNumber("internalTransferId"),
-        SubmissionSucceeded,
-        None,
-        Some(QtNumber("QT123456")),
-        Some(memberDetails),
-        Some(transferDetails),
-        Some(receivingQROPS),
-        Some(sampleAuditUserInfoPsa)
+        referenceId              = TransferNumber("internalTransferId"),
+        journeyType              = SubmissionSucceeded,
+        correlationId            = correlationId,
+        failureReason            = None,
+        maybeQTNumber            = Some(QtNumber("QT123456")),
+        maybeMemberDetails       = Some(memberDetails),
+        maybeTransferDetails     = Some(transferDetails),
+        maybeAboutReceivingQROPS = Some(receivingQROPS),
+        maybeUserInfo            = Some(sampleAuditUserInfoPsa)
       )
       result.auditType mustBe "overseasPensionTransferReportSubmitted"
-      result.detail    mustBe expectedJson
+      result.detail mustBe expectedJson
     }
 
     "must build correct json with psp user" in {
@@ -215,6 +228,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
       val expectedJson = Json.obj(
         "internalReportReferenceId"                 -> "internalTransferId",
         "journeyType"                               -> "newReportSubmissionSucceeded",
+        "correlationId"                             -> correlationId,
         "overseasPensionTransferReportReference"    -> "QT123456",
         "member"                                    -> Json.obj(
           "foreName"               -> "Forename",
@@ -287,17 +301,18 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
       )
 
       val result = ReportSubmittedAuditModel.build(
-        TransferNumber("internalTransferId"),
-        SubmissionSucceeded,
-        None,
-        Some(QtNumber("QT123456")),
-        Some(memberDetails),
-        Some(transferDetails),
-        Some(receivingQROPS),
-        Some(sampleAuditUserInfoPsp)
+        referenceId              = TransferNumber("internalTransferId"),
+        journeyType              = SubmissionSucceeded,
+        correlationId            = correlationId,
+        failureReason            = None,
+        maybeQTNumber            = Some(QtNumber("QT123456")),
+        maybeMemberDetails       = Some(memberDetails),
+        maybeTransferDetails     = Some(transferDetails),
+        maybeAboutReceivingQROPS = Some(receivingQROPS),
+        maybeUserInfo            = Some(sampleAuditUserInfoPsp)
       )
       result.auditType mustBe "overseasPensionTransferReportSubmitted"
-      result.detail    mustBe expectedJson
+      result.detail mustBe expectedJson
     }
   }
 
@@ -307,22 +322,24 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
 
       val expectedJson = Json.obj(
         "internalReportReferenceId" -> "internalTransferId",
+        "correlationId"             -> correlationId,
         "journeyType"               -> "reportSubmissionFailed",
         "failureReason"             -> "400 - Bad request"
       )
 
       val result = ReportSubmittedAuditModel.build(
-        TransferNumber("internalTransferId"),
-        SubmissionFailed,
-        Some("400 - Bad request"),
-        None,
-        None,
-        None,
-        None,
-        None
+        referenceId              = TransferNumber("internalTransferId"),
+        journeyType              = SubmissionFailed,
+        correlationId            = correlationId,
+        failureReason            = Some("400 - Bad request"),
+        maybeQTNumber            = None,
+        maybeMemberDetails       = None,
+        maybeTransferDetails     = None,
+        maybeAboutReceivingQROPS = None,
+        maybeUserInfo            = None
       )
       result.auditType mustBe "overseasPensionTransferReportSubmitted"
-      result.detail    mustBe expectedJson
+      result.detail mustBe expectedJson
     }
   }
 }

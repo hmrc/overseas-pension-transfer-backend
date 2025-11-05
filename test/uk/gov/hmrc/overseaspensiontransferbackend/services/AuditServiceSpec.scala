@@ -65,7 +65,17 @@ class AuditServiceSpec extends AnyFreeSpec with Matchers with SpecBase with Befo
         s"must send an event to the audit connector for $journey event type" in {
           when(mockAppConfig.appName).thenReturn(appName)
           service.audit(
-            ReportSubmittedAuditModel.build(TransferNumber("internalTransferId"), journey, None, None, None, None, None, Some(sampleAuditUserInfoPsa))
+            ReportSubmittedAuditModel.build(
+              referenceId              = TransferNumber("internalTransferId"),
+              journeyType              = journey,
+              correlationId            = correlationId,
+              failureReason            = None,
+              maybeQTNumber            = None,
+              maybeMemberDetails       = None,
+              maybeTransferDetails     = None,
+              maybeAboutReceivingQROPS = None,
+              maybeUserInfo            = Some(sampleAuditUserInfoPsa)
+            )
           )
           val eventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
