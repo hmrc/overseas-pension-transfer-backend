@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// models/dtos/SubmissionDTO.scala
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
@@ -38,13 +37,14 @@ final case class PsaSubmissionDTO(
     lastUpdated: Instant
   ) extends SubmissionDTO {
 
-  override def normalise(withReferenceId: TransferId): NormalisedSubmission =
+  override def normalise(withReferenceId: TransferId): NormalisedSubmission = {
     NormalisedSubmission(
       referenceId = withReferenceId,
       userId      = userId,
       psaId       = None,
       lastUpdated = lastUpdated
     )
+  }
 }
 object PsaSubmissionDTO { implicit val format: OFormat[PsaSubmissionDTO] = Json.format }
 

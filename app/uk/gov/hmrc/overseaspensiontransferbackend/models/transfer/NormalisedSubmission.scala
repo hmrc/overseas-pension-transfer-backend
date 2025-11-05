@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, Submitter}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId}
 
 import java.time.Instant
 
 final case class NormalisedSubmission(
     referenceId: TransferId,
-    userId: Submitter,
+    userId: PsaPspId,
     psaId: Option[PsaId],
     lastUpdated: Instant
   )

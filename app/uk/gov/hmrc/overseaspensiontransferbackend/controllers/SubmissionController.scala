@@ -21,7 +21,7 @@ import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.IdentifierAction
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.SubmissionDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{SubmissionFailed, SubmissionTransformationError, TransferId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, SubmissionFailed, SubmissionTransformationError, TransferId}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -41,7 +41,7 @@ class SubmissionController @Inject() (
     identify.async(parse.json[SubmissionDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-      val normalised = request.body.normalise(referenceId)
+      val normalised: NormalisedSubmission = request.body.normalise(referenceId)
 
       transferService.submitTransfer(normalised).map {
         case Right(submissionResponse)                =>
