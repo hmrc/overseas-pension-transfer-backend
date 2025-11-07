@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.{JsBoolean, JsError, JsResultException, JsString, Json, JsonValidationError}
+import play.api.libs.json._
 
 class TransferIdSpec extends AnyFreeSpec with Matchers {
 

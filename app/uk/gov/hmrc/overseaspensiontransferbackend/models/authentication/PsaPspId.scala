@@ -14,45 +14,45 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
 
-import play.api.libs.json._
+import play.api.libs.json.{Format, JsError, JsResult, JsString, JsSuccess, JsValue, Json}
 
-trait Submitter {
+sealed trait PsaPspId {
   val value: String
   val userType: UserType
 }
 
-object Submitter {
+final case class PsaId(value: String) extends PsaPspId {
+  override val userType: UserType = Psa
+}
 
-  implicit val format: Format[Submitter] = new Format[Submitter] {
+object PsaId {
+  implicit val format: Format[PsaId]  = Json.format[PsaId]
+  val downstreamFormat: Format[PsaId] = Json.valueFormat
+}
 
-    def reads(js: JsValue): JsResult[Submitter] = js.validate[String].flatMap {
+final case class PspId(value: String) extends PsaPspId {
+  override val userType: UserType = Psp
+}
+
+object PspId {
+  implicit val format: Format[PspId] = Json.format[PspId]
+}
+
+object PsaPspId {
+
+  implicit val format: Format[PsaPspId] = new Format[PsaPspId] {
+
+    def reads(js: JsValue): JsResult[PsaPspId] = js.validate[String].flatMap {
       case value @ s"A$digits" if digits.matches("/d{7}") => JsSuccess(PsaId(value))
       case value if value.matches("/d{8}")                => JsSuccess(PspId(value))
       case other                                          => JsError(s"Invalid userType: $other")
     }
 
-    def writes(submitter: Submitter): JsValue = JsString(submitter match {
+    def writes(psaPspId: PsaPspId): JsValue = JsString(psaPspId match {
       case PsaId(value) => value
       case PspId(value) => value
     })
-  }
-
-  final case class PsaId(value: String) extends Submitter {
-    override val userType: UserType = Psa
-  }
-
-  object PsaId {
-    implicit val format: Format[PsaId]  = Json.format[PsaId]
-    val downstreamFormat: Format[PsaId] = Json.valueFormat
-  }
-
-  final case class PspId(value: String) extends Submitter {
-    override val userType: UserType = Psp
-  }
-
-  object PspId {
-    implicit val format: Format[PspId] = Json.format[PspId]
   }
 }

@@ -18,8 +18,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, Psa, Psp, QtNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, QtNumber}
 
 import javax.inject.{Inject, Singleton}
 
@@ -55,7 +56,7 @@ object Submission {
       QtDeclaration(
         normalised.userId.userType,
         normalised.userId,
-        normalised.psaId
+        normalised.maybeAssociatedPsaId
       )
 
     val (psaDeclaration, pspDeclaration): (Option[Declaration], Option[Declaration]) = {

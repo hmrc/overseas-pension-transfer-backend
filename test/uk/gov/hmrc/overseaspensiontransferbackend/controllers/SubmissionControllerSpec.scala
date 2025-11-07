@@ -25,8 +25,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
@@ -66,7 +66,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(psaJson)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(expectedResponse)
@@ -77,10 +77,10 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe TransferNumber(testRefId)
-        captured.userId      mustBe PsaId("A1234567")
-        captured.psaId       mustBe None
-        captured.lastUpdated mustBe now
+        captured.referenceId          mustBe TransferNumber(testRefId)
+        captured.userId               mustBe PsaId("A1234567")
+        captured.maybeAssociatedPsaId mustBe None
+        captured.lastUpdated          mustBe now
       }
     }
 
@@ -109,7 +109,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(pspJson)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.toJson(expectedResponse)
@@ -120,10 +120,10 @@ class SubmissionControllerSpec
         verify(mockService).submitTransfer(captor.capture())(any[HeaderCarrier])
         val captured = captor.getValue
 
-        captured.referenceId mustBe TransferNumber(testRefId)
-        captured.userId      mustBe PspId("X9999999")
-        captured.psaId       mustBe Some(PsaId("A7654321"))
-        captured.lastUpdated mustBe now
+        captured.referenceId          mustBe TransferNumber(testRefId)
+        captured.userId               mustBe PspId("X9999999")
+        captured.maybeAssociatedPsaId mustBe Some(PsaId("A7654321"))
+        captured.lastUpdated          mustBe now
       }
     }
 
@@ -146,7 +146,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(payload)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result)                               mustBe BAD_REQUEST
         (contentAsJson(result) \ "error").as[String] mustBe "Transformation failed"
@@ -173,7 +173,7 @@ class SubmissionControllerSpec
         val request = FakeRequest(POST, s"$routePrefix/submit-declaration/$testRefId")
           .withJsonBody(payload)
 
-        val result = route(app, request).value
+        val result = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }

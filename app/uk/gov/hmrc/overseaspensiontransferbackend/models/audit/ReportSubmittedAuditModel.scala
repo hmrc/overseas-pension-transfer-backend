@@ -17,17 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import play.api.libs.json.{JsObject, JsValue, Json}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.PsaPspId
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{AboutReceivingQROPS, MemberDetails, TransferDetails}
 
 case class ReportSubmittedAuditModel(
     referenceId: TransferId,
     journeyType: JourneySubmittedType,
+    correlationId: String,
     failureReason: Option[String],
     maybeQTNumber: Option[QtNumber],
     maybeMemberDetails: Option[MemberDetails],
     maybeTransferDetails: Option[TransferDetails],
-    maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
+    maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
+    maybeUserInfo: Option[AuditUserInfo]
   ) extends JsonAuditModel {
   override val auditType: String = "overseasPensionTransferReportSubmitted"
 
@@ -61,10 +64,29 @@ case class ReportSubmittedAuditModel(
       case None               => Json.obj()
     }
 
+  private def authorisingSchemeAdministratorID(maybeSchemeAdminId: Option[PsaPspId]): JsObject =
+    maybeSchemeAdminId match {
+      case Some(id) => Json.obj("authorisingSchemeAdministratorID" -> id)
+      case None     => Json.obj()
+    }
+
+  private val userInfo: JsObject =
+    maybeUserInfo match {
+      case Some(userInfo) =>
+        Json.obj(
+          "roleLoggedInAs"      -> userInfo.roleLoggedInAs,
+          "affinityGroup"       -> userInfo.affinityGroup,
+          "requesterIdentifier" -> userInfo.requesterIdentifier.value
+        ) ++
+          authorisingSchemeAdministratorID(userInfo.maybeAuthorisingSchemeAdministratorID)
+      case None           => Json.obj()
+    }
+
   override val detail: JsValue = Json.obj(
     "internalReportReferenceId" -> referenceId,
-    "journeyType"               -> journeyType.toString
-  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS
+    "journeyType"               -> journeyType.toString,
+    "correlationId"             -> correlationId
+  ) ++ failureOutcome ++ qtNumber ++ memberDetails ++ transferDetails ++ receivingQROPS ++ userInfo
 }
 
 object ReportSubmittedAuditModel {
@@ -72,19 +94,23 @@ object ReportSubmittedAuditModel {
   def build(
       referenceId: TransferId,
       journeyType: JourneySubmittedType,
+      correlationId: String,
       failureReason: Option[String],
       maybeQTNumber: Option[QtNumber],
       maybeMemberDetails: Option[MemberDetails],
       maybeTransferDetails: Option[TransferDetails],
-      maybeAboutReceivingQROPS: Option[AboutReceivingQROPS]
+      maybeAboutReceivingQROPS: Option[AboutReceivingQROPS],
+      maybeUserInfo: Option[AuditUserInfo]
     ): ReportSubmittedAuditModel =
     ReportSubmittedAuditModel(
       referenceId,
       journeyType,
+      correlationId,
       failureReason,
       maybeQTNumber,
       maybeMemberDetails,
       maybeTransferDetails,
-      maybeAboutReceivingQROPS
+      maybeAboutReceivingQROPS,
+      maybeUserInfo
     )
 }

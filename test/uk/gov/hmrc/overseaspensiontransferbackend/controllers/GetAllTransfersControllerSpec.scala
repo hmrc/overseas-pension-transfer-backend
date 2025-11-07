@@ -81,7 +81,7 @@ class GetAllTransfersControllerSpec
 
       running(app) {
         val request = FakeRequest(GET, s"$endpoint/$pstrStr")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe OK
 
@@ -99,7 +99,7 @@ class GetAllTransfersControllerSpec
       running(app) {
         val badPstr = "not-a-pstr"
         val request = FakeRequest(GET, s"$endpoint/$badPstr")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe BAD_REQUEST
         contentAsString(result) must include("PSTR must be 8 digits followed by 2 letters")
@@ -124,7 +124,7 @@ class GetAllTransfersControllerSpec
 
       running(app) {
         val request = FakeRequest(GET, s"$endpoint/$pstrStr")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe NOT_FOUND
       }
@@ -150,7 +150,7 @@ class GetAllTransfersControllerSpec
 
       running(app) {
         val request = FakeRequest(GET, s"$endpoint/$pstrStr")
-        val result  = route(app, request).value
+        val result  = route(app, fakeIdentifierRequest(request)).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }

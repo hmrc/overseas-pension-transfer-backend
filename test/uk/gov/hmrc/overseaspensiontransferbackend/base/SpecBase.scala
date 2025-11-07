@@ -20,23 +20,21 @@ import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.AuditUserInfo
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId, PspUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, Psp, TransferNumber}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{
-  AnswersData,
-  Compiled,
-  Declaration,
-  PstrNumber,
-  QtDeclaration,
-  ReportDetails,
-  SavedUserAnswers,
-  Submitted
-}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.Instant
@@ -109,8 +107,19 @@ trait SpecBase
     lastUpdated = now
   )
 
-  protected def applicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
+  val psaId: PsaId = PsaId("A123456")
+
+  val psaUser: PsaUser = PsaUser(psaId, internalId = "id", affinityGroup = Individual)
+
+  val pspId: PspId = PspId("A123456")
+
+  val pspUser: PspUser = PspUser(pspId, internalId = "id", affinityGroup = Individual)
+
+  val schemeDetails = PensionSchemeDetails(
+    SrnNumber("S1234567"),
+    PstrNumber("12345678AB"),
+    "SchemeName"
+  )
 
   def quotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
     Json.obj("quotedValue" -> BigDecimal(v), "quotedShareTotal" -> n, "quotedCompany" -> c, "quotedClass" -> cls)
@@ -118,4 +127,22 @@ trait SpecBase
   def unquotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
     Json.obj("unquotedValue" -> BigDecimal(v), "unquotedShareTotal" -> n, "unquotedCompany" -> c, "unquotedClass" -> cls)
 
+  protected def applicationBuilder(): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder().overrides(
+      bind[IdentifierAction].to[FakeIdentifierAction]
+    )
+
+  def fakeIdentifierRequest[A](
+      fakeRequest: FakeRequest[A],
+      authenticatedUser: AuthenticatedUser = psaUser.updatePensionSchemeDetails(schemeDetails)
+    ): IdentifierRequest[A] =
+    IdentifierRequest(fakeRequest, authenticatedUser)
+
+  implicit val testIdentifierRequest: IdentifierRequest[_] =
+    IdentifierRequest(FakeRequest(), psaUser.updatePensionSchemeDetails(schemeDetails))
+
+  val sampleAuditUserInfoPsa = AuditUserInfo(Psa, AffinityGroup.Individual, psaId, None)
+  val sampleAuditUserInfoPsp = AuditUserInfo(Psp, AffinityGroup.Individual, pspId, Some(psaId))
+
+  val correlationId = "e470d658-99f7-4292-a4a1-ed12c72f1337"
 }

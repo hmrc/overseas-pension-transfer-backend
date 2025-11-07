@@ -19,9 +19,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.validators
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{Declaration, QtDeclaration, ReportDetails, Submitted}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, Psa, Psp, QtNumber, TransferNumber}
 
 import java.util.UUID
 
@@ -33,7 +33,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         TransferNumber(UUID.randomUUID().toString),
         PsaId("A1234567"),
         None,
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(
@@ -58,7 +59,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         QtNumber("QT123456"),
         PspId("12345678"),
         Some(PsaId("A1234567")),
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(
@@ -83,7 +85,8 @@ class SubmissionSpec extends AnyFreeSpec with Matchers with SpecBase {
         QtNumber("QT123456"),
         PspId("12345678"),
         Some(PsaId("A1234567")),
-        now
+        now,
+        psaUser
       )
 
       val expected = Submission(

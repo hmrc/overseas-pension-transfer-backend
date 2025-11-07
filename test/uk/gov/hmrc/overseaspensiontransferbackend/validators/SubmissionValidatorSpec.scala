@@ -18,8 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
 import org.scalatest.freespec.AnyFreeSpec
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Psp
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PspId
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psp, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{Declaration, QtDeclaration}
 
 class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {

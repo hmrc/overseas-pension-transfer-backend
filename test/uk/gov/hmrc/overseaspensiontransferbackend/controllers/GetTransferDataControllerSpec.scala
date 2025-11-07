@@ -36,7 +36,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
 
   private val mockTransferService: TransferService = mock[TransferService]
 
-  def application: Application = GuiceApplicationBuilder().overrides(
+  def application: Application = applicationBuilder().overrides(
     bind[TransferService].toInstance(mockTransferService)
   ).build()
 
@@ -50,7 +50,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")
 
-        val result = route(application, request).value
+        val result = route(application, fakeIdentifierRequest(request)).value
 
         status(result)        mustBe OK
         contentAsJson(result) mustBe Json.obj(
@@ -69,7 +69,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")
 
-        val result = route(application, request).value
+        val result = route(application, fakeIdentifierRequest(request)).value
 
         status(result) mustBe NOT_FOUND
       }
@@ -82,7 +82,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")
 
-        val result = route(application, request).value
+        val result = route(application, fakeIdentifierRequest(request)).value
 
         status(result) mustBe INTERNAL_SERVER_ERROR
       }

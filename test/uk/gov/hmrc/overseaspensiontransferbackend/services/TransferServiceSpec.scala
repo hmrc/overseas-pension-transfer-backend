@@ -26,9 +26,9 @@ import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
@@ -54,10 +54,11 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   )
 
   private val normalisedSubmission = NormalisedSubmission(
-    referenceId = testId,
-    userId      = PspId("12345678"),
-    psaId       = Some(PsaId("A1234567")),
-    lastUpdated = now
+    referenceId          = testId,
+    userId               = PspId("12345678"),
+    maybeAssociatedPsaId = Some(PsaId("A1234567")),
+    lastUpdated          = now,
+    authenticatedUser    = psaUser
   )
 
   private val newData                 = sampleAnswersData.copy(transferringMember =
@@ -104,7 +105,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
-        when(mockConnector.submitTransfer(eqTo(submission))(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
+        when(mockConnector.submitTransfer(eqTo(submission), any[String])(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -135,8 +136,13 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
       "must map validation-type downstream errors to SubmissionTransformationError and audit correctly" in {
         val downstreamErrors: List[DownstreamError] = List(
-          EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text    = "Request could not be processed"),
-          HipBadRequest(origin               = "HoD", code                  = "400", message = "Invalid JSON", logId = Some("ABCDEF0123456789ABCDEF0123456789")),
+          EtmpValidationError(processingDate = "2025-07-01T09:30:00Z", code = "003", text = "Request could not be processed"),
+          HipBadRequest(
+            origin                           = "HoD",
+            code                             = "400",
+            message                          = "Invalid JSON",
+            logId                            = Some("ABCDEF0123456789ABCDEF0123456789")
+          ),
           HipOriginFailures(origin           = "HIP", failures              = List(HipOriginFailures.Failure("Type", "Reason"))),
           UnsupportedMedia
         )
@@ -147,7 +153,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         downstreamErrors.foreach { ue =>
           Mockito.reset(mockAuditService)
-          when(mockConnector.submitTransfer(eqTo(submission))(any))
+          when(mockConnector.submitTransfer(eqTo(submission), any[String])(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue
@@ -177,7 +183,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
 
         infra.foreach { ue =>
-          when(mockConnector.submitTransfer(eqTo(submission))(any))
+          when(mockConnector.submitTransfer(eqTo(submission), any[String])(any))
             .thenReturn(Future.successful(Left(ue)))
 
           val result = service.submitTransfer(normalisedSubmission).futureValue

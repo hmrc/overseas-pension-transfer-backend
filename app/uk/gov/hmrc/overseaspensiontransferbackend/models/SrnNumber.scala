@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaPspId}
+import play.api.libs.json._
 
-import java.time.Instant
+case class SrnNumber(value: String)
 
-final case class NormalisedSubmission(
-    referenceId: TransferId,
-    userId: PsaPspId,
-    maybeAssociatedPsaId: Option[PsaId],
-    lastUpdated: Instant,
-    authenticatedUser: AuthenticatedUser
-  )
+object SrnNumber {
+  implicit val format: Format[SrnNumber] = Json.valueFormat[SrnNumber]
+}

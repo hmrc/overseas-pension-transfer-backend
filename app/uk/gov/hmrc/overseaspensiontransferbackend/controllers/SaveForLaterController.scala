@@ -18,11 +18,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import org.apache.pekko.Done
 import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.IdentifierAction
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import javax.inject.{Inject, Singleton}
@@ -31,11 +33,12 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class SaveForLaterController @Inject() (
     cc: ControllerComponents,
+    identify: IdentifierAction,
     saveForLaterService: SaveForLaterService
   )(implicit ec: ExecutionContext
-  ) extends AbstractController(cc) {
+  ) extends BackendController(cc) {
 
-  def getAnswers(referenceId: TransferId): Action[AnyContent] = Action.async { implicit request =>
+  def getAnswers(referenceId: TransferId): Action[AnyContent] = identify.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     saveForLaterService.getAnswers(referenceId).map {
@@ -53,7 +56,7 @@ class SaveForLaterController @Inject() (
   }
 
   def saveAnswers: Action[UserAnswersDTO] =
-    Action.async(parse.json[UserAnswersDTO]) { request =>
+    identify.async(parse.json[UserAnswersDTO]) { request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
       saveForLaterService.saveAnswer(request.body).map {
@@ -71,7 +74,7 @@ class SaveForLaterController @Inject() (
       }
     }
 
-  def deleteAnswers(referenceId: TransferId): Action[AnyContent] = Action.async {
+  def deleteAnswers(referenceId: TransferId): Action[AnyContent] = identify.async {
     implicit request =>
       implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 

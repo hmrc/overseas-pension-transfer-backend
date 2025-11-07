@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaId, PsaPspId}
+import uk.gov.hmrc.auth.core.AffinityGroup
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId, UserType}
 
-import java.time.Instant
-
-final case class NormalisedSubmission(
-    referenceId: TransferId,
-    userId: PsaPspId,
-    maybeAssociatedPsaId: Option[PsaId],
-    lastUpdated: Instant,
-    authenticatedUser: AuthenticatedUser
+case class AuditUserInfo(
+    roleLoggedInAs: UserType,
+    affinityGroup: AffinityGroup,
+    requesterIdentifier: PsaPspId,
+    maybeAuthorisingSchemeAdministratorID: Option[PsaId]
   )

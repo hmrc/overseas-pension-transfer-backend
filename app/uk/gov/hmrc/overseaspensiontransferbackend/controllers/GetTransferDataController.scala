@@ -20,6 +20,7 @@ import com.google.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.IdentifierAction
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferId, TransferNotFound, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
@@ -29,8 +30,12 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext
 
-class GetTransferDataController @Inject() (cc: ControllerComponents, transferService: TransferService)(implicit ec: ExecutionContext)
-    extends BackendController(cc) {
+class GetTransferDataController @Inject() (
+    cc: ControllerComponents,
+    transferService: TransferService,
+    identify: IdentifierAction
+  )(implicit ec: ExecutionContext
+  ) extends BackendController(cc) {
 
   def getTransfer(
       referenceId: TransferId,
@@ -38,7 +43,7 @@ class GetTransferDataController @Inject() (cc: ControllerComponents, transferSer
       qtStatus: String,
       versionNumber: Option[String]
     ): Action[AnyContent] =
-    Action.async {
+    identify.async {
       implicit request =>
         implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
+package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
 
 import play.api.libs.json._
 

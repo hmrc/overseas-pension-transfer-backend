@@ -23,11 +23,11 @@ import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
+import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.PsaId
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{Psa, QtNumber, TransferNumber}
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.format.DateTimeFormatter
@@ -40,8 +40,9 @@ class TransferConnectorISpec extends BaseISpec {
       inject.bind[TransferConnector].to[TransferConnectorImpl]
     )
 
-  private val now = Instant.now()
+  private val now  = Instant.now()
   private val pstr = PstrNumber("12345678AB")
+
   private val submission = Submission(
     ReportDetails(pstr.value, Submitted, None, None),
     None,
@@ -52,17 +53,18 @@ class TransferConnectorISpec extends BaseISpec {
     None
   )
 
+  val correlationId = "e470d658-99f7-4292-a4a1-ed12c72f1337"
+
   private val connector = app.injector.instanceOf[TransferConnector]
 
   "submit" - {
     "send correlationId as header when RequestId is present" in {
-      connector.submitTransfer(submission)
+      connector.submitTransfer(submission, correlationId)
 
       val correlationIdRegex = "^[0-9a-fA-F]{8}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{4}[-][0-9a-fA-F]{12}$".r
 
       verify(postRequestedFor(urlEqualTo("/etmp/RESTAdapter/pods/reports/qrops-transfer"))
-        .withHeader("correlationid", matching(correlationIdRegex.toString()))
-      )
+        .withHeader("correlationid", matching(correlationIdRegex.toString())))
     }
 
     "return DownstreamSuccess when 201 and valid payload is returned from downstream" in {
@@ -70,15 +72,15 @@ class TransferConnectorISpec extends BaseISpec {
 
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
-          "qtReference" -> "QT123456",
-          "processingDate" -> now.toString,
+          "qtReference"      -> "QT123456",
+          "processingDate"   -> now.toString,
           "formBundleNumber" -> "123"
         )
       ).toString()
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, CREATED)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission, correlationId))
 
       result mustBe Right(DownstreamSuccess(QtNumber("QT123456"), now, "123"))
     }
@@ -87,19 +89,19 @@ class TransferConnectorISpec extends BaseISpec {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
 
       val downstreamPayload = Json.obj(
-        "origin" -> "HIP",
+        "origin"   -> "HIP",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission, correlationId))
 
       result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
     }
@@ -110,14 +112,14 @@ class TransferConnectorISpec extends BaseISpec {
       val downstreamPayload = Json.obj(
         "errors" -> Json.obj(
           "processingDate" -> now,
-          "code" -> "003",
-          "text" -> "Request could not be processed"
+          "code"           -> "003",
+          "text"           -> "Request could not be processed"
         )
       ).toString()
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission, correlationId))
 
       result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
     }
@@ -126,19 +128,19 @@ class TransferConnectorISpec extends BaseISpec {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
 
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission, correlationId))
 
       result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
     }
@@ -147,11 +149,11 @@ class TransferConnectorISpec extends BaseISpec {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
 
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "failures" -> Seq(
             Json.obj(
-              "type" -> "type",
+              "type"   -> "type",
               "reason" -> "reason"
             )
           )
@@ -160,7 +162,7 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubPost("/etmp/RESTAdapter/pods/reports/qrops-transfer", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission))
+      val result: Either[DownstreamError, DownstreamSuccess] = await(connector.submitTransfer(submission, correlationId))
 
       result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
     }
@@ -170,10 +172,10 @@ class TransferConnectorISpec extends BaseISpec {
     "return Right DownstreamTransferData when 200 and valid data is returned from downstream" in {
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
-          "pstr" -> "12345678AB",
+          "pstr"      -> "12345678AB",
           "qtDetails" -> Json.obj(
-            "qtVersion" -> "001",
-            "qtStatus" -> "Submitted",
+            "qtVersion"   -> "001",
+            "qtStatus"    -> "Submitted",
             "receiptDate" -> now,
             "qtReference" -> "QT123456"
           )
@@ -204,12 +206,12 @@ class TransferConnectorISpec extends BaseISpec {
 
     "return HipBadRequest when 400 is returned with valid payload" in {
       val downstreamPayload = Json.obj(
-        "origin" -> "HIP",
+        "origin"   -> "HIP",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -225,8 +227,8 @@ class TransferConnectorISpec extends BaseISpec {
       val downstreamPayload = Json.obj(
         "errors" -> Json.obj(
           "processingDate" -> now,
-          "code" -> "003",
-          "text" -> "Request could not be processed"
+          "code"           -> "003",
+          "text"           -> "Request could not be processed"
         )
       ).toString()
 
@@ -239,12 +241,12 @@ class TransferConnectorISpec extends BaseISpec {
 
     "return HipBadRequest when 500 is returned with valid payload" in {
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -258,11 +260,11 @@ class TransferConnectorISpec extends BaseISpec {
 
     "return HipOriginFailures when 503 is returned with valid payload" in {
       val downstreamPayload = Json.obj(
-        "origin" -> "HoD",
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "failures" -> Seq(
             Json.obj(
-              "type" -> "type",
+              "type"   -> "type",
               "reason" -> "reason"
             )
           )
@@ -279,28 +281,28 @@ class TransferConnectorISpec extends BaseISpec {
 
   "getAllTransfers" - {
 
-    val pstr         = PstrNumber("12345678AB")
-    val fromDate     = LocalDate.of(2025, 9, 22)
-    val toDate       = fromDate.minusYears(10)
-    val formatter    = DateTimeFormatter.ISO_LOCAL_DATE
-    val basePath     = "/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
+    val pstr      = PstrNumber("12345678AB")
+    val fromDate  = LocalDate.of(2025, 9, 22)
+    val toDate    = fromDate.minusYears(10)
+    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+    val basePath  = "/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
 
     def successBody(now: Instant): String =
       Json.obj(
         "success" -> Json.obj(
           "qropsTransferOverview" -> Json.arr(
             Json.obj(
-              "fbNumber"                   -> "123456000023",
-              "qtReference"                -> "QT564321",
-              "qtVersion"                  -> "001",
-              "qtStatus"                   -> "Compiled",
-              "qtDigitalStatus"            -> "Complied",
-              "nino"                       -> "AA000000A",
-              "firstName"                  -> "David",
-              "lastName"                   -> "Warne",
-              "qtDate"                     -> "2025-03-14",
-              "qropsReference"             -> "QROPS654321",
-              "submissionCompilationDate"  -> now.toString
+              "fbNumber"                  -> "123456000023",
+              "qtReference"               -> "QT564321",
+              "qtVersion"                 -> "001",
+              "qtStatus"                  -> "Compiled",
+              "qtDigitalStatus"           -> "Complied",
+              "nino"                      -> "AA000000A",
+              "firstName"                 -> "David",
+              "lastName"                  -> "Warne",
+              "qtDate"                    -> "2025-03-14",
+              "qropsReference"            -> "QROPS654321",
+              "submissionCompilationDate" -> now.toString
             )
           )
         )
@@ -330,7 +332,7 @@ class TransferConnectorISpec extends BaseISpec {
 
     "include qtRef when provided" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val qt = QtNumber("QT123456")
+      val qt                         = QtNumber("QT123456")
 
       stubFor(
         get(urlPathEqualTo(basePath))
@@ -369,13 +371,13 @@ class TransferConnectorISpec extends BaseISpec {
 
     "map 400 HIP error to HipBadRequest" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val body = Json.obj(
-        "origin" -> "HIP",
+      val body                       = Json.obj(
+        "origin"   -> "HIP",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -394,11 +396,11 @@ class TransferConnectorISpec extends BaseISpec {
 
     "map 422 to EtmpValidationError" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val body = Json.obj(
+      val body                       = Json.obj(
         "errors" -> Json.obj(
           "processingDate" -> now.toString,
-          "code" -> "003",
-          "text" -> "Request could not be processed"
+          "code"           -> "003",
+          "text"           -> "Request could not be processed"
         )
       ).toString()
 
@@ -416,11 +418,11 @@ class TransferConnectorISpec extends BaseISpec {
 
     "map 422 with subcode 183 to NoTransfersFound" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val body = Json.obj(
+      val body                       = Json.obj(
         "errors" -> Json.obj(
           "processingDate" -> now.toString,
-          "code" -> "183",
-          "text" -> "No QT was found in ETMP for the requested details"
+          "code"           -> "183",
+          "text"           -> "No QT was found in ETMP for the requested details"
         )
       ).toString()
 
@@ -438,13 +440,13 @@ class TransferConnectorISpec extends BaseISpec {
 
     "map 500 to HipBadRequest (HoD origin example)" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val body = Json.obj(
-        "origin" -> "HoD",
+      val body                       = Json.obj(
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "error" -> Json.obj(
-            "code" -> "code",
+            "code"    -> "code",
             "message" -> "There's been an error",
-            "logID" -> "logID"
+            "logID"   -> "logID"
           )
         )
       ).toString()
@@ -463,8 +465,8 @@ class TransferConnectorISpec extends BaseISpec {
 
     "map 503 failures to HipOriginFailures" in {
       implicit val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-      val body = Json.obj(
-        "origin" -> "HoD",
+      val body                       = Json.obj(
+        "origin"   -> "HoD",
         "response" -> Json.obj(
           "failures" -> Seq(
             Json.obj("type" -> "type", "reason" -> "reason")

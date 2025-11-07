@@ -39,7 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[TransferConnectorImpl])
 trait TransferConnector {
-  def submitTransfer(validated: Submission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
+  def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
 
   def getTransfer(
       pstr: PstrNumber,
@@ -64,14 +64,11 @@ class TransferConnectorImpl @Inject() (
   )(implicit ec: ExecutionContext
   ) extends TransferConnector with Logging {
 
-  override def submitTransfer(validated: Submission)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+  override def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val payload: JsValue = Json.toJson(validated)
-
-    // Required headers from the spec
-    val correlationId = UUID.randomUUID().toString
 
     val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
 

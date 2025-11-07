@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-// models/dtos/SubmissionDTO.scala
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.Submitter.{PsaId, PspId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 
 import java.time.Instant
@@ -28,7 +27,7 @@ sealed trait SubmissionDTO {
   def userType: UserType
   def lastUpdated: Instant
 
-  def normalise(withReferenceId: TransferId): NormalisedSubmission
+  def normalise(withReferenceId: TransferId, authenticatedUser: AuthenticatedUser): NormalisedSubmission
 }
 
 final case class PsaSubmissionDTO(
@@ -38,13 +37,15 @@ final case class PsaSubmissionDTO(
     lastUpdated: Instant
   ) extends SubmissionDTO {
 
-  override def normalise(withReferenceId: TransferId): NormalisedSubmission =
+  override def normalise(withReferenceId: TransferId, authenticatedUser: AuthenticatedUser): NormalisedSubmission = {
     NormalisedSubmission(
-      referenceId = withReferenceId,
-      userId      = userId,
-      psaId       = None,
-      lastUpdated = lastUpdated
+      referenceId          = withReferenceId,
+      userId               = userId,
+      maybeAssociatedPsaId = None,
+      lastUpdated          = lastUpdated,
+      authenticatedUser    = authenticatedUser
     )
+  }
 }
 object PsaSubmissionDTO { implicit val format: OFormat[PsaSubmissionDTO] = Json.format }
 
@@ -56,12 +57,13 @@ final case class PspSubmissionDTO(
     lastUpdated: Instant
   ) extends SubmissionDTO {
 
-  override def normalise(withReferenceId: TransferId): NormalisedSubmission =
+  override def normalise(withReferenceId: TransferId, authenticatedUser: AuthenticatedUser): NormalisedSubmission =
     NormalisedSubmission(
-      referenceId = withReferenceId,
-      userId      = userId,
-      psaId       = Some(psaId),
-      lastUpdated = lastUpdated
+      referenceId          = withReferenceId,
+      userId               = userId,
+      maybeAssociatedPsaId = Some(psaId),
+      lastUpdated          = lastUpdated,
+      authenticatedUser    = authenticatedUser
     )
 }
 object PspSubmissionDTO { implicit val format: OFormat[PspSubmissionDTO] = Json.format }
