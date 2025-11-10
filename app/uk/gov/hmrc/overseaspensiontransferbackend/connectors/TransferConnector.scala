@@ -72,8 +72,15 @@ class TransferConnectorImpl @Inject() (
 
     val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
 
+    // TODO: These params are only used for stubbing and should be removed before we connect to HIP
+    val params =
+      Seq(
+        "userId" -> validated.qtDeclaration.submitterId.value
+      )
+
     httpClientV2
       .post(url)
+      .transform(_.addQueryStringParameters(params: _*))
       .setHeader(
         authorisation           -> authorization(),
         "correlationid"         -> correlationId,
