@@ -120,6 +120,104 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
     }
   }
 
+  "filterForHighestVersion" - {
+    val item = DownstreamAllTransfersData.OverviewItem(
+      fbNumber                  = "123456000023",
+      qtReference               = "QT564321",
+      qtVersion                 = "001",
+      qtStatus                  = "Submitted",
+      qtDigitalStatus           = Some("Submitted"),
+      nino                      = Some("AA000000A"),
+      firstName                 = Some("David"),
+      lastName                  = Some("Warne"),
+      qtDate                    = Some(LocalDate.parse("2025-03-14")),
+      qropsReference            = Some("QROPS654321"),
+      submissionCompilationDate = Instant.parse("2025-05-09T10:10:12Z")
+    )
+
+    "Return highest version where multiple records are returned" in {
+      val data =
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              item.copy(qtVersion = "003"),
+              item.copy(qtVersion = "002"),
+              item,
+              item.copy(qtVersion = "004")
+            )
+          )
+        )
+
+      DownstreamAllTransfersData.filterForHighestVersion(data.success.qropsTransferOverview, Nil) mustBe
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(item.copy(qtVersion = "004"))
+          )
+        )
+    }
+
+    "return only record when one version exists for qtReference" in {
+      val data =
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              item
+            )
+          )
+        )
+
+      DownstreamAllTransfersData.filterForHighestVersion(data.success.qropsTransferOverview, Nil) mustBe
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(item)
+          )
+        )
+    }
+
+    "return records for all qtReferences present in the original data" in {
+      val item2 = item.copy(qtReference = "QT222222")
+      val item3 = item.copy(qtReference = "QT333333")
+      val item4 = item.copy(qtReference = "QT444444")
+
+      val data =
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              item,
+              item.copy(qtVersion  = "002"),
+              item2.copy(qtVersion = "003"),
+              item2,
+              item2.copy(qtVersion = "002"),
+              item4,
+              item3,
+              item3.copy(qtVersion = "002"),
+              item3.copy(qtVersion = "003"),
+              item3.copy(qtVersion = "004"),
+              item3.copy(qtVersion = "005"),
+              item3.copy(qtVersion = "006"),
+              item3.copy(qtVersion = "007"),
+              item3.copy(qtVersion = "007"),
+              item3.copy(qtVersion = "008"),
+              item3.copy(qtVersion = "009"),
+              item3.copy(qtVersion = "010")
+            )
+          )
+        )
+
+      DownstreamAllTransfersData.filterForHighestVersion(data.success.qropsTransferOverview, Nil) mustBe
+        DownstreamAllTransfersData(
+          DownstreamAllTransfersData.Payload(
+            qropsTransferOverview = List(
+              item.copy(qtVersion  = "002"),
+              item2.copy(qtVersion = "003"),
+              item4,
+              item3.copy(qtVersion = "010")
+            )
+          )
+        )
+    }
+  }
+
   "toAllTransfersItem" - {
     "Convert to AllTransfersItem" in {
       val data =
