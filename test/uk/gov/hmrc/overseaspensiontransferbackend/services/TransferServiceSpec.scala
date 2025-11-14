@@ -366,8 +366,8 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 fbNumber                  = "123456000023",
                 qtReference               = "QT564321",
                 qtVersion                 = "001",
-                qtStatus                  = "Compiled",
-                qtDigitalStatus           = Some("Complied"),
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = Some("Submitted"),
                 nino                      = Some("AA000000A"),
                 firstName                 = Some("David"),
                 lastName                  = Some("Warne"),
@@ -379,6 +379,32 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 fbNumber                  = "123456000024",
                 qtReference               = "QT564322",
                 qtVersion                 = "003",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000001A"),
+                firstName                 = Some("Edith"),
+                lastName                  = Some("Ennis-Hill"),
+                qtDate                    = Some(LocalDate.parse("2025-01-01")),
+                qropsReference            = Some("QROPS654322"),
+                submissionCompilationDate = submissionDate
+              ),
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "123456000024",
+                qtReference               = "QT564322",
+                qtVersion                 = "002",
+                qtStatus                  = "Submitted",
+                qtDigitalStatus           = Some("Submitted"),
+                nino                      = Some("AA000001A"),
+                firstName                 = Some("Edith"),
+                lastName                  = Some("Ennis-Hill"),
+                qtDate                    = Some(LocalDate.parse("2025-01-01")),
+                qropsReference            = Some("QROPS654322"),
+                submissionCompilationDate = submissionDate
+              ),
+              DownstreamAllTransfersData.OverviewItem(
+                fbNumber                  = "123456000024",
+                qtReference               = "QT564322",
+                qtVersion                 = "001",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
                 nino                      = Some("AA000001A"),
@@ -412,7 +438,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
             val first = items.head
             first.transferId      mustBe QtNumber("QT564321")
             first.qtVersion       mustBe Some("001")
-            first.qtStatus        mustBe Some(QtStatus("Compiled"))
+            first.qtStatus        mustBe Some(QtStatus("Submitted"))
             first.nino            mustBe Some("AA000000A")
             first.memberFirstName mustBe Some("David")
             first.memberSurname   mustBe Some("Warne")
@@ -424,6 +450,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
             second.transferId      mustBe QtNumber("QT564322")
             second.memberFirstName mustBe Some("Edith")
             second.memberSurname   mustBe Some("Ennis-Hill")
+            second.qtVersion       mustBe Some("003")
 
           case other =>
             fail(s"Unexpected: $other")

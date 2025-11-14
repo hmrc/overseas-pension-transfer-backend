@@ -42,8 +42,23 @@ object DownstreamAllTransfersData {
       submissionCompilationDate: Instant
     )
 
+  def filterForHighestVersion(curr: List[OverviewItem], acc: List[OverviewItem]): DownstreamAllTransfersData =
+    curr match {
+      case Nil          => DownstreamAllTransfersData(Payload(acc))
+      case head :: tail =>
+        if (tail.isEmpty) {
+          filterForHighestVersion(tail, head :: acc)
+        } else {
+          val allVersions      = curr.filter(item => head.qtReference == item.qtReference)
+          val sorted           = allVersions.sortWith(_.qtVersion.toInt > _.qtVersion.toInt)
+          val removeDuplicates = tail.filterNot(item => head.qtReference == item.qtReference)
+
+          filterForHighestVersion(removeDuplicates, acc :+ sorted.head)
+        }
+    }
+
   def toAllTransferItems(pstrNumber: PstrNumber, d: DownstreamAllTransfersData): Seq[AllTransfersItem] =
-    d.success.qropsTransferOverview.map { r =>
+    filterForHighestVersion(d.success.qropsTransferOverview, Nil).success.qropsTransferOverview.map { r =>
       AllTransfersItem(
         transferId      = QtNumber(r.qtReference),
         qtVersion       = Some(r.qtVersion),
