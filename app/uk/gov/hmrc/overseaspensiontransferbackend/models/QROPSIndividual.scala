@@ -18,13 +18,14 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Json, OFormat, OWrites, Reads}
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class QROPSIndividual(
     individualForename: Option[String],
     individualSurname: Option[String]
   )
 
-object QROPSIndividual {
+object QROPSIndividual extends JsonHelpers {
 
   implicit val reads: Reads[QROPSIndividual] = (
     (__ \ "individualForename").readNullable[String] and
@@ -33,6 +34,11 @@ object QROPSIndividual {
 
   implicit val writes: OWrites[QROPSIndividual] =
     Json.writes[QROPSIndividual]
+
+  val auditWrites: OWrites[QROPSIndividual] = { qropsIndividual =>
+    optField("forename", qropsIndividual.individualForename) ++
+      optField("surname", qropsIndividual.individualSurname)
+  }
 
   implicit val format: OFormat[QROPSIndividual] = OFormat(reads, writes)
 }

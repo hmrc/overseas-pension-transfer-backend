@@ -18,13 +18,14 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class ReceivingQropsEstablishedDetails(
     qropsEstablished: Option[String],
     qropsEstablishedOther: Option[String]
   )
 
-object ReceivingQropsEstablishedDetails {
+object ReceivingQropsEstablishedDetails extends JsonHelpers {
 
   implicit val reads: Reads[ReceivingQropsEstablishedDetails] = (
     (__ \ "qropsEstablished").readNullable[String] and
@@ -33,6 +34,11 @@ object ReceivingQropsEstablishedDetails {
 
   implicit val writes: OWrites[ReceivingQropsEstablishedDetails] =
     Json.writes[ReceivingQropsEstablishedDetails]
+
+  val auditWrites: OWrites[ReceivingQropsEstablishedDetails] = { receivingQropsEstablishedDetails =>
+    optField("countryCode", receivingQropsEstablishedDetails.qropsEstablished) ++
+      optField("otherTerritoryDetails", receivingQropsEstablishedDetails.qropsEstablishedOther)
+  }
 
   implicit val format: OFormat[ReceivingQropsEstablishedDetails] =
     OFormat(reads, writes)

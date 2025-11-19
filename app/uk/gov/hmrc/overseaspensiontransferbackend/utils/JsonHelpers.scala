@@ -20,6 +20,9 @@ import play.api.libs.json._
 
 trait JsonHelpers {
 
+  def optField[A](name: String, value: Option[A])(implicit w: Writes[A]): JsObject =
+    value.fold(Json.obj())(v => Json.obj(name -> v))
+
   def movePath(from: JsPath, to: JsPath, json: JsObject): Either[JsError, JsObject] = {
     from.asSingleJson(json).toOption match {
       case Some(value) =>

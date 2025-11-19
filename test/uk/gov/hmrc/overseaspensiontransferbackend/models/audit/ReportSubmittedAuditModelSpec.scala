@@ -28,6 +28,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{
   Occupational,
   PrincipalResAddDetails,
   QROPSIndividual,
+  QROPSOrganisation,
   QROPSSchemeManagerType,
   ReceivingQropsAddress,
   ReceivingQropsEstablishedDetails,
@@ -72,43 +73,6 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
     Some(Seq(Occupational)),
     None,
     None
-  )
-
-  private val receivingQROPS = AboutReceivingQROPS(
-    Some("Receiving QROPS"),
-    None,
-    Some(ReceivingQropsAddress(
-      Some("line 1"),
-      Some("line 2"),
-      Some("line 3"),
-      Some("line 4"),
-      Some("line 5"),
-      Some("ZZ1 1ZZ"),
-      Some("UK")
-    )),
-    Some(ReceivingQropsEstablishedDetails(
-      Some("Established"),
-      Some("Other")
-    )),
-    Some(QROPSSchemeManagerType(
-      Some(SchemeManagerType("01")),
-      Some(SchemeManagerAddress(
-        Some("line 1"),
-        Some("line 2"),
-        Some("line 3"),
-        Some("line 4"),
-        Some("line 5"),
-        Some("ZZ1 1ZZ"),
-        Some("UK")
-      )),
-      Some("email.com"),
-      Some("111111111111"),
-      Some(QROPSIndividual(
-        Some("Forename"),
-        Some("Surname")
-      )),
-      None
-    ))
   )
 
   "must create correct minimal json for different journey types" in {
@@ -170,42 +134,80 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           )
         ),
         "qualifyingRecognisedOverseasPensionScheme" -> Json.obj(
-          "qropsFullName"                    -> "Receiving QROPS",
-          "receivingQropsAddress"            -> Json.obj(
+          "fullName"                -> "Receiving QROPS",
+          "referenceNumber"         -> "QT123456",
+          "address"                 -> Json.obj(
             "addressLine1" -> "line 1",
             "addressLine2" -> "line 2",
             "addressLine3" -> "line 3",
             "addressLine4" -> "line 4",
             "addressLine5" -> "line 5",
-            "ukPostCode"   -> "ZZ1 1ZZ",
-            "country"      -> "UK"
+            "countryCode"  -> "UK",
+            "postcode"     -> "ZZ1 1ZZ"
           ),
-          "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished"      -> "Established",
-            "qropsEstablishedOther" -> "Other"
+          "locationOfEstablishment" -> Json.obj(
+            "countryCode"           -> "Established",
+            "otherTerritoryDetails" -> "Other"
           ),
-          "qropsSchemeManagerType"           -> Json.obj(
-            "schemeManagerType"    -> "01",
-            "schemeManagerAddress" -> Json.obj(
+          "schemeManagerDetails"    -> Json.obj(
+            "type"        -> "01",
+            "address"     -> Json.obj(
               "addressLine1" -> "line 1",
               "addressLine2" -> "line 2",
               "addressLine3" -> "line 3",
               "addressLine4" -> "line 4",
               "addressLine5" -> "line 5",
-              "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> "UK"
+              "countryCode"  -> "UK",
+              "postcode"     -> "ZZ1 1ZZ"
             ),
-            "schemeManagerEmail"   -> "email.com",
-            "schemeManagerPhone"   -> "111111111111",
-            "qropsIndividual"      -> Json.obj(
-              "individualForename" -> "Forename",
-              "individualSurname"  -> "Surname"
+            "email"       -> "email.com",
+            "phoneNumber" -> "111111111111",
+            "individual"  -> Json.obj(
+              "forename" -> "Forename",
+              "surname"  -> "Surname"
             )
           )
         ),
         "roleLoggedInAs"                            -> "PSA",
         "affinityGroup"                             -> "Individual",
         "requesterIdentifier"                       -> psaId.value
+      )
+
+      val receivingQROPSOrg = AboutReceivingQROPS(
+        Some("Receiving QROPS"),
+        Some("QT123456"),
+        Some(ReceivingQropsAddress(
+          Some("line 1"),
+          Some("line 2"),
+          Some("line 3"),
+          Some("line 4"),
+          Some("line 5"),
+          Some("ZZ1 1ZZ"),
+          Some("UK")
+        )),
+        Some(ReceivingQropsEstablishedDetails(
+          Some("Established"),
+          Some("Other")
+        )),
+        Some(QROPSSchemeManagerType(
+          Some(SchemeManagerType("01")),
+          Some(SchemeManagerAddress(
+            Some("line 1"),
+            Some("line 2"),
+            Some("line 3"),
+            Some("line 4"),
+            Some("line 5"),
+            Some("ZZ1 1ZZ"),
+            Some("UK")
+          )),
+          Some("email.com"),
+          Some("111111111111"),
+          Some(QROPSIndividual(
+            Some("Forename"),
+            Some("Surname")
+          )),
+          None
+        ))
       )
 
       val result = ReportSubmittedAuditModel.build(
@@ -216,7 +218,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
         maybeQTNumber            = Some(QtNumber("QT123456")),
         maybeMemberDetails       = Some(memberDetails),
         maybeTransferDetails     = Some(transferDetails),
-        maybeAboutReceivingQROPS = Some(receivingQROPS),
+        maybeAboutReceivingQROPS = Some(receivingQROPSOrg),
         maybeUserInfo            = Some(sampleAuditUserInfoPsa)
       )
       result.auditType mustBe "overseasPensionTransferReportSubmitted"
@@ -261,36 +263,38 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           )
         ),
         "qualifyingRecognisedOverseasPensionScheme" -> Json.obj(
-          "qropsFullName"                    -> "Receiving QROPS",
-          "receivingQropsAddress"            -> Json.obj(
+          "fullName"                -> "Receiving QROPS",
+          "referenceNumber"         -> "QT123456",
+          "address"                 -> Json.obj(
             "addressLine1" -> "line 1",
             "addressLine2" -> "line 2",
             "addressLine3" -> "line 3",
             "addressLine4" -> "line 4",
             "addressLine5" -> "line 5",
-            "ukPostCode"   -> "ZZ1 1ZZ",
-            "country"      -> "UK"
+            "countryCode"  -> "UK",
+            "postcode"     -> "ZZ1 1ZZ"
           ),
-          "receivingQropsEstablishedDetails" -> Json.obj(
-            "qropsEstablished"      -> "Established",
-            "qropsEstablishedOther" -> "Other"
+          "locationOfEstablishment" -> Json.obj(
+            "countryCode"           -> "Established",
+            "otherTerritoryDetails" -> "Other"
           ),
-          "qropsSchemeManagerType"           -> Json.obj(
-            "schemeManagerType"    -> "01",
-            "schemeManagerAddress" -> Json.obj(
+          "schemeManagerDetails"    -> Json.obj(
+            "type"         -> "02",
+            "address"      -> Json.obj(
               "addressLine1" -> "line 1",
               "addressLine2" -> "line 2",
               "addressLine3" -> "line 3",
               "addressLine4" -> "line 4",
               "addressLine5" -> "line 5",
-              "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> "UK"
+              "countryCode"  -> "UK",
+              "postcode"     -> "ZZ1 1ZZ"
             ),
-            "schemeManagerEmail"   -> "email.com",
-            "schemeManagerPhone"   -> "111111111111",
-            "qropsIndividual"      -> Json.obj(
-              "individualForename" -> "Forename",
-              "individualSurname"  -> "Surname"
+            "email"        -> "email.com",
+            "phoneNumber"  -> "111111111111",
+            "organisation" -> Json.obj(
+              "name"             -> "orgName",
+              "contactsForename" -> "forename",
+              "contactsSurname"  -> "surname"
             )
           )
         ),
@@ -298,6 +302,44 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
         "affinityGroup"                             -> "Individual",
         "requesterIdentifier"                       -> pspId.value,
         "authorisingSchemeAdministratorID"          -> psaId.value
+      )
+
+      val receivingQROPS = AboutReceivingQROPS(
+        Some("Receiving QROPS"),
+        Some("QT123456"),
+        Some(ReceivingQropsAddress(
+          Some("line 1"),
+          Some("line 2"),
+          Some("line 3"),
+          Some("line 4"),
+          Some("line 5"),
+          Some("ZZ1 1ZZ"),
+          Some("UK")
+        )),
+        Some(ReceivingQropsEstablishedDetails(
+          Some("Established"),
+          Some("Other")
+        )),
+        Some(QROPSSchemeManagerType(
+          Some(SchemeManagerType("02")),
+          Some(SchemeManagerAddress(
+            Some("line 1"),
+            Some("line 2"),
+            Some("line 3"),
+            Some("line 4"),
+            Some("line 5"),
+            Some("ZZ1 1ZZ"),
+            Some("UK")
+          )),
+          Some("email.com"),
+          Some("111111111111"),
+          None,
+          Some(QROPSOrganisation(
+            Some("orgName"),
+            Some("forename"),
+            Some("surname")
+          ))
+        ))
       )
 
       val result = ReportSubmittedAuditModel.build(

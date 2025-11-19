@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 import java.time.LocalDate
 
@@ -95,10 +96,20 @@ case class ReceivingQropsAddress(
     country: Option[String]
   ) extends AddressBase
 
-object ReceivingQropsAddress {
+object ReceivingQropsAddress extends JsonHelpers {
   // NB: This may not be validated properly, I'm not sure if the compiler is smart enough to get recognise that
   // it is a form of Address. It might need its own custom reads like the others.
   implicit val format: OFormat[ReceivingQropsAddress] = Json.format
+
+  val auditWrites: OWrites[ReceivingQropsAddress] = { receivingQropsAddress =>
+    optField("addressLine1", receivingQropsAddress.addressLine1) ++
+      optField("addressLine2", receivingQropsAddress.addressLine2) ++
+      optField("addressLine3", receivingQropsAddress.addressLine3) ++
+      optField("addressLine4", receivingQropsAddress.addressLine4) ++
+      optField("addressLine5", receivingQropsAddress.addressLine5) ++
+      optField("countryCode", receivingQropsAddress.country) ++
+      optField("postcode", receivingQropsAddress.ukPostCode)
+  }
 }
 
 case class SchemeManagerAddress(
@@ -111,8 +122,18 @@ case class SchemeManagerAddress(
     country: Option[String]
   ) extends AddressBase
 
-object SchemeManagerAddress {
+object SchemeManagerAddress extends JsonHelpers {
   // NB: This may not be validated properly, I'm not sure if the compiler is smart enough to get recognise that
   // it is a form of Address. It might need its own custom reads like the others.
   implicit val format: OFormat[SchemeManagerAddress] = Json.format
+
+  val auditWrites: OWrites[SchemeManagerAddress] = { schemeManagerAddress =>
+    optField("addressLine1", schemeManagerAddress.addressLine1) ++
+      optField("addressLine2", schemeManagerAddress.addressLine2) ++
+      optField("addressLine3", schemeManagerAddress.addressLine3) ++
+      optField("addressLine4", schemeManagerAddress.addressLine4) ++
+      optField("addressLine5", schemeManagerAddress.addressLine5) ++
+      optField("countryCode", schemeManagerAddress.country) ++
+      optField("postcode", schemeManagerAddress.ukPostCode)
+  }
 }

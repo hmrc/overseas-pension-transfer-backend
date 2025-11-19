@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class AboutReceivingQROPS(
     qropsFullName: Option[String],
@@ -27,7 +28,7 @@ case class AboutReceivingQROPS(
     qropsSchemeManagerType: Option[QROPSSchemeManagerType]
   )
 
-object AboutReceivingQROPS {
+object AboutReceivingQROPS extends JsonHelpers {
 
   implicit val reads: Reads[AboutReceivingQROPS] = (
     (__ \ "qropsFullName").readNullable[String] and
@@ -39,6 +40,20 @@ object AboutReceivingQROPS {
 
   implicit val writes: OWrites[AboutReceivingQROPS] =
     Json.writes[AboutReceivingQROPS]
+
+  val auditWrites: OWrites[AboutReceivingQROPS] = { aboutReceivingQROPS =>
+    optField("fullName", aboutReceivingQROPS.qropsFullName) ++
+      optField("referenceNumber", aboutReceivingQROPS.qropsRef) ++
+      aboutReceivingQROPS.receivingQropsAddress.map(address =>
+        Json.obj("address" -> ReceivingQropsAddress.auditWrites.writes(address))
+      ).getOrElse(Json.obj()) ++
+      aboutReceivingQROPS.receivingQropsEstablishedDetails.map(establishedDetails =>
+        Json.obj("locationOfEstablishment" -> ReceivingQropsEstablishedDetails.auditWrites.writes(establishedDetails))
+      ).getOrElse(Json.obj()) ++
+      aboutReceivingQROPS.qropsSchemeManagerType.map(schemeManagerType =>
+        Json.obj("schemeManagerDetails" -> QROPSSchemeManagerType.auditWrites.writes(schemeManagerType))
+      ).getOrElse(Json.obj())
+  }
 
   implicit val format: OFormat[AboutReceivingQROPS] =
     OFormat(reads, writes)

@@ -60,7 +60,8 @@ case class ReportSubmittedAuditModel(
 
   private val receivingQROPS: JsObject =
     maybeAboutReceivingQROPS match {
-      case Some(qropsDetails) => Json.obj("qualifyingRecognisedOverseasPensionScheme" -> qropsDetails)
+      case Some(qropsDetails) =>
+        Json.obj("qualifyingRecognisedOverseasPensionScheme" -> AboutReceivingQROPS.auditWrites.writes(qropsDetails))
       case None               => Json.obj()
     }
 
