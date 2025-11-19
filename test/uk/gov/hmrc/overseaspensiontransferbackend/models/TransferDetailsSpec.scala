@@ -27,9 +27,9 @@ class TransferDetailsSpec extends AnyFreeSpec with Matchers {
   "TransferDetails" - {
 
     "must serialize and deserialize correctly with value" in {
-      val typeOfAssets = TypeOfAssets(None, Some("Yes"), None, None, None, None, None, None, None, None, None, None, None, None, None)
+      val typeOfAssets = TypeOfAssets(Some("004"), Some("Yes"), None, None, None, None, None, None, None, None, None, None, None, None, None)
       val model        = TransferDetails(
-        None,
+        Some("004"),
         Some(12345.67),
         Some(54321.99),
         Some(LocalDate.of(2012, 12, 12)),
