@@ -20,6 +20,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
 
 case class TypeOfAssets(
+    recordVersion: Option[String],
     cashAssets: Option[String],
     cashValue: Option[BigDecimal],
     unquotedShareAssets: Option[String],
@@ -59,7 +60,8 @@ object TypeOfAssets {
   implicit val propertyAssetsReads: Reads[PropertyAssets] = PropertyAssets.upstreamReads
 
   implicit val reads: Reads[TypeOfAssets] = (
-    (__ \ "cashAssets").readNullable[String] and
+    (__ \ "recordVersion").readNullable[String] and
+      (__ \ "cashAssets").readNullable[String] and
       (__ \ "cashValue").readNullable[BigDecimal] and
       (__ \ "unquotedShareAssets").readNullable[String] and
       (__ \ "moreUnquoted").readNullable[String] and

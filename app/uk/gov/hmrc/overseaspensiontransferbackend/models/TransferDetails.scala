@@ -22,6 +22,7 @@ import play.api.libs.json._
 import java.time.LocalDate
 
 case class TransferDetails(
+    recordVersion: Option[String],
     transferAmount: Option[BigDecimal],
     allowanceBeforeTransfer: Option[BigDecimal],
     dateMemberTransferred: Option[LocalDate],
@@ -35,7 +36,8 @@ case class TransferDetails(
 object TransferDetails {
 
   implicit val reads: Reads[TransferDetails] = (
-    (__ \ "transferAmount").readNullable[BigDecimal] and
+    (__ \ "recordVersion").readNullable[String] and
+      (__ \ "transferAmount").readNullable[BigDecimal] and
       (__ \ "allowanceBeforeTransfer").readNullable[BigDecimal] and
       (__ \ "dateMemberTransferred").readNullable[LocalDate] and
       (__ \ "cashOnlyTransfer").readNullable[String] and

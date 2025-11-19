@@ -20,6 +20,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Json, Reads, Writes}
 
 case class PropertyAssets(
+    recordVersion: Option[String],
     propertyAddress: Option[Address],
     propValue: Option[BigDecimal],
     propDescription: Option[String]
@@ -30,7 +31,8 @@ object PropertyAssets {
   implicit val writes: Writes[PropertyAssets] = Json.writes[PropertyAssets]
 
   val upstreamReads: Reads[PropertyAssets] = (
-    (__ \ "propertyAddress").readNullable[Address](Address.upstreamReads) and
+    (__ \ "recordVersion").readNullable[String] and
+      (__ \ "propertyAddress").readNullable[Address](Address.upstreamReads) and
       (__ \ "propValue").readNullable[BigDecimal] and
       (__ \ "propDescription").readNullable[String]
   )(PropertyAssets.apply _)
