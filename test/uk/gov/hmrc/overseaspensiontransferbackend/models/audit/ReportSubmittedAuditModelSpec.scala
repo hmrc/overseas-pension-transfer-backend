@@ -64,6 +64,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
   )
 
   private val transferDetails = TransferDetails(
+    None,
     Some(100),
     Some(100),
     Some(LocalDate.of(2013, 1, 1)),

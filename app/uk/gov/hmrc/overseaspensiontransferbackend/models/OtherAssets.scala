@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import play.api.libs.json.{Json, Reads, Writes}
 
 case class OtherAssets(
+    recordVersion: Option[String],
     assetValue: Option[BigDecimal],
     assetDescription: Option[String]
   )

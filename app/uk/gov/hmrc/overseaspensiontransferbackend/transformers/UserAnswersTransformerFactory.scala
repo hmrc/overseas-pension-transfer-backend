@@ -34,6 +34,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
   PropertyTransformer,
   QuotedSharesTransformer,
   ReasonNoOverseasTransferTransformer,
+  RecordVersionTransformer,
   TransferMinusTaxTransformer,
   UnquotedSharesTransformer,
   WhyTaxableTransformer
@@ -83,6 +84,7 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
     new TransferMinusTaxTransformer,
     new CashAssetsTransformer,
     new AssetTypeTransformer,
+    new RecordVersionTransformer,
     new CashValueTransformer,
     new MoreQuotedTransformer,
     new MoreUnquotedTransformer,

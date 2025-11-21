@@ -69,6 +69,7 @@ class SaveForLaterRepositorySpec
         aboutReceivingQROPS = None,
         transferDetails     = Some(
           TransferDetails(
+            recordVersion                  = None,
             transferAmount                 = Some(1000),
             allowanceBeforeTransfer        = Some(5000),
             dateMemberTransferred          = Some(java.time.LocalDate.parse("2025-01-01")),
@@ -78,14 +79,16 @@ class SaveForLaterRepositorySpec
             taxableOverseasTransferDetails = None,
             typeOfAssets                   = Some(
               TypeOfAssets(
+                recordVersion       = None,
                 cashAssets          = Some("Yes"),
                 cashValue           = Some(1000),
                 unquotedShareAssets = Some("Yes"),
-                unquotedShares      = Some(List(UnquotedShares(Some(1000), Some(100), Some("Company A"), Some("A")))),
+                unquotedShares      = Some(List(UnquotedShares(None, Some(1000), Some(100), Some("Company A"), Some("A")))),
                 quotedShareAssets   = Some("Yes"),
-                quotedShares        = Some(List(QuotedShares(Some(2000), Some(200), Some("Company B"), Some("B")))),
+                quotedShares        = Some(List(QuotedShares(None, Some(2000), Some(200), Some("Company B"), Some("B")))),
                 propertyAsset       = Some("Yes"),
                 propertyAssets      = Some(List(PropertyAssets(
+                  recordVersion   = None,
                   propertyAddress = Some(Address(
                     addressLine1 = Some("6 Test Address"),
                     addressLine2 = Some("Test Street"),
@@ -103,7 +106,9 @@ class SaveForLaterRepositorySpec
                 moreProp            = None,
                 moreQuoted          = None,
                 moreUnquoted        = None,
-                otherAssets         = Some(List(OtherAssets(Some(400), Some("Other Asset"))))
+                otherAssets         = Some(
+                  List(OtherAssets(None, Some(400), Some("Other Asset")))
+                )
               )
             )
           )
