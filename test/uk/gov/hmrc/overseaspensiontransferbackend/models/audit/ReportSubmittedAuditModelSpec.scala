@@ -104,23 +104,21 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
         "correlationId"                             -> correlationId,
         "overseasPensionTransferReportReference"    -> "QT123456",
         "member"                                    -> Json.obj(
-          "foreName"               -> "Forename",
-          "lastName"               -> "Last name",
-          "dateOfBirth"            -> "2000-01-01",
-          "nino"                   -> "AA123456A",
-          "principalResAddDetails" -> Json.obj(
-            "addressDetails" -> Json.obj(
-              "addressLine1" -> "line 1",
-              "addressLine2" -> "line 2",
-              "addressLine3" -> "line 3",
-              "addressLine4" -> "line 4",
-              "addressLine5" -> "line 5",
-              "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> "UK"
-            )
+          "foreName"                    -> "Forename",
+          "lastName"                    -> "Last name",
+          "dateOfBirth"                 -> "2000-01-01",
+          "nino"                        -> "AA123456A",
+          "principalResidentialAddress" -> Json.obj(
+            "addressLine1" -> "line 1",
+            "addressLine2" -> "line 2",
+            "addressLine3" -> "line 3",
+            "addressLine4" -> "line 4",
+            "addressLine5" -> "line 5",
+            "countryCode"  -> "UK",
+            "postcode"     -> "ZZ1 1ZZ"
           ),
-          "memberResidencyDetails" -> Json.obj(
-            "memUkResident" -> "true"
+          "residencyDetails"            -> Json.obj(
+            "isTheMemberAUKResident" -> "true"
           )
         ),
         "pensionTransfer"                           -> Json.obj(
@@ -233,23 +231,21 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
         "correlationId"                             -> correlationId,
         "overseasPensionTransferReportReference"    -> "QT123456",
         "member"                                    -> Json.obj(
-          "foreName"               -> "Forename",
-          "lastName"               -> "Last name",
-          "dateOfBirth"            -> "2000-01-01",
-          "nino"                   -> "AA123456A",
-          "principalResAddDetails" -> Json.obj(
-            "addressDetails" -> Json.obj(
-              "addressLine1" -> "line 1",
-              "addressLine2" -> "line 2",
-              "addressLine3" -> "line 3",
-              "addressLine4" -> "line 4",
-              "addressLine5" -> "line 5",
-              "ukPostCode"   -> "ZZ1 1ZZ",
-              "country"      -> "UK"
-            )
+          "foreName"                    -> "Forename",
+          "lastName"                    -> "Last name",
+          "dateOfBirth"                 -> "2000-01-01",
+          "nino"                        -> "AA123456A",
+          "principalResidentialAddress" -> Json.obj(
+            "addressLine1" -> "line 1",
+            "addressLine2" -> "line 2",
+            "addressLine3" -> "line 3",
+            "addressLine4" -> "line 4",
+            "addressLine5" -> "line 5",
+            "countryCode"  -> "UK",
+            "postcode"     -> "ZZ1 1ZZ"
           ),
-          "memberResidencyDetails" -> Json.obj(
-            "memUkResident" -> "true"
+          "residencyDetails"            -> Json.obj(
+            "isTheMemberAUKResident" -> "true"
           )
         ),
         "pensionTransfer"                           -> Json.obj(

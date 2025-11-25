@@ -21,6 +21,8 @@ import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
+import java.time.LocalDate
+
 class AuditWritesSpec extends AnyFreeSpec with Matchers {
 
   private val receivingQropsAddress = Some(ReceivingQropsAddress(
@@ -171,6 +173,113 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
           )
         )
       }
+    }
+  }
+
+  "When writing MemberDetails to JSON" - {
+
+    "valid JSON should be produced" in {
+      val address                 = Some(Address(
+        Some("addressline1"),
+        Some("addressline2"),
+        Some("addressline3"),
+        Some("addressline4"),
+        Some("addressline5"),
+        Some("postcode"),
+        Some("country")
+      ))
+      val principalResAddDetails  = PrincipalResAddDetails(address, Some("poBox"))
+      val lastPrincipalAddDetails = LastPrincipalAddDetails(address, Some(LocalDate.of(2020, 1, 1)))
+      val memberResidencyDetails  = MemberResidencyDetails(Some("No"), Some("Yes"), Some(lastPrincipalAddDetails))
+
+      val model: MemberDetails = MemberDetails(
+        Some("forename"),
+        Some("lastName"),
+        Some(LocalDate.of(2020, 1, 1)),
+        None,
+        Some("reasonNoNino"),
+        Some(principalResAddDetails),
+        Some(memberResidencyDetails)
+      )
+
+      val result = MemberDetails.auditWrites.writes(model)
+
+      result mustBe Json.obj(
+        "foreName"                    -> "forename",
+        "lastName"                    -> "lastName",
+        "dateOfBirth"                 -> "2020-01-01",
+        "reasonMemberDoesNotHaveNino" -> "reasonNoNino",
+        "principalResidentialAddress" -> Json.obj(
+          "addressLine1" -> "addressline1",
+          "addressLine2" -> "addressline2",
+          "addressLine3" -> "addressline3",
+          "addressLine4" -> "addressline4",
+          "addressLine5" -> "addressline5",
+          "countryCode"  -> "country",
+          "postcode"     -> "postcode",
+          "poBoxNumber"  -> "poBox"
+        ),
+        "residencyDetails"            -> Json.obj(
+          "isTheMemberAUKResident"                -> "No",
+          "hasTheMemberPreviouslyBeenAUKResident" -> "Yes",
+          "previousUKResidencyDetails"            -> Json.obj(
+            "addressLine1"        -> "addressline1",
+            "addressLine2"        -> "addressline2",
+            "addressLine3"        -> "addressline3",
+            "addressLine4"        -> "addressline4",
+            "addressLine5"        -> "addressline5",
+            "countryCode"         -> "country",
+            "postcode"            -> "postcode",
+            "dateMemberLeftTheUK" -> "2020-01-01"
+          )
+        )
+      )
+    }
+
+    "valid JSON should be produced with optional values" in {
+      val address                = Some(Address(
+        Some("addressline1"),
+        Some("addressline2"),
+        Some("addressline3"),
+        Some("addressline4"),
+        Some("addressline5"),
+        Some("postcode"),
+        Some("country")
+      ))
+      val principalResAddDetails = PrincipalResAddDetails(address, Some("poBox"))
+      val memberResidencyDetails = MemberResidencyDetails(Some("Yes"), None, None)
+
+      val model: MemberDetails = MemberDetails(
+        Some("forename"),
+        Some("lastName"),
+        Some(LocalDate.of(2020, 1, 1)),
+        Some("NINO"),
+        None,
+        Some(principalResAddDetails),
+        Some(memberResidencyDetails)
+      )
+
+      val result = MemberDetails.auditWrites.writes(model)
+
+      result mustBe Json.obj(
+        "foreName"                    -> "forename",
+        "lastName"                    -> "lastName",
+        "dateOfBirth"                 -> "2020-01-01",
+        "nino"                        -> "NINO",
+        "principalResidentialAddress" -> Json.obj(
+          "addressLine1" -> "addressline1",
+          "addressLine2" -> "addressline2",
+          "addressLine3" -> "addressline3",
+          "addressLine4" -> "addressline4",
+          "addressLine5" -> "addressline5",
+          "countryCode"  -> "country",
+          "postcode"     -> "postcode",
+          "poBoxNumber"  -> "poBox"
+        ),
+        "residencyDetails"            -> Json.obj(
+          "isTheMemberAUKResident" -> "Yes"
+        )
+      )
     }
   }
 }

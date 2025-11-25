@@ -35,7 +35,7 @@ case class PrincipalResAddDetails(
   override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
-object PrincipalResAddDetails {
+object PrincipalResAddDetails extends JsonHelpers {
 
   implicit val reads: Reads[PrincipalResAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
@@ -43,6 +43,18 @@ object PrincipalResAddDetails {
   )(PrincipalResAddDetails.apply _)
 
   implicit val writes: OWrites[PrincipalResAddDetails] = Json.writes[PrincipalResAddDetails]
+
+  val auditWrites: OWrites[PrincipalResAddDetails] = { address =>
+    optField("addressLine1", address.addressLine1) ++
+      optField("addressLine2", address.addressLine2) ++
+      optField("addressLine3", address.addressLine3) ++
+      optField("addressLine4", address.addressLine4) ++
+      optField("addressLine5", address.addressLine5) ++
+      optField("countryCode", address.country) ++
+      optField("postcode", address.ukPostCode) ++
+      optField("poBoxNumber", address.poBoxNumber)
+  }
+
   implicit val format: OFormat[PrincipalResAddDetails] = OFormat(reads, writes)
 }
 
@@ -59,7 +71,7 @@ case class LastPrincipalAddDetails(
   override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
-object LastPrincipalAddDetails {
+object LastPrincipalAddDetails extends JsonHelpers {
 
   implicit val reads: Reads[LastPrincipalAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
@@ -67,6 +79,18 @@ object LastPrincipalAddDetails {
   )(LastPrincipalAddDetails.apply _)
 
   implicit val writes: OWrites[LastPrincipalAddDetails] = Json.writes[LastPrincipalAddDetails]
+
+  val auditWrites: OWrites[LastPrincipalAddDetails] = { lastPrincipalAddressDetails =>
+    optField("addressLine1", lastPrincipalAddressDetails.addressLine1) ++
+      optField("addressLine2", lastPrincipalAddressDetails.addressLine2) ++
+      optField("addressLine3", lastPrincipalAddressDetails.addressLine3) ++
+      optField("addressLine4", lastPrincipalAddressDetails.addressLine4) ++
+      optField("addressLine5", lastPrincipalAddressDetails.addressLine5) ++
+      optField("countryCode", lastPrincipalAddressDetails.country) ++
+      optField("postcode", lastPrincipalAddressDetails.ukPostCode) ++
+      optField("dateMemberLeftTheUK", lastPrincipalAddressDetails.dateMemberLeftUk)
+  }
+
   implicit val format: OFormat[LastPrincipalAddDetails] = OFormat(reads, writes)
 }
 

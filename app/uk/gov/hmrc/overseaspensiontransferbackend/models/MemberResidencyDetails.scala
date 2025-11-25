@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class MemberResidencyDetails(
     memUkResident: Option[String]                            = None,
@@ -25,7 +26,7 @@ case class MemberResidencyDetails(
     lastPrincipalAddDetails: Option[LastPrincipalAddDetails] = None
   )
 
-object MemberResidencyDetails {
+object MemberResidencyDetails extends JsonHelpers {
 
   implicit val reads: Reads[MemberResidencyDetails] = (
     (__ \ "memUkResident").readNullable[String] and
@@ -35,6 +36,14 @@ object MemberResidencyDetails {
 
   implicit val writes: OWrites[MemberResidencyDetails] =
     Json.writes[MemberResidencyDetails]
+
+  val auditWrites: OWrites[MemberResidencyDetails] = { residencyDetails =>
+    optField("isTheMemberAUKResident", residencyDetails.memUkResident) ++
+      optField("hasTheMemberPreviouslyBeenAUKResident", residencyDetails.memEverUkResident) ++
+      residencyDetails.lastPrincipalAddDetails.map(lastAddress =>
+        Json.obj("previousUKResidencyDetails" -> LastPrincipalAddDetails.auditWrites.writes(lastAddress))
+      ).getOrElse(Json.obj())
+  }
 
   implicit val format: OFormat[MemberResidencyDetails] =
     OFormat(reads, writes)
