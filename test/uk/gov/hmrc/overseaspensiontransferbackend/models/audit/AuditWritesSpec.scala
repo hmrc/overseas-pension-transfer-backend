@@ -282,4 +282,172 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       )
     }
   }
+
+  "When writing TransferDetails to JSON" - {
+
+    "valid JSON should be produced for taxable overseas transfers with all assets" in {
+      val address        = Address(
+        Some("line 1"),
+        Some("line 2"),
+        Some("line 3"),
+        Some("line 4"),
+        Some("line 5"),
+        Some("postcode"),
+        Some("country")
+      )
+      val propertyAsset  = PropertyAssets(Some(address), Some(100), Some("propertyDescription"))
+      val unquotedShares = UnquotedShares(Some(100), Some(100), Some("company"), Some("shareClass"))
+      val quotedShares   = QuotedShares(Some(100), Some(100), Some("company"), Some("shareClass"))
+
+      val otherAssets                    = OtherAssets(Some(100), Some("assetDescription"))
+      val typeOfAssets                   =
+        TypeOfAssets(
+          Some("Yes"),
+          Some(100),
+          Some("Yes"),
+          Some("Yes"),
+          Some(List(unquotedShares, unquotedShares, unquotedShares, unquotedShares, unquotedShares)),
+          Some("Yes"),
+          Some("Yes"),
+          Some(List(quotedShares, quotedShares, quotedShares, quotedShares, quotedShares)),
+          Some("Yes"),
+          Some("Yes"),
+          Some(List(propertyAsset, propertyAsset, propertyAsset, propertyAsset, propertyAsset)),
+          Some("Yes"),
+          Some("Yes"),
+          Some(List(otherAssets, otherAssets, otherAssets, otherAssets, otherAssets))
+        )
+      val taxableOverseasTransferDetails =
+        TaxableOverseasTransferDetails(
+          Some(TransferExceedsOTCAllowance),
+          Some(Seq(ApplicableExclusion("01"))),
+          Some(100),
+          Some(100)
+        )
+
+      val model: TransferDetails = TransferDetails(
+        Some(100),
+        Some(100),
+        Some(LocalDate.of(2020, 1, 1)),
+        Some("No"),
+        Some("Yes"),
+        None,
+        Some(taxableOverseasTransferDetails),
+        Some(typeOfAssets)
+      )
+
+      val propertyJson = Json.obj(
+        "address"     -> Json.obj(
+          "addressLine1" -> "line 1",
+          "addressLine2" -> "line 2",
+          "addressLine3" -> "line 3",
+          "addressLine4" -> "line 4",
+          "addressLine5" -> "line 5",
+          "country"      -> "country",
+          "ukPostCode"   -> "postcode"
+        ),
+        "value"       -> 100,
+        "description" -> "propertyDescription"
+      )
+
+      val quotedSharesJson = Json.obj(
+        "value"                -> 100,
+        "numberOfQuotedShares" -> 100,
+        "companyName"          -> "company",
+        "quotedSharesClass"    -> "shareClass"
+      )
+
+      val unquotedSharesJson = Json.obj(
+        "value"                  -> 100,
+        "numberOfUnquotedShares" -> 100,
+        "companyName"            -> "company",
+        "unquotedSharesClass"    -> "shareClass"
+      )
+
+      val otherAssetsJson = Json.obj(
+        "assetValue"       -> 100,
+        "assetDescription" -> "assetDescription"
+      )
+
+      val result = TransferDetails.auditWrites.writes(model)
+
+      result mustBe Json.obj(
+        "totalAmount"                    -> 100,
+        "totalAllowanceBeforeTransfer"   -> 100,
+        "date"                           -> "2020-01-01",
+        "isTransferCashOnly"             -> "No",
+        "isTheTransferTaxableOverseas"   -> "Yes",
+        "taxableOverseasTransferDetails" -> Json.obj(
+          "reasonCode"                   -> "01",
+          "applicableExclusionsCodes"    -> Json.arr("01"),
+          "amountOfTaxDeducted"          -> 100,
+          "transferAmountMinusTaxAmount" -> 100
+        ),
+        "assets"                         -> Json.obj(
+          "transferContainsCash"            -> "Yes",
+          "cashValue"                       -> 100,
+          "transferContainsUnquotedShares"  -> "Yes",
+          "areThereMoreThan5UnquotedShares" -> "Yes",
+          "unquotedSharesDetails"           -> Json.arr(
+            unquotedSharesJson,
+            unquotedSharesJson,
+            unquotedSharesJson,
+            unquotedSharesJson,
+            unquotedSharesJson
+          ),
+          "transferContainsQuotedShares"    -> "Yes",
+          "areThereMoreThan5QuotedShares"   -> "Yes",
+          "quotedSharesDetails"             -> Json.arr(
+            quotedSharesJson,
+            quotedSharesJson,
+            quotedSharesJson,
+            quotedSharesJson,
+            quotedSharesJson
+          ),
+          "transferContainsPropertyAssets"  -> "Yes",
+          "areThereMoreThan5PropertyAssets" -> "Yes",
+          "propertyAssetsDetails"           -> Json.arr(
+            propertyJson,
+            propertyJson,
+            propertyJson,
+            propertyJson,
+            propertyJson
+          ),
+          "transferContainsOtherAssets"     -> "Yes",
+          "areThereMoreThan5OtherAssets"    -> "Yes",
+          "otherAssetsDetails"              -> Json.arr(
+            otherAssetsJson,
+            otherAssetsJson,
+            otherAssetsJson,
+            otherAssetsJson,
+            otherAssetsJson
+          )
+        )
+      )
+    }
+
+    "valid JSON should be produced for not taxable overseas transfers and cash only" in {
+      val model: TransferDetails = TransferDetails(
+        Some(100),
+        Some(100),
+        Some(LocalDate.of(2020, 1, 1)),
+        Some("Yes"),
+        Some("No"),
+        Some(Seq(Occupational)),
+        None,
+        None
+      )
+
+      val result = TransferDetails.auditWrites.writes(model)
+
+      result mustBe Json.obj(
+        "totalAmount"                                -> 100,
+        "totalAllowanceBeforeTransfer"               -> 100,
+        "date"                                       -> "2020-01-01",
+        "isTransferCashOnly"                         -> "Yes",
+        "isTheTransferTaxableOverseas"               -> "No",
+        "reasonCodesWhyTransferIsNotTaxableOverseas" -> Json.arr("01")
+      )
+    }
+  }
 }

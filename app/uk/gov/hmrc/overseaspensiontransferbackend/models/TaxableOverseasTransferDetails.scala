@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Format, Json, Reads, Writes}
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class TaxableOverseasTransferDetails(
     whyTaxableOT: Option[WhyTransferTaxable],
@@ -26,7 +27,7 @@ case class TaxableOverseasTransferDetails(
     transferMinusTax: Option[BigDecimal]
   )
 
-object TaxableOverseasTransferDetails {
+object TaxableOverseasTransferDetails extends JsonHelpers {
 
   implicit val reads: Reads[TaxableOverseasTransferDetails] = (
     (__ \ "whyTaxableOT").readNullable[WhyTransferTaxable] and
@@ -36,6 +37,13 @@ object TaxableOverseasTransferDetails {
   )(TaxableOverseasTransferDetails.apply _)
 
   implicit val writes: Writes[TaxableOverseasTransferDetails] = Json.writes[TaxableOverseasTransferDetails]
+
+  val auditWrites: Writes[TaxableOverseasTransferDetails] = { taxableOverseasTransferDetails =>
+    optField("reasonCode", taxableOverseasTransferDetails.whyTaxableOT) ++
+      optField("applicableExclusionsCodes", taxableOverseasTransferDetails.applicableExclusion) ++
+      optField("amountOfTaxDeducted", taxableOverseasTransferDetails.amountTaxDeducted) ++
+      optField("transferAmountMinusTaxAmount", taxableOverseasTransferDetails.transferMinusTax)
+  }
 
   implicit val format: Format[TaxableOverseasTransferDetails] = Format(reads, writes)
 }

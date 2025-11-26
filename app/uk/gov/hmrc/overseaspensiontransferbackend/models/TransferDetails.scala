@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 import java.time.LocalDate
 
@@ -32,7 +33,7 @@ case class TransferDetails(
     typeOfAssets: Option[TypeOfAssets]
   )
 
-object TransferDetails {
+object TransferDetails extends JsonHelpers {
 
   implicit val reads: Reads[TransferDetails] = (
     (__ \ "transferAmount").readNullable[BigDecimal] and
@@ -47,6 +48,21 @@ object TransferDetails {
 
   implicit val writes: OWrites[TransferDetails] =
     Json.writes[TransferDetails]
+
+  val auditWrites: OWrites[TransferDetails] = { transferDetails =>
+    optField("totalAmount", transferDetails.transferAmount) ++
+      optField("totalAllowanceBeforeTransfer", transferDetails.allowanceBeforeTransfer) ++
+      optField("date", transferDetails.dateMemberTransferred) ++
+      optField("isTransferCashOnly", transferDetails.cashOnlyTransfer) ++
+      optField("isTheTransferTaxableOverseas", transferDetails.paymentTaxableOverseas) ++
+      transferDetails.taxableOverseasTransferDetails.map(taxableDetails =>
+        Json.obj("taxableOverseasTransferDetails" -> TaxableOverseasTransferDetails.auditWrites.writes(taxableDetails))
+      ).getOrElse(Json.obj()) ++
+      optField("reasonCodesWhyTransferIsNotTaxableOverseas", transferDetails.reasonNoOverseasTransfer) ++
+      transferDetails.typeOfAssets.map(assets =>
+        Json.obj("assets" -> TypeOfAssets.auditWrites.writes(assets))
+      ).getOrElse(Json.obj())
+  }
 
   implicit val format: OFormat[TransferDetails] =
     OFormat(reads, writes)

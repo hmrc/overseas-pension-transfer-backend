@@ -122,12 +122,12 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           )
         ),
         "pensionTransfer"                           -> Json.obj(
-          "transferAmount"           -> 100,
-          "allowanceBeforeTransfer"  -> 100,
-          "dateMemberTransferred"    -> "2013-01-01",
-          "cashOnlyTransfer"         -> "false",
-          "paymentTaxableOverseas"   -> "true",
-          "reasonNoOverseasTransfer" -> Json.arr(
+          "totalAmount"                                -> 100,
+          "totalAllowanceBeforeTransfer"               -> 100,
+          "date"                                       -> "2013-01-01",
+          "isTransferCashOnly"                         -> "false",
+          "isTheTransferTaxableOverseas"               -> "true",
+          "reasonCodesWhyTransferIsNotTaxableOverseas" -> Json.arr(
             "01"
           )
         ),
@@ -249,12 +249,12 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           )
         ),
         "pensionTransfer"                           -> Json.obj(
-          "transferAmount"           -> 100,
-          "allowanceBeforeTransfer"  -> 100,
-          "dateMemberTransferred"    -> "2013-01-01",
-          "cashOnlyTransfer"         -> "false",
-          "paymentTaxableOverseas"   -> "true",
-          "reasonNoOverseasTransfer" -> Json.arr(
+          "totalAmount"                                -> 100,
+          "totalAllowanceBeforeTransfer"               -> 100,
+          "date"                                       -> "2013-01-01",
+          "isTransferCashOnly"                         -> "false",
+          "isTheTransferTaxableOverseas"               -> "true",
+          "reasonCodesWhyTransferIsNotTaxableOverseas" -> Json.arr(
             "01"
           )
         ),

@@ -54,7 +54,7 @@ case class ReportSubmittedAuditModel(
 
   private val transferDetails: JsObject =
     maybeTransferDetails match {
-      case Some(transferDetails) => Json.obj("pensionTransfer" -> transferDetails)
+      case Some(transferDetails) => Json.obj("pensionTransfer" -> TransferDetails.auditWrites.writes(transferDetails))
       case None                  => Json.obj()
     }
 

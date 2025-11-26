@@ -29,6 +29,12 @@ object PropertyAssets {
   implicit val reads: Reads[PropertyAssets]   = Json.reads[PropertyAssets]
   implicit val writes: Writes[PropertyAssets] = Json.writes[PropertyAssets]
 
+  val auditWrites: Writes[PropertyAssets] = (
+    (__ \ "address").writeNullable[Address] and
+      (__ \ "value").writeNullable[BigDecimal] and
+      (__ \ "description").writeNullable[String]
+  )(pa => (pa.propertyAddress, pa.propValue, pa.propDescription))
+
   val upstreamReads: Reads[PropertyAssets] = (
     (__ \ "propertyAddress").readNullable[Address](Address.upstreamReads) and
       (__ \ "propValue").readNullable[BigDecimal] and
