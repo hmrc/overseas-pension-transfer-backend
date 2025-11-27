@@ -75,11 +75,12 @@ object UnquotedShares {
   )(us => (us.recordVersion, us.value, us.shareTotal, us.company, us.shareClass))
 
   val auditWrites: Writes[UnquotedShares] = (
-    (__ \ "value").writeNullable[BigDecimal] and
+    (__ \ "recordVersion").writeNullable[String] and
+      (__ \ "value").writeNullable[BigDecimal] and
       (__ \ "numberOfUnquotedShares").writeNullable[Int] and
       (__ \ "companyName").writeNullable[String] and
       (__ \ "unquotedSharesClass").writeNullable[String]
-  )(us => (us.value, us.shareTotal, us.company, us.shareClass))
+  )(us => (us.recordVersion, us.value, us.shareTotal, us.company, us.shareClass))
 
   implicit val format: Format[UnquotedShares] = Format(reads, writes)
 }
@@ -119,11 +120,12 @@ object QuotedShares {
   )(qs => (qs.recordVersion, qs.value, qs.shareTotal, qs.company, qs.shareClass))
 
   val auditWrites: Writes[QuotedShares] = (
-    (__ \ "value").writeNullable[BigDecimal] and
+    (__ \ "recordVersion").writeNullable[String] and
+      (__ \ "value").writeNullable[BigDecimal] and
       (__ \ "numberOfQuotedShares").writeNullable[Int] and
       (__ \ "companyName").writeNullable[String] and
       (__ \ "quotedSharesClass").writeNullable[String]
-  )(qs => (qs.value, qs.shareTotal, qs.company, qs.shareClass))
+  )(qs => (qs.recordVersion, qs.value, qs.shareTotal, qs.company, qs.shareClass))
 
   implicit val format: Format[QuotedShares] = Format(reads, writes)
 }
