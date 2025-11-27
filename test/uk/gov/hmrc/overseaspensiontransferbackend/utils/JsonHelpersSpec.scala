@@ -24,6 +24,20 @@ class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers {
 
   "JsonHelpers" - {
 
+    "optField" - {
+
+      "must return JSON when value exists" in {
+        val result = optField("key", Some("value"))
+        result mustBe Json.obj("key" -> "value")
+      }
+
+      "must return empty JSON when value doesnt exist" in {
+        val none: Option[String] = None
+        val result               = optField("key", none)
+        result mustBe Json.obj()
+      }
+    }
+
     "movePath" - {
 
       "must move a value from one path to another and prune empty parents" in {

@@ -48,19 +48,20 @@ case class ReportSubmittedAuditModel(
 
   private val memberDetails: JsObject =
     maybeMemberDetails match {
-      case Some(memberDetails) => Json.obj("member" -> memberDetails)
+      case Some(memberDetails) => Json.obj("member" -> MemberDetails.auditWrites.writes(memberDetails))
       case None                => Json.obj()
     }
 
   private val transferDetails: JsObject =
     maybeTransferDetails match {
-      case Some(transferDetails) => Json.obj("pensionTransfer" -> transferDetails)
+      case Some(transferDetails) => Json.obj("pensionTransfer" -> TransferDetails.auditWrites.writes(transferDetails))
       case None                  => Json.obj()
     }
 
   private val receivingQROPS: JsObject =
     maybeAboutReceivingQROPS match {
-      case Some(qropsDetails) => Json.obj("qualifyingRecognisedOverseasPensionScheme" -> qropsDetails)
+      case Some(qropsDetails) =>
+        Json.obj("qualifyingRecognisedOverseasPensionScheme" -> AboutReceivingQROPS.auditWrites.writes(qropsDetails))
       case None               => Json.obj()
     }
 

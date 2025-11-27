@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 case class TypeOfAssets(
     recordVersion: Option[String],
@@ -55,7 +56,7 @@ case class TypeOfAssets(
 
 }
 
-object TypeOfAssets {
+object TypeOfAssets extends JsonHelpers {
 
   implicit val propertyAssetsReads: Reads[PropertyAssets] = PropertyAssets.upstreamReads
 
@@ -78,4 +79,29 @@ object TypeOfAssets {
   )(TypeOfAssets.apply _)
 
   implicit val writes: Writes[TypeOfAssets] = Json.writes[TypeOfAssets]
+
+  val auditWrites: Writes[TypeOfAssets] = { assets =>
+    optField("transferContainsCash", assets.cashAssets) ++
+      optField("cashValue", assets.cashValue) ++
+      optField("transferContainsUnquotedShares", assets.unquotedShareAssets) ++
+      optField("areThereMoreThan5UnquotedShares", assets.moreUnquoted) ++
+      assets.unquotedShares.map(shares =>
+        Json.obj("unquotedSharesDetails" -> Json.toJson(shares)(Writes.list(UnquotedShares.auditWrites)))
+      ).getOrElse(Json.obj()) ++
+      optField("transferContainsQuotedShares", assets.unquotedShareAssets) ++
+      optField("areThereMoreThan5QuotedShares", assets.moreUnquoted) ++
+      assets.quotedShares.map(shares =>
+        Json.obj("quotedSharesDetails" -> Json.toJson(shares)(Writes.list(QuotedShares.auditWrites)))
+      ).getOrElse(Json.obj()) ++
+      optField("transferContainsPropertyAssets", assets.unquotedShareAssets) ++
+      optField("areThereMoreThan5PropertyAssets", assets.moreUnquoted) ++
+      assets.propertyAssets.map(property =>
+        Json.obj("propertyAssetsDetails" -> Json.toJson(property)(Writes.list(PropertyAssets.auditWrites)))
+      ).getOrElse(Json.obj()) ++
+      optField("transferContainsOtherAssets", assets.unquotedShareAssets) ++
+      optField("areThereMoreThan5OtherAssets", assets.moreUnquoted) ++
+      assets.otherAssets.map(other =>
+        Json.obj("otherAssetsDetails" -> other)
+      ).getOrElse(Json.obj())
+  }
 }

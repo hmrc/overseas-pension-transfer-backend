@@ -18,6 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
 import java.time.LocalDate
 
@@ -34,7 +35,7 @@ case class PrincipalResAddDetails(
   override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
-object PrincipalResAddDetails {
+object PrincipalResAddDetails extends JsonHelpers {
 
   implicit val reads: Reads[PrincipalResAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
@@ -42,6 +43,18 @@ object PrincipalResAddDetails {
   )(PrincipalResAddDetails.apply _)
 
   implicit val writes: OWrites[PrincipalResAddDetails] = Json.writes[PrincipalResAddDetails]
+
+  val auditWrites: OWrites[PrincipalResAddDetails] = { address =>
+    optField("addressLine1", address.addressLine1) ++
+      optField("addressLine2", address.addressLine2) ++
+      optField("addressLine3", address.addressLine3) ++
+      optField("addressLine4", address.addressLine4) ++
+      optField("addressLine5", address.addressLine5) ++
+      optField("countryCode", address.country) ++
+      optField("postcode", address.ukPostCode) ++
+      optField("poBoxNumber", address.poBoxNumber)
+  }
+
   implicit val format: OFormat[PrincipalResAddDetails] = OFormat(reads, writes)
 }
 
@@ -58,7 +71,7 @@ case class LastPrincipalAddDetails(
   override def country: Option[String]      = addressDetails.flatMap(_.country)
 }
 
-object LastPrincipalAddDetails {
+object LastPrincipalAddDetails extends JsonHelpers {
 
   implicit val reads: Reads[LastPrincipalAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
@@ -66,6 +79,18 @@ object LastPrincipalAddDetails {
   )(LastPrincipalAddDetails.apply _)
 
   implicit val writes: OWrites[LastPrincipalAddDetails] = Json.writes[LastPrincipalAddDetails]
+
+  val auditWrites: OWrites[LastPrincipalAddDetails] = { lastPrincipalAddressDetails =>
+    optField("addressLine1", lastPrincipalAddressDetails.addressLine1) ++
+      optField("addressLine2", lastPrincipalAddressDetails.addressLine2) ++
+      optField("addressLine3", lastPrincipalAddressDetails.addressLine3) ++
+      optField("addressLine4", lastPrincipalAddressDetails.addressLine4) ++
+      optField("addressLine5", lastPrincipalAddressDetails.addressLine5) ++
+      optField("countryCode", lastPrincipalAddressDetails.country) ++
+      optField("postcode", lastPrincipalAddressDetails.ukPostCode) ++
+      optField("dateMemberLeftTheUK", lastPrincipalAddressDetails.dateMemberLeftUk)
+  }
+
   implicit val format: OFormat[LastPrincipalAddDetails] = OFormat(reads, writes)
 }
 
@@ -95,10 +120,20 @@ case class ReceivingQropsAddress(
     country: Option[String]
   ) extends AddressBase
 
-object ReceivingQropsAddress {
+object ReceivingQropsAddress extends JsonHelpers {
   // NB: This may not be validated properly, I'm not sure if the compiler is smart enough to get recognise that
   // it is a form of Address. It might need its own custom reads like the others.
   implicit val format: OFormat[ReceivingQropsAddress] = Json.format
+
+  val auditWrites: OWrites[ReceivingQropsAddress] = { receivingQropsAddress =>
+    optField("addressLine1", receivingQropsAddress.addressLine1) ++
+      optField("addressLine2", receivingQropsAddress.addressLine2) ++
+      optField("addressLine3", receivingQropsAddress.addressLine3) ++
+      optField("addressLine4", receivingQropsAddress.addressLine4) ++
+      optField("addressLine5", receivingQropsAddress.addressLine5) ++
+      optField("countryCode", receivingQropsAddress.country) ++
+      optField("postcode", receivingQropsAddress.ukPostCode)
+  }
 }
 
 case class SchemeManagerAddress(
@@ -111,8 +146,18 @@ case class SchemeManagerAddress(
     country: Option[String]
   ) extends AddressBase
 
-object SchemeManagerAddress {
+object SchemeManagerAddress extends JsonHelpers {
   // NB: This may not be validated properly, I'm not sure if the compiler is smart enough to get recognise that
   // it is a form of Address. It might need its own custom reads like the others.
   implicit val format: OFormat[SchemeManagerAddress] = Json.format
+
+  val auditWrites: OWrites[SchemeManagerAddress] = { schemeManagerAddress =>
+    optField("addressLine1", schemeManagerAddress.addressLine1) ++
+      optField("addressLine2", schemeManagerAddress.addressLine2) ++
+      optField("addressLine3", schemeManagerAddress.addressLine3) ++
+      optField("addressLine4", schemeManagerAddress.addressLine4) ++
+      optField("addressLine5", schemeManagerAddress.addressLine5) ++
+      optField("countryCode", schemeManagerAddress.country) ++
+      optField("postcode", schemeManagerAddress.ukPostCode)
+  }
 }

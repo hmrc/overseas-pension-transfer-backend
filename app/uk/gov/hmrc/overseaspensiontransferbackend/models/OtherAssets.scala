@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{__, Json, Reads, Writes}
 
 case class OtherAssets(
     recordVersion: Option[String],
