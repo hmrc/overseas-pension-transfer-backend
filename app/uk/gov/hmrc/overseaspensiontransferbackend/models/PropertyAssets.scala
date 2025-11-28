@@ -31,11 +31,10 @@ object PropertyAssets {
   implicit val writes: Writes[PropertyAssets] = Json.writes[PropertyAssets]
 
   val auditWrites: Writes[PropertyAssets] = (
-    (__ \ "recordVersion").writeNullable[String] and
-      (__ \ "address").writeNullable[Address] and
+    (__ \ "address").writeNullable[Address](Address.auditWrites) and
       (__ \ "value").writeNullable[BigDecimal] and
       (__ \ "description").writeNullable[String]
-  )(pa => (pa.recordVersion, pa.propertyAddress, pa.propValue, pa.propDescription))
+  )(pa => (pa.propertyAddress, pa.propValue, pa.propDescription))
 
   val upstreamReads: Reads[PropertyAssets] = (
     (__ \ "recordVersion").readNullable[String] and

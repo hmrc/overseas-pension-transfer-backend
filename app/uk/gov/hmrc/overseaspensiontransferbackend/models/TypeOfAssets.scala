@@ -81,8 +81,7 @@ object TypeOfAssets extends JsonHelpers {
   implicit val writes: Writes[TypeOfAssets] = Json.writes[TypeOfAssets]
 
   val auditWrites: Writes[TypeOfAssets] = { assets =>
-    optField("recordVersion", assets.recordVersion) ++
-      optField("transferContainsCash", assets.cashAssets) ++
+    optField("transferContainsCash", assets.cashAssets) ++
       optField("cashValue", assets.cashValue) ++
       optField("transferContainsUnquotedShares", assets.unquotedShareAssets) ++
       optField("areThereMoreThan5UnquotedShares", assets.moreUnquoted) ++
@@ -102,7 +101,7 @@ object TypeOfAssets extends JsonHelpers {
       optField("transferContainsOtherAssets", assets.unquotedShareAssets) ++
       optField("areThereMoreThan5OtherAssets", assets.moreUnquoted) ++
       assets.otherAssets.map(other =>
-        Json.obj("otherAssetsDetails" -> other)
+        Json.obj("otherAssetsDetails" -> Json.toJson(other)(Writes.list(OtherAssets.auditWrites)))
       ).getOrElse(Json.obj())
   }
 }
