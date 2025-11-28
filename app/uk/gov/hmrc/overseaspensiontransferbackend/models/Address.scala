@@ -83,6 +83,26 @@ object Address {
     )
   )
 
+  val auditWrites: OWrites[Address] = (
+    (__ \ "addressLine1").writeNullable[String] and
+      (__ \ "addressLine2").writeNullable[String] and
+      (__ \ "addressLine3").writeNullable[String] and
+      (__ \ "addressLine4").writeNullable[String] and
+      (__ \ "addressLine5").writeNullable[String] and
+      (__ \ "ukPostCode").writeNullable[String] and
+      (__ \ "countryCode").writeNullable[String]
+  )(address =>
+    (
+      address.addressLine1,
+      address.addressLine2,
+      address.addressLine3,
+      address.addressLine4,
+      address.addressLine5,
+      address.ukPostCode,
+      address.country
+    )
+  )
+
   implicit val format: OFormat[Address] = OFormat(reads, writes)
 }
 

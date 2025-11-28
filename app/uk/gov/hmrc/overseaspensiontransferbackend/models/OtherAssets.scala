@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models
 
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Json, Reads, Writes}
 
 case class OtherAssets(
@@ -27,4 +28,9 @@ case class OtherAssets(
 object OtherAssets {
   implicit val reads: Reads[OtherAssets]   = Json.reads[OtherAssets]
   implicit val writes: Writes[OtherAssets] = Json.writes[OtherAssets]
+
+  val auditWrites: Writes[OtherAssets] = (
+    (__ \ "assetValue").writeNullable[BigDecimal] and
+      (__ \ "assetDescription").writeNullable[String]
+  )(oa => (oa.assetValue, oa.assetDescription))
 }

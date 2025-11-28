@@ -52,10 +52,9 @@ object TransferDetails extends JsonHelpers {
     Json.writes[TransferDetails]
 
   val auditWrites: OWrites[TransferDetails] = { transferDetails =>
-    optField("recordVersion", transferDetails.recordVersion) ++
-      optField("totalAmount", transferDetails.transferAmount) ++
+    optField("totalAmount", transferDetails.transferAmount) ++
       optField("totalAllowanceBeforeTransfer", transferDetails.allowanceBeforeTransfer) ++
-      optField("date", transferDetails.dateMemberTransferred) ++
+      optField("dateMemberTransferred", transferDetails.dateMemberTransferred) ++
       optField("isTransferCashOnly", transferDetails.cashOnlyTransfer) ++
       optField("isTheTransferTaxableOverseas", transferDetails.paymentTaxableOverseas) ++
       transferDetails.taxableOverseasTransferDetails.map(taxableDetails =>

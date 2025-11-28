@@ -339,22 +339,20 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       )
 
       val propertyJson = Json.obj(
-        "recordVersion" -> "001",
-        "address"       -> Json.obj(
+        "address"     -> Json.obj(
           "addressLine1" -> "line 1",
           "addressLine2" -> "line 2",
           "addressLine3" -> "line 3",
           "addressLine4" -> "line 4",
           "addressLine5" -> "line 5",
-          "country"      -> "country",
+          "countryCode"  -> "country",
           "ukPostCode"   -> "postcode"
         ),
-        "value"         -> 100,
-        "description"   -> "propertyDescription"
+        "value"       -> 100,
+        "description" -> "propertyDescription"
       )
 
       val quotedSharesJson = Json.obj(
-        "recordVersion"        -> "001",
         "value"                -> 100,
         "numberOfQuotedShares" -> 100,
         "companyName"          -> "company",
@@ -362,7 +360,6 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       )
 
       val unquotedSharesJson = Json.obj(
-        "recordVersion"          -> "001",
         "value"                  -> 100,
         "numberOfUnquotedShares" -> 100,
         "companyName"            -> "company",
@@ -370,7 +367,6 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       )
 
       val otherAssetsJson = Json.obj(
-        "recordVersion"    -> "001",
         "assetValue"       -> 100,
         "assetDescription" -> "assetDescription"
       )
@@ -378,10 +374,9 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       val result = TransferDetails.auditWrites.writes(model)
 
       result mustBe Json.obj(
-        "recordVersion"                  -> "001",
         "totalAmount"                    -> 100,
         "totalAllowanceBeforeTransfer"   -> 100,
-        "date"                           -> "2020-01-01",
+        "dateMemberTransferred"          -> "2020-01-01",
         "isTransferCashOnly"             -> "No",
         "isTheTransferTaxableOverseas"   -> "Yes",
         "taxableOverseasTransferDetails" -> Json.obj(
@@ -391,7 +386,6 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
           "transferAmountMinusTaxAmount" -> 100
         ),
         "assets"                         -> Json.obj(
-          "recordVersion"                   -> "001",
           "transferContainsCash"            -> "Yes",
           "cashValue"                       -> 100,
           "transferContainsUnquotedShares"  -> "Yes",
@@ -450,10 +444,9 @@ class AuditWritesSpec extends AnyFreeSpec with Matchers {
       val result = TransferDetails.auditWrites.writes(model)
 
       result mustBe Json.obj(
-        "recordVersion"                              -> "001",
         "totalAmount"                                -> 100,
         "totalAllowanceBeforeTransfer"               -> 100,
-        "date"                                       -> "2020-01-01",
+        "dateMemberTransferred"                      -> "2020-01-01",
         "isTransferCashOnly"                         -> "Yes",
         "isTheTransferTaxableOverseas"               -> "No",
         "reasonCodesWhyTransferIsNotTaxableOverseas" -> Json.arr("01")
