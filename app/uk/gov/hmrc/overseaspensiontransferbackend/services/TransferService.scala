@@ -209,7 +209,7 @@ class TransferServiceImpl @Inject() (
 
     val inProgressF: Future[Seq[AllTransfersItem]] =
       repository.getRecords(pstrNumber).recover { case e =>
-        logger.warn(s"[getAllTransfers] in-progress lookup failed for pstr=${pstrNumber.normalised}", e)
+        logger.warn("[getAllTransfers] in-progress lookup failed with error:", e)
         Seq.empty
       }
 
@@ -233,7 +233,6 @@ class TransferServiceImpl @Inject() (
               }
           }))
         case Left(e)   =>
-          logger.info(s"[getAllTransfers] pstr=${pstrNumber.normalised} ${e.log}")
           if (inProgress.nonEmpty) {
             Right(AllTransfersResponse(inProgress))
           } else {
