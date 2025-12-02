@@ -40,7 +40,6 @@ object TestAppConfig {
       "enrolments.psp.identifierKey"           -> "PSPID",
       "mongodb.timeToLiveInDays"               -> 30,
       "mongodb.uri"                            -> "mongodb://localhost:27017/test-saveforlater",
-      "mongodb.localMasterKey"                 -> masterKey,
       "getAllTransfers.yearsOffset"            -> 10
     )
   )

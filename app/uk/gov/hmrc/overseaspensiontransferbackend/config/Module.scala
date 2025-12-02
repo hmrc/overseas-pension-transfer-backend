@@ -44,10 +44,9 @@ class Module extends AbstractModule {
   @Provides
   @Singleton
   def provideEncryptionService(config: Configuration): EncryptionService = {
-    val master = config.getOptional[String]("mongodb.localMasterKey")
-      .orElse(config.getOptional[String]("encryption.masterKey"))
+    val master = config.getOptional[String]("encryption.masterKey")
       .getOrElse(
-        throw new IllegalStateException("encryption master key not configured (mongodb.localMasterKey or encryption.masterKey)")
+        throw new IllegalStateException("encryption master key not configured")
       )
     new EncryptionService(master)
   }
