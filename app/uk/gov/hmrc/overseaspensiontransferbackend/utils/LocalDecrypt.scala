@@ -47,11 +47,10 @@ object LocalDecrypt extends App with Logging {
       Some(config.getString(path))
     else None
 
-  val masterKey = getOptionalString("mongodb.localMasterKey")
-    .orElse(getOptionalString("encryption.masterKey"))
+  val masterKey = getOptionalString("encryption.masterKey")
     .getOrElse(
       throw new IllegalStateException(
-        "encryption master key not configured (mongodb.localMasterKey or encryption.masterKey)"
+        "encryption master key not configured"
       )
     )
 
