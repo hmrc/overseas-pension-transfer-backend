@@ -16,7 +16,7 @@ This is the backend microservice application that is part of the Managing Pensio
 
    > `sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes`
 
-The service runs on port `15600` by default.
+The service runs on port `15601` by default.
 
 ---
 
