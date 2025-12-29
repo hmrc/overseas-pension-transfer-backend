@@ -297,7 +297,7 @@ class TransferConnectorISpec extends BaseISpec {
               "qtVersion"                 -> "001",
               "qtStatus"                  -> "Compiled",
               "qtDigitalStatus"           -> "Complied",
-              "nino"                      -> "AA000000A",
+              "nino"                      -> generateNino(),
               "firstName"                 -> "David",
               "lastName"                  -> "Warne",
               "qtDate"                    -> "2025-03-14",

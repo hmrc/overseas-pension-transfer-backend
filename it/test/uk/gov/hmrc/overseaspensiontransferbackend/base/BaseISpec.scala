@@ -36,6 +36,8 @@ import scala.concurrent.{Await, Awaitable}
 import play.api.inject.bind
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 
+import scala.util.Random
+
 trait BaseISpec
   extends AnyFreeSpec
     with Matchers
@@ -56,6 +58,13 @@ trait BaseISpec
     "microservice.services.auth.port"                            -> WireMockHelper.wireMockPort.toString,
     "mongodb.uri"                                                -> testMongoUri
   )
+
+  def generateNino(prefix: String = "AA"): String = {
+    val num    = Random.nextInt(1000000)
+    val suffix = "C"
+    val nino   = f"$prefix$num%06d$suffix"
+    nino
+  }
 
   protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty
 

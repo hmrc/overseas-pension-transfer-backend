@@ -31,34 +31,34 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
 
     "must read a valid payload with multiple items and set nonEmpty=true" in {
       val json = Json.parse(
-        """
-          |{
-          |  "success": {
-          |    "qropsTransferOverview": [
-          |      {
-          |        "fbNumber": "123456000023",
-          |        "qtReference": "QT564321",
-          |        "qtVersion": "001",
-          |        "qtStatus": "Compiled",
-          |        "qtDigitalStatus": "Compiled",
-          |        "nino": "AA000000A",
-          |        "firstName": "David",
-          |        "lastName": "Warne",
-          |        "qtDate": "2025-03-14",
-          |        "qropsReference": "QROPS654321",
-          |        "submissionCompilationDate": "2025-05-09T10:10:12Z"
-          |      },
-          |      {
-          |        "fbNumber": "123456000024",
-          |        "qtReference": "QT564322",
-          |        "qtVersion": "003",
-          |        "qtStatus": "Submitted",
-          |        "submissionCompilationDate": "2025-05-09T19:10:12Z"
-          |      }
-          |    ]
-          |  }
-          |}
-          |""".stripMargin
+        s"""
+           |{
+           |  "success": {
+           |    "qropsTransferOverview": [
+           |      {
+           |        "fbNumber": "123456000023",
+           |        "qtReference": "QT564321",
+           |        "qtVersion": "001",
+           |        "qtStatus": "Compiled",
+           |        "qtDigitalStatus": "Compiled",
+           |        "nino": "$testNino",
+           |        "firstName": "David",
+           |        "lastName": "Warne",
+           |        "qtDate": "2025-03-14",
+           |        "qropsReference": "QROPS654321",
+           |        "submissionCompilationDate": "2025-05-09T10:10:12Z"
+           |      },
+           |      {
+           |        "fbNumber": "123456000024",
+           |        "qtReference": "QT564322",
+           |        "qtVersion": "003",
+           |        "qtStatus": "Submitted",
+           |        "submissionCompilationDate": "2025-05-09T19:10:12Z"
+           |      }
+           |    ]
+           |  }
+           |}
+           |""".stripMargin
       )
 
       val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
@@ -72,7 +72,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
       first.qtVersion                 mustBe "001"
       first.qtStatus                  mustBe "Compiled"
       first.qtDigitalStatus           mustBe Some("Compiled")
-      first.nino                      mustBe Some("AA000000A")
+      first.nino                      mustBe Some(testNino)
       first.firstName                 mustBe Some("David")
       first.lastName                  mustBe Some("Warne")
       first.qtDate                    mustBe Some(LocalDate.parse("2025-03-14"))
@@ -101,7 +101,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
               qtVersion                 = "001",
               qtStatus                  = "Compiled",
               qtDigitalStatus           = Some("Compiled"),
-              nino                      = Some("AA000000A"),
+              nino                      = Some(testNino),
               firstName                 = Some("David"),
               lastName                  = Some("Warne"),
               qtDate                    = Some(LocalDate.parse("2025-03-14")),
@@ -127,7 +127,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
       qtVersion                 = "001",
       qtStatus                  = "Submitted",
       qtDigitalStatus           = Some("Submitted"),
-      nino                      = Some("AA000000A"),
+      nino                      = Some(testNino),
       firstName                 = Some("David"),
       lastName                  = Some("Warne"),
       qtDate                    = Some(LocalDate.parse("2025-03-14")),
@@ -230,7 +230,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
                 qtVersion                 = "001",
                 qtStatus                  = "Compiled",
                 qtDigitalStatus           = Some("Compiled"),
-                nino                      = Some("AA000000A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("David"),
                 lastName                  = Some("Warne"),
                 qtDate                    = Some(LocalDate.parse("2025-03-14")),
@@ -245,7 +245,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
         List(AllTransfersItem(
           transferId      = QtNumber("QT564321"),
           qtVersion       = Some("001"),
-          nino            = Some("AA000000A"),
+          nino            = Some(testNino),
           memberFirstName = Some("David"),
           memberSurname   = Some("Warne"),
           submissionDate  = Some(Instant.parse("2025-05-09T10:10:12Z")),
