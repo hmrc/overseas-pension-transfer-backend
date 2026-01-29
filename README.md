@@ -31,15 +31,17 @@ These **test-only** endpoints allow developers to insert, generate, or clear dat
 
 **POST** `/test-only/in-progress/seed`  
 Creates one in-progress transfer entry in the Save-For-Later collection.
+Payload requires UUID as transferReference
 
 **POST** `/test-only/amend-in-progress/seed`
 Creates one amend-in-progress transfer entry in the Save-For-Later collection.
+Payload requires QTNumber as reference
 
 **Request body example**
 ```json
 {
   "pstr": "24000001IN",
-  "transferReference": "T-1",
+  "transferReference": "QT000001/8AFB72FC-F46D-44A1-A408-3EC57A123E16",
   "lastUpdated": "2025-10-01T12:34:56Z",
   "nino": "AA000001A",
   "firstName": "Jane",
@@ -66,7 +68,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 [
   {
     "pstr": "24000001IN",
-    "transferReference": "T-1",
+    "transferReference": "QT000001/8AFB72FC-F46D-44A1-A408-3EC57A123E16",
     "lastUpdated": "2025-09-10T10:15:30Z",
     "nino": "AA000001A",
     "firstName": "Alice",
@@ -74,7 +76,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "24000001IN",
-    "transferReference": "T-2",
+    "transferReference": "QT000002/8AFB72HC-F46D-44A1-A408-3EC57A123E16",
     "lastUpdated": "2025-09-20T14:22:05Z",
     "nino": "AA000002A",
     "firstName": "Bob",
@@ -82,7 +84,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "24000001IN",
-    "transferReference": "T-3",
+    "transferReference": "QT000003/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
     "lastUpdated": "2025-09-28T08:45:00Z",
     "nino": "AA000003A",
     "firstName": "Carol",
@@ -176,13 +178,13 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 
 2. **Run the script with your encrypted JSON document as input.**  
    
-3. **Pass the full MongoDB document containing the `_id`, `referenceId`, and `data` fields.**
+3. **Pass the full MongoDB document containing the `_id`, `transferReference`, and `data` fields.**
 
    Example with only the encrypted string:
    > `sh decrypt.sh 'ENCRYPTED_JSON_DATA'`
 
    Example with a full MongoDB document:
-   > `sh decrypt.sh '{ "_id": { "$oid": "68d29dff44e574ac97b990cb" }, "referenceId": "Int-b963d6ce-3951-43e7-8f77-b0a39cd18162", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
+   > `sh decrypt.sh '{ "_id": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16" }, "transferReference": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
 
 3. **Check the terminal output.**  
    The script will return the same JSON, but with the `data` field decrypted.
@@ -191,10 +193,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 
 ```json
 {
-  "_id" : {
-    "$oid" : "68d29dff44e574ac97b990cb"
-  },
-  "referenceId" : "Int-b963d6ce-3951-43e7-8f77-b0a39cd18162",
+  "_id" : "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
+  "transferReference": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
   "data" : {
     "transferDetails" : {
       "typeOfAssets" : {

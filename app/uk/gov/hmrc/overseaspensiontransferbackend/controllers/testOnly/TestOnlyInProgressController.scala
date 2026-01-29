@@ -20,13 +20,14 @@ import play.api.libs.json.{JsError, JsValue}
 import play.api.mvc._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly.SeedInProgress
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly.NameGenerator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
@@ -63,7 +64,7 @@ class TestOnlyInProgressController @Inject() (
       val lastUpdated   = randomInstantBetween(maxDaysBack, now)
       SeedInProgress(
         pstr              = pstr,
-        transferReference = QtNumber("QT123456"),
+        transferReference = TransferNumber(UUID.randomUUID().toString),
         lastUpdated       = lastUpdated,
         nino              = Some(f"AA0000$i%02dA"),
         firstName         = Some(first),
