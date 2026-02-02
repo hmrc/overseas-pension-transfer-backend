@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
-import org.mockito.{ArgumentMatchersSugar, MockitoSugar}
+import org.mockito.ArgumentMatchers
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
@@ -29,7 +30,7 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.AuditUserInfo
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId, PspUser}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
@@ -38,11 +39,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.Instant
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 trait SpecBase
     extends Matchers
-    with ArgumentMatchersSugar
     with TryValues
     with OptionValues
     with EitherValues
@@ -54,7 +55,7 @@ trait SpecBase
   implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val mockAppConfig: AppConfig  = mock[AppConfig]
 
-  val testId: TransferNumber = TransferNumber("test-id")
+  val testId: TransferNumber = TransferNumber(UUID.randomUUID().toString)
   val pstr: PstrNumber       = PstrNumber("12345678AB")
   val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
 

@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.authentication
 
-import play.api.libs.json.{Format, JsError, JsResult, JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json._
 
-sealed trait PsaPspId {
+trait PsaPspId {
   val value: String
   val userType: UserType
 }
@@ -28,8 +28,17 @@ final case class PsaId(value: String) extends PsaPspId {
 }
 
 object PsaId {
-  implicit val format: Format[PsaId]  = Json.format[PsaId]
-  val downstreamFormat: Format[PsaId] = Json.valueFormat
+  implicit val format: Format[PsaId] = Json.format[PsaId]
+
+  val downstreamReads: Reads[PsaId] =
+    (JsPath \ "psaId").read[String].map(PsaId.apply)
+
+  val downstreamWrites: Writes[PsaId] =
+    new Writes[PsaId] {
+
+      override def writes(o: PsaId): JsValue =
+        Json.obj("psaId" -> o.value)
+    }
 }
 
 final case class PspId(value: String) extends PsaPspId {

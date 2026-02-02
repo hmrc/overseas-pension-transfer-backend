@@ -16,23 +16,26 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito
+import org.mockito.Mockito.{doNothing, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.libs.json.{JsError, Json}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JsonAuditModel
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PspId}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, UserAnswersDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.*
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
-import uk.gov.hmrc.overseaspensiontransferbackend.validators._
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.*
 
 import java.time.{Instant, LocalDate, ZoneOffset}
 import scala.concurrent.Future

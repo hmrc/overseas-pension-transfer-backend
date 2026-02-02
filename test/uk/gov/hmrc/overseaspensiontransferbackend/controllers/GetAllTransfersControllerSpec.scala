@@ -16,19 +16,21 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.Application
 import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.*
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import java.time.{Clock, Instant, ZoneOffset}

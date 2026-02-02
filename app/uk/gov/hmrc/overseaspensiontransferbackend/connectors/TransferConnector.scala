@@ -20,10 +20,11 @@ import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logging
 import play.api.http.Status.CREATED
 import play.api.libs.json._
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HeaderNames.authorisation
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber

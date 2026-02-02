@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.PathBindable
 
 import scala.util.{Success, Try}
@@ -32,7 +32,8 @@ object TransferId {
       Try(json.validate[QtNumber]) match {
         case Success(JsSuccess(value, _)) =>
           JsSuccess(value)
-        case _                            =>
+        case tn                           =>
+          println("\n\n" + tn.get + "\n\n")
           json.validate[TransferNumber] match {
             case JsSuccess(value, _) => JsSuccess(value)
             case _                   => JsError("Unable to read as valid TransferId")
@@ -60,16 +61,27 @@ object TransferId {
   }
 }
 
-case class TransferNumber(value: String) extends TransferId
+final case class TransferNumber(value: String) extends TransferId
 
 object TransferNumber {
-  implicit val format: Format[TransferNumber] = Json.valueFormat
+
+  implicit val reads: Reads[TransferNumber] =
+    (JsPath \ "transferNumber").read[String].map(TransferNumber(_))
+
+  implicit val writes: Writes[TransferNumber] =
+    new Writes[TransferNumber] {
+
+      override def writes(o: TransferNumber): JsValue =
+        Json.obj("transferNumber" -> o.value)
+    }
+
+  implicit val format: Format[TransferNumber] = Format(reads, writes)
 }
 
-case class QtNumber(value: String) extends TransferId {
+final case class QtNumber(value: String) extends TransferId {
   require(value.matches("QT[0-9]{6}"))
 }
 
 object QtNumber {
-  implicit val format: Format[QtNumber] = Json.valueFormat[QtNumber]
+  implicit val format: Format[QtNumber] = Json.format[QtNumber]
 }
