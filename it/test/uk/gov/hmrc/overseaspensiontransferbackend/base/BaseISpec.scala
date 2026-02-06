@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers

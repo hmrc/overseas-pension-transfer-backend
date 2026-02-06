@@ -19,7 +19,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.transfer
 import play.api.libs.json.*
 import play.api.mvc.PathBindable
 
-import java.util.UUID
 import scala.util.{Success, Try}
 
 trait TransferId {
@@ -30,9 +29,7 @@ object TransferId {
 
   implicit val reads: Reads[TransferId] = Reads {
     json =>
-      println("\n\n" + json + "\n\n")
-      println("\n\n" + json + "\n\n")
-      Try(json.validate[QtNumber]) match {
+      Try(json.validate[QtNumber](QtNumber.reads)) match {
         case Success(JsSuccess(value, _)) =>
           JsSuccess(value)
         case _                            =>
@@ -79,7 +76,7 @@ object TransferNumber {
     new Writes[TransferNumber] {
 
       override def writes(o: TransferNumber): JsValue =
-        Json.obj("transferNumber" -> o.value)
+        JsString(o.value)
     }
 
   implicit val format: Format[TransferNumber] = Format(reads, writes)
@@ -93,16 +90,12 @@ object QtNumber {
 
   implicit val reads: Reads[QtNumber] =
     Reads {
-      json =>
-        println("\n\n" + json + "\n\n")
-        json match {
-          case JsString(value) =>
-            Try(QtNumber(value)) match {
-              case Success(_) => JsSuccess(QtNumber(value))
-              case _          => JsError("Unable to parse as QtNumber")
-            }
-          case _               => JsError("Cannot parse JsValue as QtNumber")
+      case JsString(value) =>
+        Try(QtNumber(value)) match {
+          case Success(_) => JsSuccess(QtNumber(value))
+          case _          => JsError("Unable to parse as QtNumber")
         }
+      case _               => JsError("Cannot parse JsValue as QtNumber")
     }
 
   implicit val writes: Writes[QtNumber] =
@@ -111,5 +104,5 @@ object QtNumber {
         JsString(qtNumber.value)
     }
 
-  implicit val format: Format[QtNumber] = Json.format[QtNumber]
+  implicit val format: Format[QtNumber] = Format(reads, writes)
 }
