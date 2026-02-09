@@ -16,11 +16,12 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber}
 
 import java.time.{Instant, LocalDate}
+import scala.annotation.tailrec
 
 final case class DownstreamAllTransfersData(success: DownstreamAllTransfersData.Payload)
 
@@ -42,6 +43,7 @@ object DownstreamAllTransfersData {
       submissionCompilationDate: Instant
     )
 
+  @tailrec
   def filterForHighestVersion(curr: List[OverviewItem], acc: List[OverviewItem]): DownstreamAllTransfersData =
     curr match {
       case Nil          => DownstreamAllTransfersData(Payload(acc))

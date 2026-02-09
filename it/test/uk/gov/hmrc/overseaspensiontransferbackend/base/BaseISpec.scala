@@ -32,7 +32,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 
 import java.time.{Clock, Instant, ZoneOffset}
 import java.util.UUID
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Awaitable}
 import play.api.inject.bind
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber

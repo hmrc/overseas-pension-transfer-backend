@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
-import org.mockito.ArgumentMatchers
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{EitherValues, OptionValues, TryValues}
@@ -32,7 +31,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.AuditUserInfo
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, Psa, PsaId, PsaUser, Psp, PspId, PspUser}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
