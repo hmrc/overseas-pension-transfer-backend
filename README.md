@@ -102,10 +102,10 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ### 3. Generate random test data
 
 **POST** `/test-only/in-progress/generate/:pstr/:n`  
-Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
+Automatically generates `n` (where 'n' represents number of record to generate) fake records for a given `pstr`, using random names and timestamps within the last 31 days.
 
 **POST** `/test-only/amend-in-progress/generate/:pstr/:n`  
-Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
+Automatically generates `n` (where 'n' represents number of record to generate) fake records for a given `pstr`, using random names and timestamps within the last 31 days.
 
 **Response**
 - `201 Created` – `n` random records successfully created
