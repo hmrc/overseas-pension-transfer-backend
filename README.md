@@ -41,7 +41,7 @@ Payload requires QTNumber as reference
 ```json
 {
   "pstr": "24000001IN",
-  "transferReference": "QT000001/8AFB72FC-F46D-44A1-A408-3EC57A123E16",
+  "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
   "lastUpdated": "2025-10-01T12:34:56Z",
   "nino": "AA000001A",
   "firstName": "Jane",
@@ -68,7 +68,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 [
   {
     "pstr": "24000001IN",
-    "transferReference": "QT000001/8AFB72FC-F46D-44A1-A408-3EC57A123E16",
+    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-10T10:15:30Z",
     "nino": "AA000001A",
     "firstName": "Alice",
@@ -76,7 +76,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "24000001IN",
-    "transferReference": "QT000002/8AFB72HC-F46D-44A1-A408-3EC57A123E16",
+    "transferReference": "QT000002/8afB72hc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-20T14:22:05Z",
     "nino": "AA000002A",
     "firstName": "Bob",
@@ -84,7 +84,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "24000001IN",
-    "transferReference": "QT000003/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
+    "transferReference": "QT000003/8afb72gc-f46d-44a1-a408-3ec57e123e16",
     "lastUpdated": "2025-09-28T08:45:00Z",
     "nino": "AA000003A",
     "firstName": "Carol",
@@ -184,7 +184,7 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
    > `sh decrypt.sh 'ENCRYPTED_JSON_DATA'`
 
    Example with a full MongoDB document:
-   > `sh decrypt.sh '{ "_id": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16" }, "transferReference": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
+   > `sh decrypt.sh '{ "_id": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16" }, "transferReference": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
 
 3. **Check the terminal output.**  
    The script will return the same JSON, but with the `data` field decrypted.
@@ -193,8 +193,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 
 ```json
 {
-  "_id" : "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
-  "transferReference": "QT000001/8AFB72GC-F46D-44A1-A408-3EC57A123E16",
+  "_id" : "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16",
+  "transferReference": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16",
   "data" : {
     "transferDetails" : {
       "typeOfAssets" : {
