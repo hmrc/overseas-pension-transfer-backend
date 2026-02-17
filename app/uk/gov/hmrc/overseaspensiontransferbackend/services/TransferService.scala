@@ -179,6 +179,9 @@ class TransferServiceImpl @Inject() (
             logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
+      case Left(err)                                                                 =>
+        logger.warn(s"[TransferService][getTransfer] Invalid request: $err")
+        Future.successful(Left(err))
     }
   }
 

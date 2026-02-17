@@ -18,13 +18,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId, TransferNumber}
 
 class QtNumberSpec extends AnyFreeSpec with Matchers {
 
-  "QtNumber" - {
-    "accept QtNumber in correct format" in {
-      QtNumber("QT123456").value mustBe "QT123456"
+  "QtNumber domain validation" - {
+
+    "accept valid QT numbers" in {
+      QtNumber.from("QT123456") mustBe Right(QtNumber.from("QT123456").toOption.get)
     }
 
     List(
@@ -37,13 +40,34 @@ class QtNumberSpec extends AnyFreeSpec with Matchers {
       "T123456",
       "AB123456",
       "QTA23456",
-      ""
-    ) foreach {
-      testString =>
-        s"Return error message when incorrect format: $testString" in {
-          intercept[IllegalArgumentException](QtNumber(testString)).getMessage mustBe "requirement failed"
-        }
+      "",
+      "QT12A456"
+    ).foreach { s =>
+      s"reject invalid: $s" in {
+        QtNumber.from(s).isLeft mustBe true
+      }
     }
   }
 
+  "QtNumber JSON Reads" - {
+
+    "parse valid JSON" in {
+      Json.fromJson[QtNumber](JsString("QT123456")).isSuccess mustBe true
+    }
+
+    "reject invalid JSON" in {
+      Json.fromJson[QtNumber](JsString("BAD")).isError mustBe true
+    }
+  }
+
+  "TransferId Reads" - {
+
+    "parse QT as TransferId" in {
+      Json.fromJson[TransferId](JsString("QT123456")).get mustBe a[QtNumber]
+    }
+
+    "parse non-QT as TransferNumber" in {
+      Json.fromJson[TransferId](JsString("ABC123")).get mustBe a[TransferNumber]
+    }
+  }
 }

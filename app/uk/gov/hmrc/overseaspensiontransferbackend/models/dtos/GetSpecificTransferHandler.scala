@@ -19,8 +19,6 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId, TransferIdentifierInvalid, TransferRetrievalError}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
-import scala.util.{Success, Try}
-
 sealed trait GetSpecificTransferHandler {
   def pstr: PstrNumber
   def qtStatus: QtStatus
@@ -38,8 +36,8 @@ object GetSpecificTransferHandler {
       case (InProgress, None)                                      => Right(GetSaveForLaterRecord(referenceId, pstr, qtStatus))
       case (AmendInProgress | Submitted | Compiled, Some(version)) =>
         referenceId match {
-          case qtNumber @ QtNumber(_) => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
-          case _                      => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
+          case qtNumber: QtNumber => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
+          case _                  => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
         }
       case _                                                       =>
         Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
