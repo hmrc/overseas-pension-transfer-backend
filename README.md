@@ -23,6 +23,7 @@ The service runs on port `15601` by default.
 ## Seeding the Save-For-Later Database
 
 These **test-only** endpoints allow developers to insert, generate, or clear data in the Save-For-Later MongoDB collection when running the service locally or in CI.
+References to <nino> and <pstr> are placeholders for valid nino and PSTR values
 
 > ⚠️ These routes are **not** available in production and require starting the app with:  
 > `sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes`
@@ -40,10 +41,10 @@ Payload requires QTNumber as reference
 **Request body example**
 ```json
 {
-  "pstr": "24000001IN",
+  "pstr": "<pstr>",
   "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
   "lastUpdated": "2025-10-01T12:34:56Z",
-  "nino": "AA000001A",
+  "nino": "<nino>",
   "firstName": "Jane",
   "lastName": "Doe"
 }
@@ -67,26 +68,26 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ```json
 [
   {
-    "pstr": "24000001IN",
+    "pstr": "<pstr>",
     "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-10T10:15:30Z",
-    "nino": "AA000001A",
+    "nino": "<nino>",
     "firstName": "Alice",
     "lastName": "Brown"
   },
   {
-    "pstr": "24000001IN",
+    "pstr": "<pstr>",
     "transferReference": "QT000002/8afB72hc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-20T14:22:05Z",
-    "nino": "AA000002A",
+    "nino": "<nino>",
     "firstName": "Bob",
     "lastName": "Jones"
   },
   {
-    "pstr": "24000001IN",
+    "pstr": "<pstr>",
     "transferReference": "QT000003/8afb72gc-f46d-44a1-a408-3ec57e123e16",
     "lastUpdated": "2025-09-28T08:45:00Z",
-    "nino": "AA000003A",
+    "nino": "<nino>",
     "firstName": "Carol",
     "lastName": "Smith"
   }
