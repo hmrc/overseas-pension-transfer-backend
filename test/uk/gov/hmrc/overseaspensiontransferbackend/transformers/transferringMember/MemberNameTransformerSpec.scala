@@ -20,8 +20,9 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.EitherValues
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class MemberNameTransformerSpec extends AnyFreeSpec with Matchers with EitherValues {
+class MemberNameTransformerSpec extends AnyFreeSpec with Matchers with EitherValues with SpecBase {
 
   private val transformer = new MemberNameTransformer
 
@@ -72,13 +73,13 @@ class MemberNameTransformerSpec extends AnyFreeSpec with Matchers with EitherVal
     }
 
     "must return original JSON if name key not present on construct" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A"))
+      val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> testNino))
 
       transformer.construct(inputJson).value mustBe inputJson
     }
 
     "must return original JSON if foreName/lastName not present on deconstruct" in {
-      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456A")))
+      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> testNino)))
 
       transformer.deconstruct(inputJson).value mustBe inputJson
     }

@@ -368,7 +368,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA000000A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("David"),
                 lastName                  = Some("Warne"),
                 qtDate                    = Some(LocalDate.parse("2025-03-14")),
@@ -381,7 +381,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "003",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA000001A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Edith"),
                 lastName                  = Some("Ennis-Hill"),
                 qtDate                    = Some(LocalDate.parse("2025-01-01")),
@@ -394,7 +394,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "002",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA000001A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Edith"),
                 lastName                  = Some("Ennis-Hill"),
                 qtDate                    = Some(LocalDate.parse("2025-01-01")),
@@ -407,7 +407,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA000001A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Edith"),
                 lastName                  = Some("Ennis-Hill"),
                 qtDate                    = Some(LocalDate.parse("2025-01-01")),
@@ -439,7 +439,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
             first.transferId      mustBe QtNumber("QT564321")
             first.qtVersion       mustBe Some("001")
             first.qtStatus        mustBe Some(QtStatus("Submitted"))
-            first.nino            mustBe Some("AA000000A")
+            first.nino            mustBe Some(testNino)
             first.memberFirstName mustBe Some("David")
             first.memberSurname   mustBe Some("Warne")
             first.qtDate          mustBe Some(LocalDate.parse("2025-03-14"))
@@ -503,7 +503,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "002",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA000002A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Alice"),
                 lastName                  = Some("Liddell"),
                 qtDate                    = Some(LocalDate.parse("2025-02-02")),
@@ -517,7 +517,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         val inProg = AllTransfersItem(
           transferId      = TransferNumber("T-1"),
           qtVersion       = None,
-          nino            = Some("AB123456C"),
+          nino            = Some(testNino),
           memberFirstName = Some("In"),
           memberSurname   = Some("Progress"),
           submissionDate  = None,
@@ -620,7 +620,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA777777A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Sue"),
                 lastName                  = Some("Smith"),
                 qtDate                    = Some(LocalDate.parse("2025-06-01")),
@@ -662,7 +662,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
                 qtVersion                 = "001",
                 qtStatus                  = "Submitted",
                 qtDigitalStatus           = Some("Submitted"),
-                nino                      = Some("AA777777A"),
+                nino                      = Some(testNino),
                 firstName                 = Some("Sue"),
                 lastName                  = Some("Smith"),
                 qtDate                    = Some(LocalDate.parse("2025-06-01")),

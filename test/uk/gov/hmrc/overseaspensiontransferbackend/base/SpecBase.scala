@@ -39,6 +39,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext
+import scala.util.Random
 
 trait SpecBase
     extends Matchers
@@ -120,6 +121,15 @@ trait SpecBase
     PstrNumber("12345678AB"),
     "SchemeName"
   )
+
+  def generateNino(prefix: String = "AA"): String = {
+    val num    = Random.nextInt(1000000)
+    val suffix = "C"
+    val nino   = f"$prefix$num%06d$suffix"
+    nino
+  }
+
+  val testNino = generateNino()
 
   def quotedShare(v: Int, n: Int, c: String, cls: String): JsObject =
     Json.obj("quotedValue" -> BigDecimal(v), "quotedShareTotal" -> n, "quotedCompany" -> c, "quotedClass" -> cls)
