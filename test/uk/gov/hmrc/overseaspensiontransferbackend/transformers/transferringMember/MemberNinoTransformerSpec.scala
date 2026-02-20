@@ -19,23 +19,24 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMemb
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class MemberNinoTransformerSpec extends AnyFreeSpec with Matchers {
+class MemberNinoTransformerSpec extends AnyFreeSpec with Matchers with SpecBase {
 
   private val transformer = new MemberNinoTransformer
 
   "MemberNinoTransformer" - {
 
     "must move memberDetails.nino to transferringMember.memberDetails.nino" in {
-      val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C"))
-      val expected  = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C")))
+      val inputJson = Json.obj("memberDetails" -> Json.obj("nino" -> testNino))
+      val expected  = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> testNino)))
 
       transformer.construct(inputJson) mustBe Right(expected)
     }
 
     "must move transferringMember.memberDetails.nino to memberDetails.nino" in {
-      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C")))
-      val expected  = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C"))
+      val inputJson = Json.obj("transferringMember" -> Json.obj("memberDetails" -> Json.obj("nino" -> testNino)))
+      val expected  = Json.obj("memberDetails" -> Json.obj("nino" -> testNino))
 
       transformer.deconstruct(inputJson) mustBe Right(expected)
     }

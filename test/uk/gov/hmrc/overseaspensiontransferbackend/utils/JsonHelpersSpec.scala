@@ -19,8 +19,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.utils
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers {
+class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers with SpecBase {
 
   "JsonHelpers" - {
 
@@ -123,7 +124,7 @@ class JsonHelpersSpec extends AnyFreeSpec with Matchers with JsonHelpers {
               "memberDetails" -> Json.obj(
                 "foreName" -> "Old",
                 "lastName" -> "Name",
-                "nino"     -> "AA123456A"
+                "nino"     -> testNino
               ),
               "otherKey"      -> "keepMe"
             ),

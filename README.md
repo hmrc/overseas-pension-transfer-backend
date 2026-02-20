@@ -38,10 +38,10 @@ Creates one amend-in-progress transfer entry in the Save-For-Later collection.
 **Request body example**
 ```json
 {
-  "pstr": "24000001IN",
+  "pstr": "see notes below",
   "transferReference": "T-1",
   "lastUpdated": "2025-10-01T12:34:56Z",
-  "nino": "AA000001A",
+  "nino": "see notes below",
   "firstName": "Jane",
   "lastName": "Doe"
 }
@@ -65,26 +65,26 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ```json
 [
   {
-    "pstr": "24000001IN",
+    "pstr": "see notes below",
     "transferReference": "T-1",
     "lastUpdated": "2025-09-10T10:15:30Z",
-    "nino": "AA000001A",
+    "nino": "see notes below",
     "firstName": "Alice",
     "lastName": "Brown"
   },
   {
-    "pstr": "24000001IN",
+    "pstr": "see notes below",
     "transferReference": "T-2",
     "lastUpdated": "2025-09-20T14:22:05Z",
-    "nino": "AA000002A",
+    "nino": "see notes below",
     "firstName": "Bob",
     "lastName": "Jones"
   },
   {
-    "pstr": "24000001IN",
+    "pstr": "see notes below",
     "transferReference": "T-3",
     "lastUpdated": "2025-09-28T08:45:00Z",
-    "nino": "AA000003A",
+    "nino": "see notes below",
     "firstName": "Carol",
     "lastName": "Smith"
   }
@@ -215,6 +215,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 ### Notes
 - Make sure to copy the JSON exactly (with quotes escaped) when passing it into the command.
 - If the input format is wrong, the script will fail to parse the JSON.
+- An HMRC Pension Scheme Tax Reference (PSTR) number is a 10-character reference made up of eight digits followed by two letters.
+- A National Insurance Number (NINO) format: two letters, followed by six numbers, and ending with one letter.
 
 ---
 
