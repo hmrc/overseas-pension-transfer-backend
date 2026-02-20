@@ -60,7 +60,8 @@ trait BaseISpec
   )
 
   def generateNino(prefix: String = "AA"): String = {
-    val num    = Random.nextInt(1000000)
+    val fixedRandom = new Random(12345)
+    val num    = fixedRandom.nextInt(1000000)
     val suffix = "C"
     val nino   = f"$prefix$num%06d$suffix"
     nino
