@@ -23,7 +23,6 @@ The service runs on port `15601` by default.
 ## Seeding the Save-For-Later Database
 
 These **test-only** endpoints allow developers to insert, generate, or clear data in the Save-For-Later MongoDB collection when running the service locally or in CI.
-References to <nino> and <pstr> are placeholders for valid nino and PSTR values
 
 > ⚠️ These routes are **not** available in production and require starting the app with:  
 > `sbt run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes`
@@ -41,10 +40,10 @@ Payload requires QTNumber as reference
 **Request body example**
 ```json
 {
-  "pstr": "<pstr>",
+  "pstr": "see notes below",
   "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
   "lastUpdated": "2025-10-01T12:34:56Z",
-  "nino": "<nino>",
+  "nino": "see notes below",
   "firstName": "Jane",
   "lastName": "Doe"
 }
@@ -68,26 +67,26 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ```json
 [
   {
-    "pstr": "<pstr>",
+    "pstr": "see notes below",
     "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-10T10:15:30Z",
-    "nino": "<nino>",
+    "nino": "see notes below",
     "firstName": "Alice",
     "lastName": "Brown"
   },
   {
-    "pstr": "<pstr>",
-    "transferReference": "QT000002/8afB72hc-f46d-44a1-a408-3ec57a123e16",
+    "pstr": "see notes below",
+    "transferReference":"QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-20T14:22:05Z",
-    "nino": "<nino>",
+    "nino": "see notes below",
     "firstName": "Bob",
     "lastName": "Jones"
   },
   {
-    "pstr": "<pstr>",
-    "transferReference": "QT000003/8afb72gc-f46d-44a1-a408-3ec57e123e16",
+    "pstr": "see notes below",
+    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-28T08:45:00Z",
-    "nino": "<nino>",
+    "nino": "see notes below",
     "firstName": "Carol",
     "lastName": "Smith"
   }
@@ -216,6 +215,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 ### Notes
 - Make sure to copy the JSON exactly (with quotes escaped) when passing it into the command.
 - If the input format is wrong, the script will fail to parse the JSON.
+- An HMRC Pension Scheme Tax Reference (PSTR) number is a 10-character reference made up of eight digits followed by two letters.
+- A National Insurance Number (NINO) format: two letters, followed by six numbers, and ending with one letter.
 
 ---
 

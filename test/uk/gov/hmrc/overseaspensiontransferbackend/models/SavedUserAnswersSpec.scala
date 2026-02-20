@@ -19,13 +19,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.base.{SpecBase, TestAppConfig}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
 import java.time.Instant
 
-class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
+class SavedUserAnswersSpec extends AnyFreeSpec with Matchers with SpecBase {
 
   implicit private val encryptionService: EncryptionService = TestAppConfig.encryptionService
 
@@ -99,7 +99,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferId  = TransferNumber("ref-123"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
-          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
+          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some(testNino))))),
           aboutReceivingQROPS = None,
           transferDetails     = None,
           None
@@ -112,7 +112,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
           transferId      = TransferNumber("ref-123"),
           qtVersion       = None,
           qtStatus        = Some(InProgress),
-          nino            = Some("AA000000A"),
+          nino            = Some(testNino),
           memberFirstName = Some("Forename"),
           memberSurname   = Some("Lastname"),
           qtDate          = None,
@@ -127,7 +127,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
         transferId  = QtNumber("QT123456"),
         pstr        = PstrNumber("12345678AB"),
         data        = AnswersData(
-          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some("AA000000A"))))),
+          transferringMember  = Some(TransferringMember(Some(MemberDetails(Some("Forename"), Some("Lastname"), None, Some(testNino))))),
           aboutReceivingQROPS = None,
           transferDetails     = None,
           None
@@ -140,7 +140,7 @@ class SavedUserAnswersSpec extends AnyFreeSpec with Matchers {
           transferId      = QtNumber("QT123456"),
           qtVersion       = None,
           qtStatus        = Some(AmendInProgress),
-          nino            = Some("AA000000A"),
+          nino            = Some(testNino),
           memberFirstName = Some("Forename"),
           memberSurname   = Some("Lastname"),
           qtDate          = None,
