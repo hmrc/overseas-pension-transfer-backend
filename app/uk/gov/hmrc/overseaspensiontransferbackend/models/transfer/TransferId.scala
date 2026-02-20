@@ -66,10 +66,25 @@ object TransferNumber {
   implicit val format: Format[TransferNumber] = Json.valueFormat
 }
 
-case class QtNumber(value: String) extends TransferId {
-  require(value.matches("QT[0-9]{6}"))
-}
+case class QtNumber(value: String) extends TransferId
 
 object QtNumber {
-  implicit val format: Format[QtNumber] = Json.valueFormat[QtNumber]
+
+  private val pattern = "^QT[0-9]{6}$".r
+
+  def from(value: String): Either[String, QtNumber] =
+    if (pattern.matches(value)) Right(QtNumber(value))
+    else Left(s"Invalid QT number format: $value")
+
+  implicit val reads: Reads[QtNumber] = Reads {
+    case JsString(v) =>
+      from(v) match {
+        case Right(qt) => JsSuccess(qt)
+        case Left(err) => JsError(err)
+      }
+    case _           => JsError("QT number must be a string")
+  }
+
+  implicit val writes: Writes[QtNumber] =
+    Writes(q => JsString(q.value))
 }

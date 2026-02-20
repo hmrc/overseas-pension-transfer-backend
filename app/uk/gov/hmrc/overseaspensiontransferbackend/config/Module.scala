@@ -22,7 +22,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{Identifie
 import uk.gov.hmrc.overseaspensiontransferbackend.services._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{UserAnswersTransformer, UserAnswersTransformerFactory}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.SubmissionValidator
 
 import java.time.Clock
 
