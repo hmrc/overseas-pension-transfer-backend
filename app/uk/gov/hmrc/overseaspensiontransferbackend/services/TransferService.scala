@@ -25,7 +25,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.SubmissionSucceeded
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{AuditUserInfo, JourneySubmittedType, ReportSubmittedAuditModel}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaUser, PspUser}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.DownstreamAllTransfersData.{OverviewItem, Payload}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
@@ -179,6 +178,9 @@ class TransferServiceImpl @Inject() (
             logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
+      case Left(err)                                                                 =>
+        logger.warn(s"[TransferService][getTransfer] Invalid request: $err")
+        Future.successful(Left(err))
     }
   }
 
