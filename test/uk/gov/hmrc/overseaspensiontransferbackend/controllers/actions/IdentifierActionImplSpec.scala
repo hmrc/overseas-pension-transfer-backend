@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Results.Ok
-import play.api.mvc._
+import play.api.mvc.*
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
@@ -64,22 +66,22 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
   private def stubAuthoriseReturns(value: RetrievalResult): Unit =
     when(
       mockAuthConnector.authorise[RetrievalResult](
-        *[Predicate],
-        *[Retrieval[RetrievalResult]]
+        any[Predicate],
+        any[Retrieval[RetrievalResult]]
       )(
-        *[HeaderCarrier],
-        *[ExecutionContext]
+        any[HeaderCarrier],
+        any[ExecutionContext]
       )
     ).thenReturn(Future.successful(value))
 
   private def stubAuthoriseFails(ex: Throwable): Unit =
     when(
       mockAuthConnector.authorise[RetrievalResult](
-        *[Predicate],
-        *[Retrieval[RetrievalResult]]
+        any[Predicate],
+        any[Retrieval[RetrievalResult]]
       )(
-        *[HeaderCarrier],
-        *[ExecutionContext]
+        any[HeaderCarrier],
+        any[ExecutionContext]
       )
     ).thenReturn(Future.failed(ex))
 
@@ -92,7 +94,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
       val result = action.invokeBlock(
         fakeRequest,
-        { _: IdentifierRequest[AnyContent] =>
+        { (_: IdentifierRequest[AnyContent]) =>
           Future.successful(Ok(s"OK"))
         }
       )
@@ -107,7 +109,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
       val result = action.invokeBlock(
         fakeRequest,
-        { request: IdentifierRequest[AnyContent] =>
+        { (request: IdentifierRequest[AnyContent]) =>
           Future.successful(Ok(s"OK - ${request.authenticatedUser.internalId} - ${request.authenticatedUser}"))
         }
       )

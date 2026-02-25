@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.base
 
+import org.mongodb.scala.SingleObservableFuture
 import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -31,7 +32,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 
 import java.time.{Clock, Instant, ZoneOffset}
 import java.util.UUID
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Awaitable}
 import play.api.inject.bind
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber

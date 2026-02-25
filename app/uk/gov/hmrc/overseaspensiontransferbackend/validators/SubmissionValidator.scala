@@ -18,8 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
 import com.google.inject.ImplementedBy
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, QtNumber}
 
 import javax.inject.{Inject, Singleton}
@@ -41,8 +41,8 @@ object Submission {
   def apply(answers: SavedUserAnswers, normalised: NormalisedSubmission): Submission = {
     val reportDetails = {
       val maybeQtReference = normalised.referenceId match {
-        case QtNumber(value) => Some(value)
-        case _               => None
+        case qtNumber: QtNumber => Some(qtNumber.value)
+        case _                  => None
       }
       ReportDetails(
         answers.pstr.value,
@@ -62,7 +62,7 @@ object Submission {
     val (psaDeclaration, pspDeclaration): (Option[Declaration], Option[Declaration]) = {
       val buildDeclaration: Option[Declaration] = answers.data.submitToHMRC match {
         case Some(true) => Some(Declaration(declaration1 = true, declaration2 = true))
-        case None       => None
+        case _          => None
       }
 
       normalised.userId.userType match {

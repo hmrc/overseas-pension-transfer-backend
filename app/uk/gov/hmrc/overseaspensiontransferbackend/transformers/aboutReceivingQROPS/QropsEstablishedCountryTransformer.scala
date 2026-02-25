@@ -17,9 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import com.google.inject.Inject
-import play.api.libs.json.{JsError, JsObject, JsPath, JsString, JsValue, Json}
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
@@ -32,8 +32,6 @@ class QropsEstablishedCountryTransformer @Inject() (countryCodeReader: CountryCo
   override def externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
 
   override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ jsonKey
-
-  private val qropsEstablishedOtherPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ "qropsEstablishedOther"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     *

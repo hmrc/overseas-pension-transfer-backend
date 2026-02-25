@@ -18,8 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import play.api.libs.json.Json
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 
 import java.time.LocalDate
 

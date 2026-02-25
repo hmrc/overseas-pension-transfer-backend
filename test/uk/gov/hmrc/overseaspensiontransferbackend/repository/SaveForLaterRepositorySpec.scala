@@ -24,13 +24,13 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
 import uk.gov.hmrc.overseaspensiontransferbackend.base.TestAppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferId, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 
 import java.time.{Clock, Instant, ZoneOffset}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
 class SaveForLaterRepositorySpec
     extends AnyFreeSpec
@@ -153,7 +153,7 @@ class SaveForLaterRepositorySpec
       repository.set(saved1).futureValue mustBe true
       repository.set(saved2).futureValue mustBe true
 
-      val rawDocs = rawCollection.find().collect().toFuture().futureValue
+      val rawDocs = rawCollection.find().collect().head().futureValue
       val enc1    = rawDocs.find(_.get("transferId").get.asString().getValue == "ref1").get.get("data").get.asString().getValue
       val enc2    = rawDocs.find(_.get("transferId").get.asString().getValue == "ref2").get.get("data").get.asString().getValue
 
@@ -181,7 +181,7 @@ class SaveForLaterRepositorySpec
         "data"        -> "invalid-encryption",
         "lastUpdated" -> java.util.Date.from(now)
       )
-      rawCollection.insertOne(corruptDoc).toFuture().futureValue
+      rawCollection.insertOne(corruptDoc).head().futureValue
 
       assertThrows[RuntimeException] {
         repository.get("ref-corrupt").futureValue

@@ -75,13 +75,13 @@ trait AddressTransformerStep extends JsonHelpers {
 
   private def extractAddressFields(jsObj: JsObject): Seq[(String, JsValue)] =
     Seq(
-      "addressLine1" -> (jsObj \ "addressLine1").asOpt[String].map(JsString),
-      "addressLine2" -> (jsObj \ "addressLine2").asOpt[String].map(JsString),
-      "addressLine3" -> (jsObj \ "addressLine3").asOpt[String].map(JsString),
-      "addressLine4" -> (jsObj \ "addressLine4").asOpt[String].map(JsString),
-      "addressLine5" -> (jsObj \ "addressLine5").asOpt[String].map(JsString),
-      "ukPostCode"   -> (jsObj \ "ukPostCode").asOpt[String].map(JsString),
-      "country"      -> (jsObj \ "country" \ "code").asOpt[String].map(JsString)
+      "addressLine1" -> (jsObj \ "addressLine1").asOpt[String].map(JsString.apply),
+      "addressLine2" -> (jsObj \ "addressLine2").asOpt[String].map(JsString.apply),
+      "addressLine3" -> (jsObj \ "addressLine3").asOpt[String].map(JsString.apply),
+      "addressLine4" -> (jsObj \ "addressLine4").asOpt[String].map(JsString.apply),
+      "addressLine5" -> (jsObj \ "addressLine5").asOpt[String].map(JsString.apply),
+      "ukPostCode"   -> (jsObj \ "ukPostCode").asOpt[String].map(JsString.apply),
+      "country"      -> (jsObj \ "country" \ "code").asOpt[String].map(JsString.apply)
     ).collect {
       case (key, Some(value)) => key -> value
     }

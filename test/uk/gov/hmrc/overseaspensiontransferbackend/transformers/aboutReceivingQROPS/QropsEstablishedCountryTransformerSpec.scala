@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
 
@@ -40,7 +40,6 @@ class QropsEstablishedCountryTransformerSpec extends AnyFreeSpec with Matchers w
     }
 
     "must update aboutReceivingQROPS.receivingQropsEstablishedDetails.qropsEstablished if value is already set" in {
-      val oldCountry = Country("FR", Some("France"))
       val newCountry = Country("DE", Some("Germany"))
 
       val incomingFrontendJson = Json.obj(

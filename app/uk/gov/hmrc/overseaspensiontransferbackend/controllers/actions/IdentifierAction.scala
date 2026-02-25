@@ -57,6 +57,7 @@ class IdentifierActionImpl @Inject() (
         val internalId                           = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
         val authenticatedUser: AuthenticatedUser = extractUser(enrolments, config, internalId, affinityGroup)
         block(IdentifierRequest(request, authenticatedUser))
+      case _                                                => Future.successful(Unauthorized)
     } recover handleAuthException
   }
 
