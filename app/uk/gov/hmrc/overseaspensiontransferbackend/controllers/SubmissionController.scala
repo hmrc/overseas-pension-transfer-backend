@@ -53,8 +53,6 @@ class SubmissionController @Inject() (
           ))
         case Left(SubmissionFailed)                   =>
           InternalServerError(Json.obj("error" -> "Failed to submit"))
-        case Left(other)                              =>
-          InternalServerError(Json.obj("error" -> s"Unexpected error: $other"))
       }
     }
 }

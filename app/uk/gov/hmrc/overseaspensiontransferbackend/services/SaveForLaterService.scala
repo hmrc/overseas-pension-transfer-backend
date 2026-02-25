@@ -18,11 +18,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import org.apache.pekko.Done
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferId, TransferNumber}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{AnswersData, Compiled, ReportDetails, SavedUserAnswers, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
@@ -33,10 +33,10 @@ import scala.concurrent.{ExecutionContext, Future}
 sealed trait SaveForLaterError
 
 object SaveForLaterError {
-  final case class TransformationError(msg: String) extends SaveForLaterError
-  final case object NotFound                        extends SaveForLaterError
-  final case object SaveFailed                      extends SaveForLaterError
-  final case object DeleteFailed                    extends SaveForLaterError
+  case class TransformationError(msg: String) extends SaveForLaterError
+  case object NotFound                        extends SaveForLaterError
+  case object SaveFailed                      extends SaveForLaterError
+  case object DeleteFailed                    extends SaveForLaterError
 }
 
 trait SaveForLaterService {

@@ -20,7 +20,7 @@ import play.api.libs.json.{JsError, JsValue}
 import play.api.mvc._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly.SeedAmendInProgress
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly.NameGenerator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -61,9 +61,10 @@ class TestOnlyAmendInProgressController @Inject() (
     val seeds       = (1 to n).map { i =>
       val (first, last) = NameGenerator.nameFor(pstr, i)
       val lastUpdated   = randomInstantBetween(maxDaysBack, now)
+
       SeedAmendInProgress(
         pstr              = pstr,
-        transferReference = TransferNumber("T-$i"),
+        transferReference = QtNumber(f"QT0000$i%02d"),
         lastUpdated       = lastUpdated,
         nino              = Some(f"AA0000$i%02dA"),
         firstName         = Some(first),

@@ -31,7 +31,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
     Some("Forename"),
     Some("Last name"),
     Some(LocalDate.of(2000, 1, 1)),
-    Some("AA123456A"),
+    Some(testNino),
     None,
     Some(PrincipalResAddDetails(
       Some(Address(
@@ -92,7 +92,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           "foreName"                    -> "Forename",
           "lastName"                    -> "Last name",
           "dateOfBirth"                 -> "2000-01-01",
-          "nino"                        -> "AA123456A",
+          "nino"                        -> testNino,
           "principalResidentialAddress" -> Json.obj(
             "addressLine1" -> "line 1",
             "addressLine2" -> "line 2",
@@ -219,7 +219,7 @@ class ReportSubmittedAuditModelSpec extends AnyFreeSpec with SpecBase {
           "foreName"                    -> "Forename",
           "lastName"                    -> "Last name",
           "dateOfBirth"                 -> "2000-01-01",
-          "nino"                        -> "AA123456A",
+          "nino"                        -> testNino,
           "principalResidentialAddress" -> Json.obj(
             "addressLine1" -> "line 1",
             "addressLine2" -> "line 2",

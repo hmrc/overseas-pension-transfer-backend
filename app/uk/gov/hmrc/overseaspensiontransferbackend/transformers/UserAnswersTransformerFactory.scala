@@ -17,29 +17,9 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
 import com.google.inject.Inject
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.{
-  AmountTaxDeductedTransformer,
-  ApplicableExclusionTransformer,
-  AssetTypeTransformer,
-  CashAssetsTransformer,
-  CashOnlyTransferTransformer,
-  CashValueTransformer,
-  MoreOtherAssetTransformer,
-  MorePropertyTransformer,
-  MoreQuotedTransformer,
-  MoreUnquotedTransformer,
-  OtherAssetsTransformer,
-  PaymentTaxableOverseasTransformer,
-  PropertyTransformer,
-  QuotedSharesTransformer,
-  ReasonNoOverseasTransferTransformer,
-  RecordVersionTransformer,
-  TransferMinusTaxTransformer,
-  UnquotedSharesTransformer,
-  WhyTaxableTransformer
-}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember._
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS.*
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails.*
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember.*
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
 class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeReader) {
@@ -61,7 +41,7 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
     new QropsRefTransformer(),
     new QropsAddressTransformer(countryCodeReader),
     new QropsEstablishedCountryTransformer(countryCodeReader),
-    new QropsEstablishedOtherTransformer(countryCodeReader)
+    new QropsEstablishedOtherTransformer
   )
 
   private def qropsSchemeManagerDetailsTransformers: Seq[Transformer] = Seq(

@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.base
 
 import play.api.libs.json._
 
-object UserAnswersTestData {
+object UserAnswersTestData extends BaseISpec {
 
   val submitToHMRC = Json.obj(
     "submitToHMRC" -> true
@@ -31,7 +31,7 @@ object UserAnswersTestData {
         "lastName"  -> "McTest"
       ),
       "dateOfBirth"             -> "2011-06-05",
-      "nino"                    -> "AB123456B",
+      "nino"                    -> generateNino("AB"),
       "principalResAddDetails"  -> Json.obj(
         "addressLine1" -> "1",
         "addressLine2" -> "Test road",
@@ -166,7 +166,7 @@ object UserAnswersTestData {
         "foreName"               -> "Test",
         "lastName"               -> "McTest",
         "dateOfBirth"            -> "2011-06-05",
-        "nino"                   -> "AB123456B",
+        "nino"                   -> generateNino("AB"),
         "principalResAddDetails" -> Json.obj(
           "addressDetails" -> Json.obj(
             "addressLine1" -> "1",

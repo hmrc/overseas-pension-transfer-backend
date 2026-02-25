@@ -18,19 +18,18 @@ package uk.gov.hmrc.overseaspensiontransferbackend.repositories
 
 import org.apache.pekko.Done
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model._
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import org.mongodb.scala.model.*
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 import uk.gov.hmrc.mdc.Mdc
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferId}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
-import java.time.{Clock, Instant}
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}

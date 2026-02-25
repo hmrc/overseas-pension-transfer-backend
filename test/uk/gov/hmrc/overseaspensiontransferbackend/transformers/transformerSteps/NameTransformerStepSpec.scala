@@ -19,8 +19,9 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json._
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 
-class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransformerStep {
+class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransformerStep with SpecBase {
 
   "NameTransformerStep" - {
     "must flatten name with firstName and lastName to foreName and lastName" in {
@@ -52,7 +53,7 @@ class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransfo
     }
 
     "must return original JSON if path is missing" in {
-      val input = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C"))
+      val input = Json.obj("memberDetails" -> Json.obj("nino" -> testNino))
       flattenName(__ \ "memberDetails" \ "name")(input) mustBe Right(input)
     }
 
@@ -70,7 +71,7 @@ class NameTransformerStepSpec extends AnyFreeSpec with Matchers with NameTransfo
     }
 
     "must return original JSON if neither name part exists" in {
-      val input = Json.obj("memberDetails" -> Json.obj("nino" -> "AB123456C"))
+      val input = Json.obj("memberDetails" -> Json.obj("nino" -> testNino))
       unflattenName(path = __ \ "memberDetails" \ "name")(input) mustBe Right(input)
     }
 

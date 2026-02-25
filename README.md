@@ -31,17 +31,19 @@ These **test-only** endpoints allow developers to insert, generate, or clear dat
 
 **POST** `/test-only/in-progress/seed`  
 Creates one in-progress transfer entry in the Save-For-Later collection.
+Payload requires UUID as transferReference
 
 **POST** `/test-only/amend-in-progress/seed`
 Creates one amend-in-progress transfer entry in the Save-For-Later collection.
+Payload requires QTNumber as reference
 
 **Request body example**
 ```json
 {
-  "pstr": "24000001IN",
-  "transferReference": "T-1",
+  "pstr": "see notes below",
+  "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
   "lastUpdated": "2025-10-01T12:34:56Z",
-  "nino": "AA000001A",
+  "nino": "see notes below",
   "firstName": "Jane",
   "lastName": "Doe"
 }
@@ -65,26 +67,26 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ```json
 [
   {
-    "pstr": "24000001IN",
-    "transferReference": "T-1",
+    "pstr": "see notes below",
+    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-10T10:15:30Z",
-    "nino": "AA000001A",
+    "nino": "see notes below",
     "firstName": "Alice",
     "lastName": "Brown"
   },
   {
-    "pstr": "24000001IN",
-    "transferReference": "T-2",
+    "pstr": "see notes below",
+    "transferReference":"QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-20T14:22:05Z",
-    "nino": "AA000002A",
+    "nino": "see notes below",
     "firstName": "Bob",
     "lastName": "Jones"
   },
   {
-    "pstr": "24000001IN",
-    "transferReference": "T-3",
+    "pstr": "see notes below",
+    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-28T08:45:00Z",
-    "nino": "AA000003A",
+    "nino": "see notes below",
     "firstName": "Carol",
     "lastName": "Smith"
   }
@@ -100,10 +102,10 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
 ### 3. Generate random test data
 
 **POST** `/test-only/in-progress/generate/:pstr/:n`  
-Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
+Automatically generates `n` (where 'n' represents number of record to generate) fake records for a given `pstr`, using random names and timestamps within the last 31 days.
 
 **POST** `/test-only/amend-in-progress/generate/:pstr/:n`  
-Automatically generates `n` fake records for a given `pstr`, using random names and timestamps within the last 31 days.
+Automatically generates `n` (where 'n' represents number of record to generate) fake records for a given `pstr`, using random names and timestamps within the last 31 days.
 
 **Response**
 - `201 Created` – `n` random records successfully created
@@ -176,13 +178,13 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 
 2. **Run the script with your encrypted JSON document as input.**  
    
-3. **Pass the full MongoDB document containing the `_id`, `referenceId`, and `data` fields.**
+3. **Pass the full MongoDB document containing the `_id`, `transferReference`, and `data` fields.**
 
    Example with only the encrypted string:
    > `sh decrypt.sh 'ENCRYPTED_JSON_DATA'`
 
    Example with a full MongoDB document:
-   > `sh decrypt.sh '{ "_id": { "$oid": "68d29dff44e574ac97b990cb" }, "referenceId": "Int-b963d6ce-3951-43e7-8f77-b0a39cd18162", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
+   > `sh decrypt.sh '{ "_id": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16" }, "transferReference": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16", "data": "56fKQrZrynult7fNkrbxDP7waSHqbaVOKf9cbDzrVfvTd1ZGE9sOKE86EZ1npmzo2ef3xZ8y71/Q3boTF7YBN11u+LAWUh+p+d/tFddYjQgf+2xq5pB/AHp0MgyxENIoNHZFo1mdzugaEes95LanmEbtDfpPRMbdu9dqtClLGzgL8NvRn8W21ZLkd5OBums=", "lastUpdated": { "$date": "2025-09-23T13:17:47.458Z" } }'`
 
 3. **Check the terminal output.**  
    The script will return the same JSON, but with the `data` field decrypted.
@@ -191,10 +193,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 
 ```json
 {
-  "_id" : {
-    "$oid" : "68d29dff44e574ac97b990cb"
-  },
-  "referenceId" : "Int-b963d6ce-3951-43e7-8f77-b0a39cd18162",
+  "_id" : "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16",
+  "transferReference": "QT000001/8afb72gc-f46d-44a1-a408-3ec57e123e16",
   "data" : {
     "transferDetails" : {
       "typeOfAssets" : {
@@ -215,6 +215,8 @@ The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB d
 ### Notes
 - Make sure to copy the JSON exactly (with quotes escaped) when passing it into the command.
 - If the input format is wrong, the script will fail to parse the JSON.
+- An HMRC Pension Scheme Tax Reference (PSTR) number is a 10-character reference made up of eight digits followed by two letters.
+- A National Insurance Number (NINO) format: two letters, followed by six numbers, and ending with one letter.
 
 ---
 
