@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
-import play.api.libs.json._
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferId
 
@@ -45,7 +45,7 @@ object UserAnswersDTO {
         (__ \ "pstr").write[PstrNumber] and
         (__ \ "data").write[JsObject] and
         (__ \ "lastUpdated").write[Instant]
-    )(unlift(UserAnswersDTO.unapply))
+    )(ua => Tuple.fromProductTyped(ua))
 
     OFormat(reads, writes)
   }

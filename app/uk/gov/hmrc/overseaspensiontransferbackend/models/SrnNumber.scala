@@ -21,5 +21,5 @@ import play.api.libs.json._
 case class SrnNumber(value: String)
 
 object SrnNumber {
-  implicit val format: Format[SrnNumber] = Json.valueFormat[SrnNumber]
+  implicit val format: Format[SrnNumber] = Json.format[SrnNumber]
 }

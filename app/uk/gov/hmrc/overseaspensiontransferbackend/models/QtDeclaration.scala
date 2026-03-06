@@ -18,7 +18,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Format, JsPath, Reads, Writes}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.PsaId.downstreamFormat
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.PsaId._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaPspId, UserType}
 
 case class QtDeclaration(
@@ -32,13 +32,13 @@ object QtDeclaration {
   implicit val reads: Reads[QtDeclaration] = (
     (JsPath \ "submittedBy").read[UserType] and
       (JsPath \ "submitterId").read[PsaPspId] and
-      (JsPath \ "psaId").readNullable[PsaId](downstreamFormat.reads)
+      (JsPath \ "psaId").readNullable[PsaId](downstreamReads)
   )(QtDeclaration.apply _)
 
   implicit val writes: Writes[QtDeclaration] = (
     (JsPath \ "submittedBy").write[UserType] and
       (JsPath \ "submitterId").write[PsaPspId] and
-      (JsPath \ "psaId").writeNullable[PsaId](downstreamFormat.writes)
+      (JsPath \ "psaId").writeNullable[PsaId](downstreamWrites)
   )(qtDec => (qtDec.submittedBy, qtDec.submitterId, qtDec.psaId))
 
   implicit val format: Format[QtDeclaration] = Format(reads, writes)

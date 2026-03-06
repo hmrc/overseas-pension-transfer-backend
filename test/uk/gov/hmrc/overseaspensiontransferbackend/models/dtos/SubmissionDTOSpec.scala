@@ -17,11 +17,10 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId, Psp, PspId}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.*
 
 import java.time.Instant
 

@@ -18,6 +18,8 @@ package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import org.apache.pekko.Done
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.libs.json.{JsArray, JsError, JsObject, Json}
@@ -69,7 +71,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "must return Right(UserAnswersDTO) when data exists and deconstruct succeeds" in {
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
-      when(mockTransformer.deconstruct(*)).thenReturn(Right(validData))
+      when(mockTransformer.deconstruct(any())).thenReturn(Right(validData))
 
       val result = service.getAnswers(testId)
 
@@ -86,7 +88,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "must return Left(TransformationError) when deconstruct fails" in {
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
-      when(mockTransformer.deconstruct(*)).thenReturn(Left(JsError("deconstruct failed")))
+      when(mockTransformer.deconstruct(any())).thenReturn(Left(JsError("deconstruct failed")))
 
       val result = service.getAnswers(testId)
 
@@ -98,8 +100,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "must save new answers if valid" in {
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(None))
-      when(mockTransformer.construct(*)).thenReturn(Right(validData))
-      when(mockRepository.set(*)).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any())).thenReturn(Right(validData))
+      when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
@@ -108,8 +110,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "must return Left(SaveFailed) if repo.set returns false" in {
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(None))
-      when(mockTransformer.construct(*)).thenReturn(Right(validData))
-      when(mockRepository.set(*)).thenReturn(Future.successful(false))
+      when(mockTransformer.construct(any())).thenReturn(Right(validData))
+      when(mockRepository.set(any())).thenReturn(Future.successful(false))
 
       val result = service.saveAnswer(validDTO)
 
@@ -118,8 +120,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "must merge with existing data before save" in {
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
-      when(mockTransformer.construct(*)).thenReturn(Right(validData))
-      when(mockRepository.set(*)).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any())).thenReturn(Right(validData))
+      when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
@@ -127,7 +129,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
     }
 
     "must return Left(TransformationError) when construct fails" in {
-      when(mockTransformer.construct(*)).thenReturn(Left(JsError("construct failed")))
+      when(mockTransformer.construct(any())).thenReturn(Left(JsError("construct failed")))
 
       val result = service.saveAnswer(validDTO)
 
@@ -146,9 +148,9 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
         )
       )
 
-      when(mockTransformer.construct(*)).thenReturn(Right(malformedJson))
+      when(mockTransformer.construct(any())).thenReturn(Right(malformedJson))
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(validSaved)))
-      when(mockRepository.set(*)).thenReturn(Future.successful(true))
+      when(mockRepository.set(any())).thenReturn(Future.successful(true))
 
       val result = service.saveAnswer(validDTO)
 
@@ -160,7 +162,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
     "deleteAnswers" - {
       "Return a Right(Done) when repository returns true" in {
-        when(mockRepository.clear(*)).thenReturn(Future.successful(true))
+        when(mockRepository.clear(any())).thenReturn(Future.successful(true))
 
         val result = service.deleteAnswers(testId)
 
@@ -168,7 +170,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       }
 
       "Return a Left(DeleteFailed) when repository returns false" in {
-        when(mockRepository.clear(*)).thenReturn(Future.successful(false))
+        when(mockRepository.clear(any())).thenReturn(Future.successful(false))
 
         val result = service.deleteAnswers(testId)
 
@@ -211,8 +213,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(validDTO).futureValue mustBe Right(())
 
@@ -259,8 +261,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(validDTO).futureValue mustBe Right(())
 
@@ -302,8 +304,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(validDTO).futureValue mustBe Right(())
 
@@ -343,8 +345,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(validDTO).futureValue mustBe Right(())
 
@@ -404,8 +406,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(dto).futureValue mustBe Right(())
 
@@ -447,8 +449,8 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
       val existingSaved = validSaved.copy(data = existingJson.as[AnswersData])
 
       when(mockRepository.get(testId.value)).thenReturn(Future.successful(Some(existingSaved)))
-      when(mockTransformer.construct(*[JsObject])).thenReturn(Right(updateTransformed))
-      when(mockRepository.set(*[SavedUserAnswers])).thenReturn(Future.successful(true))
+      when(mockTransformer.construct(any[JsObject])).thenReturn(Right(updateTransformed))
+      when(mockRepository.set(any[SavedUserAnswers])).thenReturn(Future.successful(true))
 
       service.saveAnswer(validDTO).futureValue mustBe Right(())
 
@@ -465,12 +467,12 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
   "deleteAnswers" - {
     "Return a Right(Done) when repository returns true" in {
-      when(mockRepository.clear(*[String])).thenReturn(Future.successful(true))
+      when(mockRepository.clear(any[String])).thenReturn(Future.successful(true))
       service.deleteAnswers(testId).futureValue mustBe Right(Done)
     }
 
     "Return a Left(DeleteFailed) when repository returns false" in {
-      when(mockRepository.clear(*[String])).thenReturn(Future.successful(false))
+      when(mockRepository.clear(any[String])).thenReturn(Future.successful(false))
       service.deleteAnswers(testId).futureValue mustBe Left(DeleteFailed)
     }
   }

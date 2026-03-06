@@ -28,8 +28,6 @@ class QropsSchemeManagerOrganisationNameTransformer extends PathAwareTransformer
 
   override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsOrganisation" \ jsonKey
 
-  private val qropsSchemeManagerIndividualPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsIndividual"
-
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   override def construct(input: JsObject): Either[JsError, JsObject] = {

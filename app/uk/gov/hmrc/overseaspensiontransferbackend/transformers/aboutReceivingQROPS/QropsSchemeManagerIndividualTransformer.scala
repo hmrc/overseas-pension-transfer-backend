@@ -17,17 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{conditionalPruneStep, moveStep, TransformerStep}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
 
 class QropsSchemeManagerIndividualTransformer extends PathAwareTransformer with NameTransformerStep {
 
   override def externalPath: JsPath = JsPath \ "schemeManagerDetails" \ "individualContactName"
 
   override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsIndividual"
-
-  private val qropsSchemeManagerOrganisationPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsOrganisation"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */

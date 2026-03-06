@@ -123,19 +123,14 @@ class TransferServiceImpl @Inject() (
     )
   }
 
-  private def mapDownstream(e: DownstreamError): SubmissionError = e match {
+  private def mapDownstream(error: DownstreamError): SubmissionError = error match {
     case EtmpValidationError(_, _, _) |
         HipBadRequest(_, _, _, _) |
         HipOriginFailures(_, _) |
         UnsupportedMedia =>
       SubmissionTransformationError("Submission failed validation")
 
-    case Unauthorized |
-        Forbidden |
-        NotFound |
-        ServerError |
-        ServiceUnavailable |
-        Unexpected(_, _) =>
+    case _ =>
       SubmissionFailed
   }
 
@@ -178,6 +173,9 @@ class TransferServiceImpl @Inject() (
             logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
         }
+      case Right(err)                                                                =>
+        logger.warn(s"[TransferService][getTransfer] Request made for Invalid Identifier: $err")
+        Future.successful(Left(TransferIdentifierInvalid(err.toString)))
       case Left(err)                                                                 =>
         logger.warn(s"[TransferService][getTransfer] Invalid request: $err")
         Future.successful(Left(err))

@@ -17,27 +17,11 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.models.audit
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{
-  AboutReceivingQROPS,
-  Address,
-  MemberDetails,
-  MemberResidencyDetails,
-  Occupational,
-  PrincipalResAddDetails,
-  QROPSIndividual,
-  QROPSOrganisation,
-  QROPSSchemeManagerType,
-  ReceivingQropsAddress,
-  ReceivingQropsEstablishedDetails,
-  SchemeManagerAddress,
-  SchemeManagerType,
-  TransferDetails
-}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.{SubmissionFailed, SubmissionSucceeded}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{QtNumber, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 
 import java.time.LocalDate
 
