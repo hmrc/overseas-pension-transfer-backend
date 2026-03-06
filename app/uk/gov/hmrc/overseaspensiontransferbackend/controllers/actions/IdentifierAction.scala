@@ -18,14 +18,15 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions
 
 import com.google.inject.Inject
 import play.api.Logging
-import play.api.mvc.Results.{InternalServerError, Unauthorized}
-import play.api.mvc._
-import uk.gov.hmrc.auth.core._
+import play.api.mvc.Results.{BadRequest, Forbidden, InternalServerError, Unauthorized}
+import play.api.mvc.*
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{affinityGroup, allEnrolments, internalId}
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.PensionSchemeConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.AuthenticatedUser
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.AuthSupport
@@ -37,6 +38,7 @@ trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent]
 
 class IdentifierActionImpl @Inject() (
     override val authConnector: AuthConnector,
+    pensionSchemeConnector: PensionSchemeConnector,
     config: AppConfig,
     val parser: BodyParsers.Default
   )(implicit val executionContext: ExecutionContext
@@ -56,8 +58,18 @@ class IdentifierActionImpl @Inject() (
         }
         val internalId                           = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
         val authenticatedUser: AuthenticatedUser = extractUser(enrolments, config, internalId, affinityGroup)
-        block(IdentifierRequest(request, authenticatedUser))
-      case _                                                => Future.successful(Unauthorized)
+
+        request.headers.get("schemeReferenceNumber").fold(Future.successful(BadRequest)) {
+          srn =>
+            pensionSchemeConnector.checkAssociation(srn, authenticatedUser) flatMap {
+              case true  => block(IdentifierRequest(request, authenticatedUser))
+              case false =>
+                logger.warn("User not authorized to access scheme data")
+                Future.successful(Forbidden)
+            }
+        }
+
+      case _ => Future.successful(Unauthorized)
     } recover handleAuthException
   }
 
