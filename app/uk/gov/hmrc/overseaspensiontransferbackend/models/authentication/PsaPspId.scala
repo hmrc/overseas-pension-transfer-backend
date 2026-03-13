@@ -33,12 +33,7 @@ object PsaId {
   val downstreamReads: Reads[PsaId] =
     (JsPath \ "psaId").read[String].map(PsaId.apply)
 
-  val downstreamWrites: Writes[PsaId] =
-    new Writes[PsaId] {
-
-      override def writes(o: PsaId): JsValue =
-        Json.obj("psaId" -> o.value)
-    }
+  val downstreamWrites: Writes[PsaId] = Writes(psa => JsString(psa.value))
 }
 
 final case class PspId(value: String) extends PsaPspId {
