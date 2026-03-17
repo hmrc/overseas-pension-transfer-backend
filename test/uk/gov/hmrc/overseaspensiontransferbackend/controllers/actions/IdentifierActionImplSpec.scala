@@ -32,6 +32,8 @@ import uk.gov.hmrc.auth.core.syntax.retrieved.authSyntaxForRetrieved
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.PensionSchemeConnector
+import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.AuthenticatedUser
 import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequest
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,9 +43,10 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
   private val application = new GuiceApplicationBuilder().build()
 
-  private val bodyParsers       = application.injector.instanceOf[BodyParsers.Default]
-  private val appConfig         = application.injector.instanceOf[AppConfig]
-  private val mockAuthConnector = mock[AuthConnector]
+  private val bodyParsers                = application.injector.instanceOf[BodyParsers.Default]
+  private val appConfig                  = application.injector.instanceOf[AppConfig]
+  private val mockAuthConnector          = mock[AuthConnector]
+  private val mockPensionSchemeConnector = mock[PensionSchemeConnector]
 
   private val internalIdValue = "test-user-id"
   private val enrolmentKey    = "HMRC-PODS-ORG"
@@ -59,9 +62,9 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
   type RetrievalResult = Option[String] ~ Enrolments ~ Option[AffinityGroup]
 
-  private val action = new IdentifierActionImpl(mockAuthConnector, appConfig, bodyParsers)
+  private val action = new IdentifierActionImpl(mockAuthConnector, mockPensionSchemeConnector, appConfig, bodyParsers)
 
-  private val fakeRequest = FakeRequest()
+  private val fakeRequest = FakeRequest().withHeaders("schemeReferenceNumber" -> "testSrn")
 
   private def stubAuthoriseReturns(value: RetrievalResult): Unit =
     when(
@@ -91,6 +94,8 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
       val expectedRetrieval = Some(internalIdValue) and Enrolments(Set(enrolment)) and Some(affinityGroup)
 
       stubAuthoriseReturns(expectedRetrieval)
+
+      when(mockPensionSchemeConnector.checkAssociation(any[String], any[AuthenticatedUser])(any[HeaderCarrier])) thenReturn Future.successful(true)
 
       val result = action.invokeBlock(
         fakeRequest,
