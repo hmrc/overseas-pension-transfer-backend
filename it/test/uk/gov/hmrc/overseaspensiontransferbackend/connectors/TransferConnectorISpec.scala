@@ -40,7 +40,7 @@ class TransferConnectorISpec extends BaseISpec {
       inject.bind[TransferConnector].to[TransferConnectorImpl]
     )
 
-  private val now  = Instant.now()
+  private val now  = Instant.now(fixedClock)
   private val pstr = PstrNumber("12345678AB")
 
   private val submission = Submission(

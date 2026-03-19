@@ -19,12 +19,13 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.dtos
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 
 import java.time.Instant
 
-class UserAnswersDTOSpec extends AnyFreeSpec with Matchers {
+class UserAnswersDTOSpec extends AnyFreeSpec with Matchers with SpecBase {
 
   "UserAnswersDTO" - {
 
@@ -51,7 +52,7 @@ class UserAnswersDTOSpec extends AnyFreeSpec with Matchers {
     }
 
     "must round-trip with an empty object for data" in {
-      val dto    = UserAnswersDTO(TransferNumber("abc"), PstrNumber("12345678AB"), Json.obj(), Instant.now)
+      val dto    = UserAnswersDTO(TransferNumber("abc"), PstrNumber("12345678AB"), Json.obj(), now)
       val result = Json.toJson(dto).validate[UserAnswersDTO]
 
       result mustBe JsSuccess(dto)

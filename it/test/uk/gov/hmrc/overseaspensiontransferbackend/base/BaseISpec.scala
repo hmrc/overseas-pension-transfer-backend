@@ -70,8 +70,8 @@ trait BaseISpec
 
   protected def moduleOverrides: Seq[GuiceableModule] = Seq.empty
 
-  val fixedInstant = Instant.parse("2025-10-22T11:53:18.911Z")
-  private val fixedClock   = Clock.fixed(fixedInstant, ZoneOffset.UTC)
+  val fixedInstant: Instant = Instant.parse("2025-10-22T11:53:18.911Z")
+  val fixedClock: Clock = Clock.fixed(fixedInstant, ZoneOffset.UTC)
 
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder()

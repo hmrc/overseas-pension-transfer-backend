@@ -54,7 +54,7 @@ class SubmissionControllerSpec
       )
       val psaJson: JsValue = Json.toJson(psaDto)
 
-      val expectedResponse = SubmissionResponse(QtNumber("QT123456"), Instant.now)
+      val expectedResponse = SubmissionResponse(QtNumber("QT123456"), now)
 
       when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))
@@ -97,7 +97,7 @@ class SubmissionControllerSpec
       )
       val pspJson: JsValue = Json.toJson(pspDto)
 
-      val expectedResponse = SubmissionResponse(QtNumber("QT999999"), Instant.now)
+      val expectedResponse = SubmissionResponse(QtNumber("QT999999"), now)
 
       when(mockService.submitTransfer(any[NormalisedSubmission])(any[HeaderCarrier]))
         .thenReturn(Future.successful(Right(expectedResponse)))
