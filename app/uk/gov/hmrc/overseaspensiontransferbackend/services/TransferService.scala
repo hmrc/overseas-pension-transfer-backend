@@ -30,7 +30,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, Ge
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
-import uk.gov.hmrc.overseaspensiontransferbackend.validators.{Submission, SubmissionValidator}
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.{Submission, SubmissionSchemaValidator, SubmissionValidator}
 
 import java.time.{LocalDate, ZoneOffset}
 import java.util.UUID
@@ -38,8 +38,18 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait TransferService {
-  def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]]
-  def getAllTransfers(pstrNumber: PstrNumber)(implicit hc: HeaderCarrier, config: AppConfig): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
+
+  def submitTransfer(
+      submission: NormalisedSubmission
+    )(implicit
+      hc: HeaderCarrier
+    ): Future[Either[SubmissionError, SubmissionResponse]]
+
+  def getAllTransfers(
+      pstrNumber: PstrNumber
+    )(implicit hc: HeaderCarrier,
+      config: AppConfig
+    ): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
 
   def getTransfer(
       transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
@@ -51,63 +61,86 @@ trait TransferService {
 class TransferServiceImpl @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
+    schemaValidator: SubmissionSchemaValidator,
     transformer: UserAnswersTransformer,
     connector: TransferConnector,
     auditService: AuditService
   )(implicit ec: ExecutionContext
-  ) extends TransferService with Logging {
+  ) extends TransferService
+    with Logging {
 
-  override def submitTransfer(submission: NormalisedSubmission)(implicit hc: HeaderCarrier): Future[Either[SubmissionError, SubmissionResponse]] =
+  override def submitTransfer(
+      submission: NormalisedSubmission
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[SubmissionError, SubmissionResponse]] =
     repository.get(submission.referenceId.value).flatMap {
       case Some(saved) =>
         validator.validate(Submission(saved, submission)) match {
           case Left(err)        =>
             Future.successful(Left(SubmissionTransformationError(err.message)))
           case Right(validated) =>
-            val correlationId = UUID.randomUUID().toString
-            connector.submitTransfer(validated, correlationId).map {
-              case Right(success) =>
-                repository.clear(referenceId = submission.referenceId.value)
-                if (validated.transferringMember.isDefined) {
-                  auditService.audit(
-                    ReportSubmittedAuditModel.build(
-                      referenceId              = saved.transferId,
-                      journeyType              = SubmissionSucceeded,
-                      correlationId            = correlationId,
-                      failureReason            = None,
-                      maybeQTNumber            = Some(success.qtNumber),
-                      maybeMemberDetails       = validated.transferringMember.get.memberDetails,
-                      maybeTransferDetails     = validated.transferDetails,
-                      maybeAboutReceivingQROPS = validated.aboutReceivingQROPS,
-                      maybeUserInfo            = Some(getAuditUserInfo(submission))
-                    )
-                  )
-                }
+            val schemaErrors = schemaValidator.validate(Json.toJson(validated))
+            if (schemaErrors.nonEmpty) {
+              logger.warn(
+                s"[submitTransfer] referenceId=${submission.referenceId} schema validation failed: ${schemaErrors.map(_.getMessage).mkString("; ")}"
+              )
+              Future.successful(Left(SubmissionTransformationError("Schema validation failed")))
+            } else {
+              val correlationId = UUID.randomUUID().toString
+              connector
+                .submitTransfer(validated, correlationId)
+                .map {
+                  case Right(success) =>
+                    repository.clear(referenceId = submission.referenceId.value)
+                    if (validated.transferringMember.isDefined) {
+                      auditService.audit(
+                        ReportSubmittedAuditModel.build(
+                          referenceId              = saved.transferId,
+                          journeyType              = SubmissionSucceeded,
+                          correlationId            = correlationId,
+                          failureReason            = None,
+                          maybeQTNumber            = Some(success.qtNumber),
+                          maybeMemberDetails       = validated.transferringMember.get.memberDetails,
+                          maybeTransferDetails     = validated.transferDetails,
+                          maybeAboutReceivingQROPS = validated.aboutReceivingQROPS,
+                          maybeUserInfo            = Some(getAuditUserInfo(submission))
+                        )
+                      )
+                    }
 
-                Right(SubmissionResponse(success.qtNumber, success.processingDate))
-              case Left(err)      =>
-                logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
-                auditService.audit(
-                  ReportSubmittedAuditModel.build(
-                    referenceId              = saved.transferId,
-                    journeyType              = JourneySubmittedType.SubmissionFailed,
-                    correlationId            = correlationId,
-                    failureReason            = Some(err.log),
-                    maybeQTNumber            = None,
-                    maybeMemberDetails       = None,
-                    maybeTransferDetails     = None,
-                    maybeAboutReceivingQROPS = None,
-                    maybeUserInfo            = None
-                  )
-                )
-                Left(mapDownstream(err))
-            }.recover { case _ => Left(SubmissionFailed) }
+                    Right(SubmissionResponse(success.qtNumber, success.processingDate))
+                  case Left(err)      =>
+                    logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
+                    auditService.audit(
+                      ReportSubmittedAuditModel.build(
+                        referenceId              = saved.transferId,
+                        journeyType              = JourneySubmittedType.SubmissionFailed,
+                        correlationId            = correlationId,
+                        failureReason            = Some(err.log),
+                        maybeQTNumber            = None,
+                        maybeMemberDetails       = None,
+                        maybeTransferDetails     = None,
+                        maybeAboutReceivingQROPS = None,
+                        maybeUserInfo            = None
+                      )
+                    )
+                    Left(mapDownstream(err))
+                }
+                .recover { case _ => Left(SubmissionFailed) }
+            }
+
         }
       case None        =>
-        logger.info(s"[submitTransfer] referenceId=${submission.referenceId} No submission found in save for later repository")
-        Future.successful(Left(SubmissionTransformationError(
-          s"No prepared submission for referenceId ${submission.referenceId}"
-        )))
+        logger.info(
+          s"[submitTransfer] referenceId=${submission.referenceId} No submission found in save for later repository"
+        )
+        Future.successful(
+          Left(
+            SubmissionTransformationError(
+              s"No prepared submission for referenceId ${submission.referenceId}"
+            )
+          )
+        )
     }
 
   private def getAuditUserInfo(submission: NormalisedSubmission): AuditUserInfo = {
@@ -124,10 +157,7 @@ class TransferServiceImpl @Inject() (
   }
 
   private def mapDownstream(error: DownstreamError): SubmissionError = error match {
-    case EtmpValidationError(_, _, _) |
-        HipBadRequest(_, _, _, _) |
-        HipOriginFailures(_, _) |
-        UnsupportedMedia =>
+    case EtmpValidationError(_, _, _) | HipBadRequest(_, _, _, _) | HipOriginFailures(_, _) | UnsupportedMedia =>
       SubmissionTransformationError("Submission failed validation")
 
     case _ =>
@@ -137,7 +167,7 @@ class TransferServiceImpl @Inject() (
   def getTransfer(
       transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
     )(implicit hc: HeaderCarrier
-    ): Future[Either[TransferRetrievalError, UserAnswersDTO]] = {
+    ): Future[Either[TransferRetrievalError, UserAnswersDTO]] =
     transferType match {
       case Right(GetSaveForLaterRecord(transferId, _, InProgress))                   =>
         repository.get(transferId.value) map {
@@ -158,11 +188,19 @@ class TransferServiceImpl @Inject() (
                 repository.set(savedUserAnswers) map {
                   case true  => deconstructSavedAnswers(savedUserAnswers)
                   case false =>
-                    logger.error(s"[TransferService][getTransfer] Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later")
-                    Left(TransferNotFound(s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"))
+                    logger.error(
+                      s"[TransferService][getTransfer] Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"
+                    )
+                    Left(
+                      TransferNotFound(
+                        s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"
+                      )
+                    )
                 }
               case Left(err)    =>
-                logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+                logger.error(
+                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}"
+                )
                 Future.successful(Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD")))
             }
         }
@@ -180,16 +218,21 @@ class TransferServiceImpl @Inject() (
         logger.warn(s"[TransferService][getTransfer] Invalid request: $err")
         Future.successful(Left(err))
     }
-  }
 
-  private def deconstructSavedAnswers(savedUserAnswers: SavedUserAnswers): Either[TransferRetrievalError, UserAnswersDTO] = {
+  private def deconstructSavedAnswers(
+      savedUserAnswers: SavedUserAnswers
+    ): Either[TransferRetrievalError, UserAnswersDTO] =
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
-      case Right(jsObject) => Right(UserAnswersDTO(savedUserAnswers.transferId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated))
+      case Right(jsObject) =>
+        Right(
+          UserAnswersDTO(savedUserAnswers.transferId, savedUserAnswers.pstr, jsObject, savedUserAnswers.lastUpdated)
+        )
       case Left(jsError)   =>
-        logger.error(s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.transferId} json with error: ${jsError.errors}")
+        logger.error(
+          s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.transferId} json with error: ${jsError.errors}"
+        )
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }
-  }
 
   override def getAllTransfers(
       pstrNumber: PstrNumber
@@ -217,21 +260,21 @@ class TransferServiceImpl @Inject() (
       dsEither   <- downstreamEitherF
       inProgress <- inProgressF
     } yield {
-      def amendInProgressRecords = {
+      def amendInProgressRecords =
         inProgress.filter(_.qtStatus.contains(AmendInProgress)).map(_.transferId)
-      }
 
       dsEither match {
         case Right(ds) =>
           val submitted = DownstreamAllTransfersData.toAllTransferItems(pstrNumber, ds)
-          Right(AllTransfersResponse(inProgress.filterNot(_.qtStatus.contains(AmendInProgress)) ++ submitted.map {
-            record =>
+          Right(
+            AllTransfersResponse(inProgress.filterNot(_.qtStatus.contains(AmendInProgress)) ++ submitted.map { record =>
               if (amendInProgressRecords.contains(record.transferId)) {
                 record.copy(qtStatus = Some(AmendInProgress))
               } else {
                 record
               }
-          }))
+            })
+          )
         case Left(e)   =>
           if (inProgress.nonEmpty) {
             Right(AllTransfersResponse(inProgress))
