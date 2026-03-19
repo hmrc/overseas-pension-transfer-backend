@@ -6,8 +6,7 @@ object AppDependencies {
   private val hmrcMongoVersion = "2.12.0"
 
   val compile: Seq[ModuleID] = Seq(
-    "com.fasterxml.jackson.module" %% "jackson-module-scala"      % "2.18.3",
-    "com.networknt"                 % "json-schema-validator"     % "2.0.1",
+    "com.networknt"      % "json-schema-validator"     % "3.0.1",
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30" % bootstrapVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"        % hmrcMongoVersion
   )
