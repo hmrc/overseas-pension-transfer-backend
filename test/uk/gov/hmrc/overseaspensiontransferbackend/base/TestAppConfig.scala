@@ -19,30 +19,35 @@ package uk.gov.hmrc.overseaspensiontransferbackend.base
 import play.api.Configuration
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 object TestAppConfig {
 
   val masterKey: String = "Test-dGVzdC1rZXktMTIzNDU2Nzg5MDEyMzQ1Ng=="
 
-  def appConfig(): AppConfig = new AppConfig(
-    Configuration(
-      "appName"                                -> "overseas-pension-transfer-backend-test",
-      "microservice.services.auth.host"        -> "localhost",
-      "microservice.services.auth.port"        -> 8500,
-      "microservice.services.hip.protocol"     -> "http",
-      "microservice.services.hip.host"         -> "localhost",
-      "microservice.services.hip.port"         -> 15602,
-      "microservice.services.hip.clientId"     -> "clientId",
-      "microservice.services.hip.clientSecret" -> "clientSecret",
-      "enrolments.psa.serviceName"             -> "HMRC-PODS-ORG",
-      "enrolments.psa.identifierKey"           -> "PSAID",
-      "enrolments.psp.serviceName"             -> "HMRC-PODSPP-ORG",
-      "enrolments.psp.identifierKey"           -> "PSPID",
-      "mongodb.timeToLiveInDays"               -> 30,
-      "mongodb.uri"                            -> "mongodb://localhost:27017/test-saveforlater",
-      "getAllTransfers.yearsOffset"            -> 10
-    )
+  private val testConfiguration = Configuration(
+    "appName"                                    -> "overseas-pension-transfer-backend-test",
+    "microservice.services.auth.host"            -> "localhost",
+    "microservice.services.auth.port"            -> 8500,
+    "microservice.services.hip.protocol"         -> "http",
+    "microservice.services.hip.host"             -> "localhost",
+    "microservice.services.hip.port"             -> 15602,
+    "microservice.services.hip.clientId"         -> "clientId",
+    "microservice.services.hip.clientSecret"     -> "clientSecret",
+    "microservice.services.pensions-scheme.host" -> "localhost",
+    "microservice.services.pensions-scheme.port" -> 15603,
+    "enrolments.psa.serviceName"                 -> "HMRC-PODS-ORG",
+    "enrolments.psa.identifierKey"               -> "PSAID",
+    "enrolments.psp.serviceName"                 -> "HMRC-PODSPP-ORG",
+    "enrolments.psp.identifierKey"               -> "PSPID",
+    "mongodb.timeToLiveInDays"                   -> 30,
+    "mongodb.uri"                                -> "mongodb://localhost:27017/test-saveforlater",
+    "getAllTransfers.yearsOffset"                -> 10
   )
+
+  private val servicesConfig = new ServicesConfig(testConfiguration)
+
+  def appConfig(): AppConfig = new AppConfig(testConfiguration, servicesConfig)
 
   implicit val encryptionService: EncryptionService = new EncryptionService(masterKey)
 }

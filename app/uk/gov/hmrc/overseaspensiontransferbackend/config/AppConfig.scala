@@ -17,15 +17,17 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.config
 
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject() (config: Configuration) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val appName: String = config.get[String]("appName")
 
-  val etmpBaseUrl: String = config.get[Service]("microservice.services.hip").baseUrl
+  val etmpBaseUrl: String          = config.get[Service]("microservice.services.hip").baseUrl
+  val pensionSchemeService: String = servicesConfig.baseUrl("pensions-scheme")
 
   val cacheTtl: Long = config.get[Int]("mongodb.timeToLiveInDays")
 
