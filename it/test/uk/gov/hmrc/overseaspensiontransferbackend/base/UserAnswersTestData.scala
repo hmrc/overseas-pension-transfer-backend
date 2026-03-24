@@ -63,7 +63,7 @@ object UserAnswersTestData extends BaseISpec {
   val qropsDetailsExternalJson: JsObject = Json.obj(
     "qropsDetails" -> Json.obj(
       "qropsFullName"         -> "Test Scheme",
-      "qropsRef"              -> "AB123",
+      "qropsRef"              -> "QROPS123456",
       "receivingQropsAddress" -> Json.obj(
         "addressLine1" -> "2",
         "addressLine2" -> "QROPS Place",
@@ -199,7 +199,7 @@ object UserAnswersTestData extends BaseISpec {
   val qropsDetailsInternalJson: JsObject = Json.obj(
     "aboutReceivingQROPS" -> Json.obj(
       "qropsFullName"                    -> "Test Scheme",
-      "qropsRef"                         -> "AB123",
+      "qropsRef"                         -> "QROPS123456",
       "receivingQropsAddress"            -> Json.obj(
         "addressLine1" -> "2",
         "addressLine2" -> "QROPS Place",
@@ -304,7 +304,7 @@ object UserAnswersTestData extends BaseISpec {
   val qropsDetailsEstablishedExternalJson: JsObject = Json.obj(
     "qropsDetails" -> Json.obj(
       "qropsFullName"         -> "Structured Scheme",
-      "qropsRef"              -> "AB123",
+      "qropsRef"              -> "QROPS123456",
       "receivingQropsAddress" -> Json.obj(
         "addressLine1" -> "10",
         "addressLine2" -> "Some Street",
@@ -319,7 +319,7 @@ object UserAnswersTestData extends BaseISpec {
   val qropsDetailsEstablishedInternalJson: JsObject = Json.obj(
     "aboutReceivingQROPS" -> Json.obj(
       "qropsFullName"         -> "Structured Scheme",
-      "qropsRef"              -> "AB123",
+      "qropsRef"              -> "QROPS123456",
       "receivingQropsAddress" -> Json.obj(
         "addressLine1" -> "10",
         "addressLine2" -> "Some Street",

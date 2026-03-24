@@ -41,15 +41,17 @@ import scala.concurrent.Future
 
 class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterEach {
 
-  private val mockRepo         = mock[SaveForLaterRepository]
-  private val mockValidator    = mock[SubmissionValidator]
-  private val mockConnector    = mock[TransferConnector]
-  private val mockTransformer  = mock[UserAnswersTransformer]
-  private val mockAuditService = mock[AuditService]
+  private val mockRepo            = mock[SaveForLaterRepository]
+  private val mockValidator       = mock[SubmissionValidator]
+  private val mockSchemaValidator = mock[SubmissionSchemaValidator]
+  private val mockConnector       = mock[TransferConnector]
+  private val mockTransformer     = mock[UserAnswersTransformer]
+  private val mockAuditService    = mock[AuditService]
 
   private val service = new TransferServiceImpl(
     mockRepo,
     mockValidator,
+    mockSchemaValidator,
     mockTransformer,
     mockConnector,
     mockAuditService
@@ -98,6 +100,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   override def beforeEach(): Unit = {
     Mockito.reset(mockRepo)
     Mockito.reset(mockValidator)
+    Mockito.reset(mockSchemaValidator)
     Mockito.reset(mockAuditService)
     super.beforeEach()
   }
@@ -107,6 +110,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
+        when(mockSchemaValidator.validate(any())).thenReturn(Set.empty)
         when(mockConnector.submitTransfer(eqTo(submission), any[String])(any)).thenReturn(Future.successful(Right(downstreamSuccess)))
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
@@ -151,6 +155,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
+        when(mockSchemaValidator.validate(any())).thenReturn(Set.empty)
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         downstreamErrors.foreach { ue =>
@@ -183,6 +188,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
 
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
         when(mockValidator.validate(eqTo(submission))).thenReturn(Right(submission))
+        when(mockSchemaValidator.validate(any())).thenReturn(Set.empty)
 
         infra.foreach { ue =>
           when(mockConnector.submitTransfer(eqTo(submission), any[String])(any))
