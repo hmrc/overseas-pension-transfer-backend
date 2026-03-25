@@ -36,7 +36,7 @@ object AboutReceivingQROPS extends JsonHelpers {
       (__ \ "receivingQropsAddress").readNullable[ReceivingQropsAddress] and
       (__ \ "receivingQropsEstablishedDetails").readNullable[ReceivingQropsEstablishedDetails] and
       (__ \ "qropsSchemeManagerType").readNullable[QROPSSchemeManagerType]
-  )(AboutReceivingQROPS.apply _)
+  )(AboutReceivingQROPS.apply)
 
   implicit val writes: OWrites[AboutReceivingQROPS] =
     Json.writes[AboutReceivingQROPS]

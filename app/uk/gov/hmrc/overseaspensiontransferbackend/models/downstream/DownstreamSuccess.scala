@@ -30,5 +30,5 @@ object DownstreamSuccess {
     (__ \ "success" \ "qtReference").read[String].map(QtNumber.apply) and
       (__ \ "success" \ "processingDate").read[Instant] and
       (__ \ "success" \ "formBundleNumber").read[String]
-  )(DownstreamSuccess.apply _)
+  )(DownstreamSuccess.apply)
 }

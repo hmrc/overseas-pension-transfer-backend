@@ -41,5 +41,5 @@ object PropertyAssets {
       (__ \ "propertyAddress").readNullable[Address](Address.upstreamReads) and
       (__ \ "propValue").readNullable[BigDecimal] and
       (__ \ "propDescription").readNullable[String]
-  )(PropertyAssets.apply _)
+  )(PropertyAssets.apply)
 }

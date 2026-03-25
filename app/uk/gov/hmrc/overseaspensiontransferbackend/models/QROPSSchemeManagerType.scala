@@ -38,7 +38,7 @@ object QROPSSchemeManagerType extends JsonHelpers {
       (__ \ "schemeManagerPhone").readNullable[String] and
       (__ \ "qropsIndividual").readNullable[QROPSIndividual] and
       (__ \ "qropsOrganisation").readNullable[QROPSOrganisation]
-  )(QROPSSchemeManagerType.apply _)
+  )(QROPSSchemeManagerType.apply)
 
   implicit val writes: OWrites[QROPSSchemeManagerType] = Json.writes[QROPSSchemeManagerType]
 

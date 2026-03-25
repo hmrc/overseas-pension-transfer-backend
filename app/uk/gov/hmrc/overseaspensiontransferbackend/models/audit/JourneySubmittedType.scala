@@ -30,7 +30,7 @@ object JourneySubmittedType {
     Seq(SubmissionSucceeded, SubmissionFailed)
 
   val enumerable: Enumerable[JourneySubmittedType] =
-    Enumerable(values.map(v => v.toString -> v): _*)
+    Enumerable(values.map(v => v.toString -> v) *)
 
   implicit def reads: Reads[JourneySubmittedType] = Reads[JourneySubmittedType] {
     case JsString(SubmissionSucceeded.toString) => JsSuccess(SubmissionSucceeded)

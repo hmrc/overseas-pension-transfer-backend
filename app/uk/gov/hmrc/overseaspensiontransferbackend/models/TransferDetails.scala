@@ -46,7 +46,7 @@ object TransferDetails extends JsonHelpers {
       (__ \ "reasonNoOverseasTransfer").readNullable[Seq[ApplicableExclusion]] and
       (__ \ "taxableOverseasTransferDetails").readNullable[TaxableOverseasTransferDetails] and
       (__ \ "typeOfAssets").readNullable[TypeOfAssets]
-  )(TransferDetails.apply _)
+  )(TransferDetails.apply)
 
   implicit val writes: OWrites[TransferDetails] =
     Json.writes[TransferDetails]

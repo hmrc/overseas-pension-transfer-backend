@@ -68,7 +68,7 @@ class SubmissionDTOSpec extends AnyFreeSpec with SpecBase {
       )
 
       val parsed = json.validate[SubmissionDTO]
-      parsed     mustBe a[JsSuccess[_]]
+      parsed     mustBe a[JsSuccess[?]]
       parsed.get mustBe PsaSubmissionDTO(TransferNumber("ignored"), Psa, PsaId("A1234567"), ts)
     }
 
@@ -82,7 +82,7 @@ class SubmissionDTOSpec extends AnyFreeSpec with SpecBase {
       )
 
       val parsed = json.validate[SubmissionDTO]
-      parsed     mustBe a[JsSuccess[_]]
+      parsed     mustBe a[JsSuccess[?]]
       parsed.get mustBe PspSubmissionDTO(TransferNumber("ignored"), Psp, PspId("X9999999"), PsaId("A7654321"), ts)
     }
 

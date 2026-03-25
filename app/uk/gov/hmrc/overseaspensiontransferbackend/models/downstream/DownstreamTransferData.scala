@@ -50,5 +50,5 @@ object DownstreamTransferData {
       (__ \ "success" \ "transferringMember").readNullable[TransferringMember] and
       (__ \ "success" \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "success" \ "transferDetails").readNullable[TransferDetails]
-  )(DownstreamTransferData.apply _)
+  )(DownstreamTransferData.apply)
 }

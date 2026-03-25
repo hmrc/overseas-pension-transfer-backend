@@ -113,7 +113,7 @@ class TransferConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
-      .transform(_.addQueryStringParameters(queryStringParams: _*))
+      .transform(_.addQueryStringParameters(queryStringParams *))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }
@@ -143,7 +143,7 @@ class TransferConnectorImpl @Inject() (
 
     httpClientV2
       .get(url)
-      .transform(_.addQueryStringParameters(params: _*))
+      .transform(_.addQueryStringParameters(params *))
       .setHeader(
         authorisation           -> authorization(),
         "correlationid"         -> correlationId,

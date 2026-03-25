@@ -32,7 +32,7 @@ object QROPSOrganisation extends JsonHelpers {
     (__ \ "orgName").readNullable[String] and
       (__ \ "orgForename").readNullable[String] and
       (__ \ "orgSurname").readNullable[String]
-  )(QROPSOrganisation.apply _)
+  )(QROPSOrganisation.apply)
 
   implicit val writes: OWrites[QROPSOrganisation] = Json.writes[QROPSOrganisation]
 

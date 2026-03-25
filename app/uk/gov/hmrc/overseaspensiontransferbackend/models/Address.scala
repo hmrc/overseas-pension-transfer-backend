@@ -49,7 +49,7 @@ object Address {
       (__ \ "addressLine5").readNullable[String] and
       (__ \ "ukPostCode").readNullable[String] and
       (__ \ "country" \ "code").readNullable[String]
-  )(Address.apply _)
+  )(Address.apply)
 
   implicit val writes: OWrites[Address] = Json.writes[Address]
 
@@ -61,7 +61,7 @@ object Address {
       (__ \ "addressLine5").readNullable[String] and
       (__ \ "ukPostCode").readNullable[String] and
       (__ \ "country").readNullable[String]
-  )(Address.apply _)
+  )(Address.apply)
 
   implicit val upstreamWrites: OWrites[Address] = (
     (__ \ "addressLine1").writeNullable[String] and
@@ -115,7 +115,7 @@ object Country {
   implicit val reads: Reads[Country] = (
     (__ \ "code").read[String] and
       (__ \ "name").readNullable[String]
-  )(Country.apply _)
+  )(Country.apply)
 
   implicit val writes: OWrites[Country] = Json.writes[Country]
 

@@ -56,7 +56,7 @@ object UnquotedShares {
       (__ \ "numberOfShares").readNullable[Int] and
       (__ \ "companyName").readNullable[String] and
       (__ \ "classOfShares").readNullable[String]
-  )(UnquotedShares.apply _)
+  )(UnquotedShares.apply)
 
   implicit val reads: Reads[UnquotedShares] = (
     (__ \ "recordVersion").readNullable[String] and
@@ -64,7 +64,7 @@ object UnquotedShares {
       (__ \ "unquotedShareTotal").readNullable[Int] and
       (__ \ "unquotedCompany").readNullable[String] and
       (__ \ "unquotedClass").readNullable[String]
-  )(UnquotedShares.apply _)
+  )(UnquotedShares.apply)
 
   implicit val writes: Writes[UnquotedShares] = (
     (__ \ "recordVersion").writeNullable[String] and
@@ -100,7 +100,7 @@ object QuotedShares {
       (__ \ "numberOfShares").readNullable[Int] and
       (__ \ "companyName").readNullable[String] and
       (__ \ "classOfShares").readNullable[String]
-  )(QuotedShares.apply _)
+  )(QuotedShares.apply)
 
   implicit val reads: Reads[QuotedShares] = (
     (__ \ "recordVersion").readNullable[String] and
@@ -108,7 +108,7 @@ object QuotedShares {
       (__ \ "quotedShareTotal").readNullable[Int] and
       (__ \ "quotedCompany").readNullable[String] and
       (__ \ "quotedClass").readNullable[String]
-  )(QuotedShares.apply _)
+  )(QuotedShares.apply)
 
   implicit val writes: Writes[QuotedShares] = (
     (__ \ "recordVersion").writeNullable[String] and
