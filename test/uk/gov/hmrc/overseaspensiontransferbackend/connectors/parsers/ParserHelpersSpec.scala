@@ -43,7 +43,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
       val expected = HttpResponse(CREATED, json, Map.empty)
       val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected, CREATED)
 
-      actual                             mustBe a[Right[_, _]]
+      actual                             mustBe a[Right[?, ?]]
       actual.toOption.get.qtNumber.value mustBe "QT123456"
     }
 
@@ -68,7 +68,7 @@ class ParserHelpersSpec extends AnyFreeSpec with Matchers {
       val expected = HttpResponse(BAD_REQUEST, json, Map.empty)
       val actual   = ParserHelpers.handleResponse[DownstreamSuccess](expected)
 
-      actual                                                       mustBe a[Left[_, _]]
+      actual                                                       mustBe a[Left[?, ?]]
       actual.left.toOption.get                                     mustBe a[HipBadRequest]
       actual.left.toOption.get.asInstanceOf[HipBadRequest].message mustBe message
     }

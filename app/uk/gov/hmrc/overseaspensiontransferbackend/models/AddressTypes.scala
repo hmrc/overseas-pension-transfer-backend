@@ -40,7 +40,7 @@ object PrincipalResAddDetails extends JsonHelpers {
   implicit val reads: Reads[PrincipalResAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "poBoxNumber").readNullable[String]
-  )(PrincipalResAddDetails.apply _)
+  )(PrincipalResAddDetails.apply)
 
   implicit val writes: OWrites[PrincipalResAddDetails] = Json.writes[PrincipalResAddDetails]
 
@@ -76,7 +76,7 @@ object LastPrincipalAddDetails extends JsonHelpers {
   implicit val reads: Reads[LastPrincipalAddDetails] = (
     (__ \ "addressDetails").readNullable[Address](Address.upstreamReads) and
       (__ \ "dateMemberLeftUk").readNullable[LocalDate]
-  )(LastPrincipalAddDetails.apply _)
+  )(LastPrincipalAddDetails.apply)
 
   implicit val writes: OWrites[LastPrincipalAddDetails] = Json.writes[LastPrincipalAddDetails]
 

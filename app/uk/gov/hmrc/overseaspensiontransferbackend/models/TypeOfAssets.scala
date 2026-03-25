@@ -76,7 +76,7 @@ object TypeOfAssets extends JsonHelpers {
       (__ \ "otherAsset").readNullable[String] and
       (__ \ "moreAsset").readNullable[String] and
       (__ \ "otherAssets").readNullable[List[OtherAssets]]
-  )(TypeOfAssets.apply _)
+  )(TypeOfAssets.apply)
 
   implicit val writes: Writes[TypeOfAssets] = Json.writes[TypeOfAssets]
 

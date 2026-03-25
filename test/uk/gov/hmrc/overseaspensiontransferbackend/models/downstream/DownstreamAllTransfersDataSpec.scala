@@ -61,7 +61,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
            |""".stripMargin
       )
 
-      val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]
+      val JsSuccess(model, _) = json.validate[DownstreamAllTransfersData]: @unchecked
 
       val items = model.success.qropsTransferOverview
       items must have size 2
@@ -113,7 +113,7 @@ class DownstreamAllTransfersDataSpec extends AnyFreeSpec with Matchers with Spec
       )
 
       val jsonOut              = Json.toJson(in)
-      val JsSuccess(backIn, _) = jsonOut.validate[DownstreamAllTransfersData]
+      val JsSuccess(backIn, _) = jsonOut.validate[DownstreamAllTransfersData]: @unchecked
 
       backIn                                                          mustBe in
       (jsonOut \ "success" \ "qropsTransferOverview").as[JsArray].value must have size 1

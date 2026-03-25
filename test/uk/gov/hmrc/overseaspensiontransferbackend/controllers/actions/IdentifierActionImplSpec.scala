@@ -95,7 +95,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
       stubAuthoriseReturns(expectedRetrieval)
 
-      when(mockPensionSchemeConnector.checkAssociation(any[String], any[AuthenticatedUser])(any[HeaderCarrier])) thenReturn Future.successful(true)
+      when(mockPensionSchemeConnector.checkAssociation(any[String], any[AuthenticatedUser])(any[HeaderCarrier])) `thenReturn` Future.successful(true)
 
       val result = action.invokeBlock(
         fakeRequest,

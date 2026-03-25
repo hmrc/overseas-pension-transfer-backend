@@ -73,7 +73,7 @@ object AnswersData {
       (__ \ "aboutReceivingQROPS").readNullable[AboutReceivingQROPS] and
       (__ \ "transferDetails").readNullable[TransferDetails] and
       (__ \ "submitToHMRC").readNullable[Boolean]
-  )(AnswersData.apply _)
+  )(AnswersData.apply)
 
   implicit val writes: OWrites[AnswersData] = Json.writes[AnswersData]
 
@@ -88,7 +88,7 @@ object SavedUserAnswers {
         (__ \ "pstr").read[PstrNumber] and
         (__ \ "data").read[AnswersData] and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
-    )(SavedUserAnswers.apply _)
+    )(SavedUserAnswers.apply)
   }
 
   val writes: OWrites[SavedUserAnswers] = {

@@ -33,7 +33,7 @@ object QtDeclaration {
     (JsPath \ "submittedBy").read[UserType] and
       (JsPath \ "submitterId").read[PsaPspId] and
       (JsPath \ "psaId").readNullable[PsaId](downstreamReads)
-  )(QtDeclaration.apply _)
+  )(QtDeclaration.apply)
 
   implicit val writes: Writes[QtDeclaration] = (
     (JsPath \ "submittedBy").write[UserType] and

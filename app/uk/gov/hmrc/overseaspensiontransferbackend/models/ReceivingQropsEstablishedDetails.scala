@@ -30,7 +30,7 @@ object ReceivingQropsEstablishedDetails extends JsonHelpers {
   implicit val reads: Reads[ReceivingQropsEstablishedDetails] = (
     (__ \ "qropsEstablished").readNullable[String] and
       (__ \ "qropsEstablishedOther").readNullable[String]
-  )(ReceivingQropsEstablishedDetails.apply _)
+  )(ReceivingQropsEstablishedDetails.apply)
 
   implicit val writes: OWrites[ReceivingQropsEstablishedDetails] =
     Json.writes[ReceivingQropsEstablishedDetails]

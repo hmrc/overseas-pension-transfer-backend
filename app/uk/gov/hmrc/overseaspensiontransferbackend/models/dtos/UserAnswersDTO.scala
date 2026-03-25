@@ -38,7 +38,7 @@ object UserAnswersDTO {
         (__ \ "pstr").read[String].map(PstrNumber.apply) and
         (__ \ "data").read[JsObject] and
         (__ \ "lastUpdated").read[Instant]
-    )(UserAnswersDTO.apply _)
+    )(UserAnswersDTO.apply)
 
     val writes: OWrites[UserAnswersDTO] = (
       (__ \ "transferId").write[TransferId] and

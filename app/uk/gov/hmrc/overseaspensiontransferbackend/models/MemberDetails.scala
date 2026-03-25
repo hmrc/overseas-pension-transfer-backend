@@ -42,7 +42,7 @@ object MemberDetails extends JsonHelpers {
       (__ \ "reasonNoNINO").readNullable[String] and
       (__ \ "principalResAddDetails").readNullable[PrincipalResAddDetails] and
       (__ \ "memberResidencyDetails").readNullable[MemberResidencyDetails]
-  )(MemberDetails.apply _)
+  )(MemberDetails.apply)
 
   implicit val writes: OWrites[MemberDetails] = Json.writes[MemberDetails]
 

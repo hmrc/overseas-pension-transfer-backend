@@ -30,7 +30,7 @@ object QROPSIndividual extends JsonHelpers {
   implicit val reads: Reads[QROPSIndividual] = (
     (__ \ "individualForename").readNullable[String] and
       (__ \ "individualSurname").readNullable[String]
-  )(QROPSIndividual.apply _)
+  )(QROPSIndividual.apply)
 
   implicit val writes: OWrites[QROPSIndividual] =
     Json.writes[QROPSIndividual]

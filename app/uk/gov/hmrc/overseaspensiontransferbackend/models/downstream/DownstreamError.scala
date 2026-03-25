@@ -40,7 +40,7 @@ object HipBadRequest {
       (__ \ "response" \ "error" \ "code").read[String] and
       (__ \ "response" \ "error" \ "message").read[String] and
       (__ \ "response" \ "error" \ "logID").readNullable[String]
-  )(HipBadRequest.apply _)
+  )(HipBadRequest.apply)
 }
 
 // ---------- 400/500: HIP-originResponse (failures array) ----------
@@ -62,7 +62,7 @@ object HipOriginFailures {
     (
       (__ \ "origin").read[String] and
         (__ \ "response" \ "failures").read[List[Failure]]
-    )(HipOriginFailures.apply _)
+    )(HipOriginFailures.apply)
 }
 
 // ---------- 422: ETMP Business Validation ----------
@@ -80,7 +80,7 @@ object EtmpValidationError {
       (__ \ "errors" \ "processingDate").read[String] and
         (__ \ "errors" \ "code").read[String] and
         (__ \ "errors" \ "text").read[String]
-    )(Errors.apply _)
+    )(Errors.apply)
 
   implicit val reads: Reads[EtmpValidationError] =
     implicitly[Reads[Errors]].map(e => EtmpValidationError(e.processingDate, e.code, e.text))

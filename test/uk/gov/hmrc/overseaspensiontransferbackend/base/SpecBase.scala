@@ -148,7 +148,7 @@ trait SpecBase
     ): IdentifierRequest[A] =
     IdentifierRequest(fakeRequest, authenticatedUser)
 
-  implicit val testIdentifierRequest: IdentifierRequest[_] =
+  implicit val testIdentifierRequest: IdentifierRequest[?] =
     IdentifierRequest(FakeRequest(), psaUser.updatePensionSchemeDetails(schemeDetails))
 
   val sampleAuditUserInfoPsa = AuditUserInfo(Psa, AffinityGroup.Individual, psaId, None)

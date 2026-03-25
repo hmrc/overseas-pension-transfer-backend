@@ -77,7 +77,7 @@ class SaveForLaterRepository @Inject() (
   }
 
   def set(answers: SavedUserAnswers): Future[Boolean] = Mdc.preservingMdc {
-    val updatedAnswers = answers copy (lastUpdated = Instant.now(clock))
+    val updatedAnswers = answers `copy` (lastUpdated = Instant.now(clock))
     collection
       .replaceOne(
         filter      = byId(updatedAnswers.transferId.value),
@@ -118,7 +118,7 @@ object SaveForLaterRepository {
           }
         } and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantFormat)
-    )(SavedUserAnswers.apply _)
+    )(SavedUserAnswers.apply)
 
     val writes: OWrites[SavedUserAnswers] = OWrites { ua =>
       val encrypted: EncryptedAnswersData =

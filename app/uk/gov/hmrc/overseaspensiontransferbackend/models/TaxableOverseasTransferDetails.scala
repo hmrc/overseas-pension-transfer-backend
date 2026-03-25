@@ -34,7 +34,7 @@ object TaxableOverseasTransferDetails extends JsonHelpers {
       (__ \ "applicableExclusion").readNullable[Seq[ApplicableExclusion]] and
       (__ \ "amountTaxDeducted").readNullable[BigDecimal] and
       (__ \ "transferMinusTax").readNullable[BigDecimal]
-  )(TaxableOverseasTransferDetails.apply _)
+  )(TaxableOverseasTransferDetails.apply)
 
   implicit val writes: Writes[TaxableOverseasTransferDetails] = Json.writes[TaxableOverseasTransferDetails]
 

@@ -40,5 +40,5 @@ object QtDetails {
       (__ \ "qtReference").read[String].map(QtNumber.apply) and
       (__ \ "qtTransferDate").readNullable[LocalDate] and
       (__ \ "qtDigitalStatus").readNullable[String]
-  )(QtDetails.apply _)
+  )(QtDetails.apply)
 }
