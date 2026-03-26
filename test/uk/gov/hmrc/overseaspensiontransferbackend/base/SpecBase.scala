@@ -37,7 +37,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.requests.IdentifierRequ
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
-import java.time.Instant
+import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.Random
@@ -57,7 +57,11 @@ trait SpecBase
 
   val testId: TransferNumber = TransferNumber(UUID.randomUUID().toString)
   val pstr: PstrNumber       = PstrNumber("12345678AB")
-  val now: Instant           = Instant.parse("2025-04-11T12:00:00Z")
+
+  private val clockMillis: Long = 1718118467838L
+  val clock: Clock              = Clock.fixed(Instant.ofEpochMilli(clockMillis), ZoneId.of("UTC"))
+
+  val now: Instant = Instant.now(clock)
 
   val sampleAnswersData: AnswersData = AnswersData(
     transferringMember  = None,

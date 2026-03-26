@@ -19,7 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logging
 import play.api.http.Status.CREATED
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HeaderNames.authorisation
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
@@ -33,7 +33,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate}
+import java.time.{Clock, Instant, LocalDate}
 import java.util.{Base64, UUID}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,7 +61,8 @@ trait TransferConnector {
 @Singleton
 class TransferConnectorImpl @Inject() (
     httpClientV2: HttpClientV2,
-    appConfig: AppConfig
+    appConfig: AppConfig,
+    clock: Clock
   )(implicit ec: ExecutionContext
   ) extends TransferConnector with Logging {
 
@@ -71,7 +72,7 @@ class TransferConnectorImpl @Inject() (
 
     val payload: JsValue = Json.toJson(validated)
 
-    val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
+    val receiptDate: String = Instant.now(clock).toString // UTC ISO-8601 per spec
 
     httpClientV2
       .post(url)
@@ -99,7 +100,7 @@ class TransferConnectorImpl @Inject() (
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val correlationId     = UUID.randomUUID().toString
-    val receiptDate       = Instant.now().toString
+    val receiptDate       = Instant.now(clock).toString
     val queryStringParams = Seq("pstr" -> pstr.value, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
 
     httpClientV2
@@ -130,7 +131,7 @@ class TransferConnectorImpl @Inject() (
 
     val correlationId = UUID.randomUUID().toString
 
-    val receiptDate = Instant.now().toString // UTC ISO-8601 per spec
+    val receiptDate = Instant.now(clock).toString // UTC ISO-8601 per spec
 
     val formatter = DateTimeFormatter.ISO_LOCAL_DATE
 

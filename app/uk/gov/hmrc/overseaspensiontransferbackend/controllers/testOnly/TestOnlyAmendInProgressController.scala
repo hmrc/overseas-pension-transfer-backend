@@ -17,7 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers.testOnly
 
 import play.api.libs.json.{JsError, JsValue}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly.SeedAmendInProgress
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
@@ -25,16 +25,17 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.testOnly.NameGenerator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ThreadLocalRandom
-import javax.inject._
+import javax.inject.*
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class TestOnlyAmendInProgressController @Inject() (
     cc: ControllerComponents,
-    saveForLaterRepo: SaveForLaterRepository
+    saveForLaterRepo: SaveForLaterRepository,
+    clock: Clock
   )(implicit ec: ExecutionContext
   ) extends BackendController(cc) {
 
@@ -56,7 +57,7 @@ class TestOnlyAmendInProgressController @Inject() (
 
   // generates n number of AmendInProgress transfers for given PSTR and seeds database
   def generate(pstr: String, n: Int): Action[AnyContent] = Action.async {
-    val now         = Instant.now
+    val now         = Instant.now(clock)
     val maxDaysBack = now.minus(31, ChronoUnit.DAYS)
     val seeds       = (1 to n).map { i =>
       val (first, last) = NameGenerator.nameFor(pstr, i)

@@ -115,7 +115,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
         doNothing.when(mockAuditService).audit(any[JsonAuditModel])(any[HeaderCarrier])
 
         val result = service.submitTransfer(normalisedSubmission).futureValue
-        result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.parse("2025-04-11T12:00:00Z")))
+        result mustBe Right(SubmissionResponse(QtNumber("QT123456"), Instant.parse("2024-06-11T15:07:47.838Z")))
         verify(mockAuditService, times(1)).audit(any[JsonAuditModel])(any[HeaderCarrier])
       }
 
