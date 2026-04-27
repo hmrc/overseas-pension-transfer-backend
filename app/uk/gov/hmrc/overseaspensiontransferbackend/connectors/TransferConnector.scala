@@ -30,10 +30,10 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormat
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
-import java.time.format.DateTimeFormatter
-import java.time.{Clock, Instant, LocalDate}
+import java.time.LocalDate
 import java.util.{Base64, UUID}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,8 +61,7 @@ trait TransferConnector {
 @Singleton
 class TransferConnectorImpl @Inject() (
     httpClientV2: HttpClientV2,
-    appConfig: AppConfig,
-    clock: Clock
+    appConfig: AppConfig
   )(implicit ec: ExecutionContext
   ) extends TransferConnector with Logging {
 
@@ -72,8 +71,6 @@ class TransferConnectorImpl @Inject() (
 
     val payload: JsValue = Json.toJson(validated)
 
-    val receiptDate: String = Instant.now(clock).toString // UTC ISO-8601 per spec
-
     httpClientV2
       .post(url)
       .setHeader(
@@ -81,7 +78,7 @@ class TransferConnectorImpl @Inject() (
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "FileQROPSTransfer",
         "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
+        "X-Receipt-Date"        -> DateTimeFormat.instantNow,
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
@@ -100,7 +97,6 @@ class TransferConnectorImpl @Inject() (
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
     val correlationId     = UUID.randomUUID().toString
-    val receiptDate       = Instant.now(clock).toString
     val queryStringParams = Seq("pstr" -> pstr.value, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
 
     httpClientV2
@@ -110,11 +106,11 @@ class TransferConnectorImpl @Inject() (
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "GetQROPSTransfer",
         "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
+        "X-Receipt-Date"        -> DateTimeFormat.instantNow,
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
-      .transform(_.addQueryStringParameters(queryStringParams *))
+      .transform(_.addQueryStringParameters(queryStringParams: _*))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }
@@ -131,26 +127,22 @@ class TransferConnectorImpl @Inject() (
 
     val correlationId = UUID.randomUUID().toString
 
-    val receiptDate = Instant.now(clock).toString // UTC ISO-8601 per spec
-
-    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
-
     val params =
       Seq(
-        "dateFrom" -> fromDate.format(formatter),
-        "dateTo"   -> toDate.format(formatter),
+        "dateFrom" -> fromDate.format(DateTimeFormat.localDate),
+        "dateTo"   -> toDate.format(DateTimeFormat.localDate),
         "pstr"     -> pstrNumber.normalised
       ) ++ qtRef.map(qt => "qtRef" -> qt.value)
 
     httpClientV2
       .get(url)
-      .transform(_.addQueryStringParameters(params *))
+      .transform(_.addQueryStringParameters(params: _*))
       .setHeader(
         authorisation           -> authorization(),
         "correlationid"         -> correlationId,
         "X-Message-Type"        -> "GetQTReportOverview",
         "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
+        "X-Receipt-Date"        -> DateTimeFormat.instantNow,
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
