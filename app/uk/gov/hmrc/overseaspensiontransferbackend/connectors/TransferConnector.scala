@@ -30,6 +30,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpe
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
 import java.time.format.DateTimeFormatter
@@ -114,7 +115,7 @@ class TransferConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
-      .transform(_.addQueryStringParameters(queryStringParams *))
+      .transform(_.addQueryStringParameters(queryStringParams: _*))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }
@@ -133,12 +134,10 @@ class TransferConnectorImpl @Inject() (
 
     val receiptDate = Instant.now(clock).toString // UTC ISO-8601 per spec
 
-    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
-
     val params =
       Seq(
-        "dateFrom" -> fromDate.format(formatter),
-        "dateTo"   -> toDate.format(formatter),
+        "dateFrom" -> fromDate.format(localDate),
+        "dateTo"   -> toDate.format(localDate),
         "pstr"     -> pstrNumber.normalised
       ) ++ qtRef.map(qt => "qtRef" -> qt.value)
 

@@ -16,21 +16,21 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.http.Status._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import play.api.http.Status.*
 import play.api.inject
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
+import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
-import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate}
 
 class TransferConnectorISpec extends BaseISpec {
@@ -284,7 +284,6 @@ class TransferConnectorISpec extends BaseISpec {
     val pstr      = PstrNumber("12345678AB")
     val fromDate  = LocalDate.of(2025, 9, 22)
     val toDate    = fromDate.minusYears(10)
-    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
     val basePath  = "/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
 
     def successBody(now: Instant): String =
@@ -311,8 +310,8 @@ class TransferConnectorISpec extends BaseISpec {
     "send correlationId header and required query params (without qtRef)" in {
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
       )
@@ -324,8 +323,8 @@ class TransferConnectorISpec extends BaseISpec {
       verify(
         getRequestedFor(urlPathEqualTo(basePath))
           .withHeader("correlationid", matching(correlationIdRegex.toString()))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
       )
     }
@@ -336,8 +335,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .withQueryParam("qtRef", equalTo(qt.value))
           .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
@@ -356,8 +355,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(OK).withBody(successBody(now)))
       )
@@ -384,8 +383,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(BAD_REQUEST).withBody(body))
       )
@@ -406,8 +405,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(UNPROCESSABLE_ENTITY).withBody(body))
       )
@@ -428,8 +427,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(UNPROCESSABLE_ENTITY).withBody(body))
       )
@@ -453,8 +452,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(INTERNAL_SERVER_ERROR).withBody(body))
       )
@@ -476,8 +475,8 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubFor(
         get(urlPathEqualTo(basePath))
-          .withQueryParam("dateFrom", equalTo(fromDate.format(formatter)))
-          .withQueryParam("dateTo", equalTo(toDate.format(formatter)))
+          .withQueryParam("dateFrom", equalTo(fromDate.format(localDate)))
+          .withQueryParam("dateTo", equalTo(toDate.format(localDate)))
           .withQueryParam("pstr", equalTo(pstr.normalised))
           .willReturn(aResponse().withStatus(SERVICE_UNAVAILABLE).withBody(body))
       )
