@@ -191,6 +191,8 @@ To run scala format, unit tests and integration tests and produce a coverage rep
 
 ## Decrypt the MongoDB Values
 
+The script described below does not work. It is to be superseded soon by an encrypted flag in application.conf.
+
 The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB documents that were stored in an encrypted format.
 
 ### Steps to use
