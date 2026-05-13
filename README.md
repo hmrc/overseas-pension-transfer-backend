@@ -182,10 +182,11 @@ To check if there are any scalastyle errors, warnings or infos:
  
 ---
 
-## All tests
+## All tests and checks
 
-To run scala format, unit tests and integration tests and produce a coverage report:
-> `./run_all_tests.sh`
+This is an sbt command alias specific to this project. It will run a scala format
+check, run unit tests, run integration tests and produce a coverage report:
+> `sbt runAllChecks`
 
 ---
 
