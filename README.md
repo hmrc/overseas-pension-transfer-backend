@@ -31,17 +31,28 @@ These **test-only** endpoints allow developers to insert, generate, or clear dat
 
 **POST** `/test-only/in-progress/seed`  
 Creates one in-progress transfer entry in the Save-For-Later collection.
-Payload requires UUID as transferReference
-
-**POST** `/test-only/amend-in-progress/seed`
-Creates one amend-in-progress transfer entry in the Save-For-Later collection.
-Payload requires QTNumber as reference
+Payload requires **UUID** as transferReference
 
 **Request body example**
 ```json
 {
   "pstr": "see notes below",
-  "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
+  "transferReference": "8afb72fc-f46d-44a1-a408-3ec57a123e16",
+  "lastUpdated": "2025-10-01T12:34:56Z",
+  "nino": "see notes below",
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+```
+**POST** `/test-only/amend-in-progress/seed`
+Creates one amend-in-progress transfer entry in the Save-For-Later collection.
+Payload requires **QTNumber** as reference
+
+**Request body example**
+```json
+{
+  "pstr": "see notes below",
+  "transferReference": "QT000001",
   "lastUpdated": "2025-10-01T12:34:56Z",
   "nino": "see notes below",
   "firstName": "Jane",
@@ -64,11 +75,13 @@ Accepts an array of `SeedInProgress` objects to insert several records at once.
 Accepts an array of `SeedAmendInProgress` objects to insert several records at once.
 
 **Request body example**
+
+Note that the transferReference can be either QTNumber or transferReference.
 ```json
 [
   {
     "pstr": "see notes below",
-    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
+    "transferReference": "QT000001",
     "lastUpdated": "2025-09-10T10:15:30Z",
     "nino": "see notes below",
     "firstName": "Alice",
@@ -76,7 +89,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "see notes below",
-    "transferReference":"QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
+    "transferReference":"8afb72fc-f46d-44a1-a408-3ec57a123e16",
     "lastUpdated": "2025-09-20T14:22:05Z",
     "nino": "see notes below",
     "firstName": "Bob",
@@ -84,7 +97,7 @@ Accepts an array of `SeedAmendInProgress` objects to insert several records at o
   },
   {
     "pstr": "see notes below",
-    "transferReference": "QT000001/8afb72fc-f46d-44a1-a408-3ec57a123e16",
+    "transferReference": "QT000001",
     "lastUpdated": "2025-09-28T08:45:00Z",
     "nino": "see notes below",
     "firstName": "Carol",
@@ -119,6 +132,16 @@ Removes all in-progress Save-For-Later entries matching the specified PSTR.
 
 **DELETE** `/test-only/amend-in-progress/clear/:pstr`  
 Removes all amend-in-progress Save-For-Later entries matching the specified PSTR.
+
+**Response**
+- `204 No Content` – Records deleted successfully
+
+---
+
+### 5. Reset test data
+
+**DELETE** `/test-only/reset-test-data`  
+Clears everything from the database.
 
 **Response**
 - `204 No Content` – Records deleted successfully
@@ -162,12 +185,14 @@ To check if there are any scalastyle errors, warnings or infos:
 ## All tests and checks
 
 This is an sbt command alias specific to this project. It will run a scala format
-check, run a scala style check, run unit tests, run integration tests and produce a coverage report:
+check, run unit tests, run integration tests and produce a coverage report:
 > `sbt runAllChecks`
 
 ---
 
 ## Decrypt the MongoDB Values
+
+The script described below does not work. It is to be superseded soon by an encrypted flag in application.conf.
 
 The `decrypt.sh` script is used to **decrypt the `data` field** inside MongoDB documents that were stored in an encrypted format.
 
