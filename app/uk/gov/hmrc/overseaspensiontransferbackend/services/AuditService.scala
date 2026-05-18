@@ -41,5 +41,6 @@ class AuditService @Inject() (
         tags        = AuditExtensions.auditHeaderCarrier(hc).toAuditTags()
       )
     )
+    ()
   }
 }

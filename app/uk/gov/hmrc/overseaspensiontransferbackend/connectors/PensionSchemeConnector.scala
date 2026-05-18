@@ -17,6 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
 import com.google.inject.Inject
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
@@ -30,8 +31,8 @@ class PensionSchemeConnector @Inject() (appConfig: AppConfig, http: HttpClientV2
     val url        = url"${appConfig.pensionSchemeService}/pensions-scheme/is-psa-associated"
     val userHeader = {
       user match {
-        case PsaUser(psaId, internalId, pensionSchemeDetails, affinityGroup) => "psaId" -> psaId.value
-        case PspUser(pspId, internalId, pensionSchemeDetails, affinityGroup) => "pspId" -> pspId.value
+        case PsaUser(psaId, _, _, _) => "psaId" -> psaId.value
+        case PspUser(pspId, _, _, _) => "pspId" -> pspId.value
       }
     }
 

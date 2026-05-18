@@ -6,6 +6,18 @@ ThisBuild / scalaVersion := "3.5.2"
 
 addCommandAlias("runAllChecks", ";clean;compile;scalafmtAll;coverage;test;it/test;coverageReport")
 
+val commonSettings: Seq[String] = Seq(
+  "-unchecked",
+  "-feature",
+  "-deprecation",
+  "-language:noAutoTupling",
+  "-Wvalue-discard",
+  "-Werror",
+  "-Wconf:src=routes/.*:s",
+  "-Wunused:unsafe-warn-patvars",
+  "-Wconf:msg=Flag.*repeatedly:s"
+)
+
 lazy val microservice = Project("overseas-pension-transfer-backend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
@@ -16,7 +28,7 @@ lazy val microservice = Project("overseas-pension-transfer-backend", file("."))
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     // https://www.scala-lang.org/2021/01/12/configuring-and-suppressing-warnings.html
     // suppress warnings in generated routes files
-    scalacOptions += "-Wconf:src=routes/.*:s",
+    scalacOptions ++= commonSettings,
     scalafmtOnCompile := true
   )
   .settings(inConfig(Test)(testSettings) *)

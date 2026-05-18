@@ -66,7 +66,7 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
 
   private val fakeRequest = FakeRequest().withHeaders("schemeReferenceNumber" -> "testSrn")
 
-  private def stubAuthoriseReturns(value: RetrievalResult): Unit =
+  private def stubAuthoriseReturns(value: RetrievalResult): Unit = {
     when(
       mockAuthConnector.authorise[RetrievalResult](
         any[Predicate],
@@ -76,8 +76,10 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
         any[ExecutionContext]
       )
     ).thenReturn(Future.successful(value))
+    ()
+  }
 
-  private def stubAuthoriseFails(ex: Throwable): Unit =
+  private def stubAuthoriseFails(ex: Throwable): Unit = {
     when(
       mockAuthConnector.authorise[RetrievalResult](
         any[Predicate],
@@ -87,6 +89,8 @@ class IdentifierActionImplSpec extends AnyFreeSpec with SpecBase {
         any[ExecutionContext]
       )
     ).thenReturn(Future.failed(ex))
+    ()
+  }
 
   "IdentifierAction" - {
 
