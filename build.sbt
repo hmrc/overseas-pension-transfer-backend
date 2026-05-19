@@ -20,7 +20,7 @@ val commonSettings: Seq[String] = Seq(
 
 lazy val microservice = Project("overseas-pension-transfer-backend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     RoutesKeys.routesImport ++= Seq(
       "uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._"
@@ -45,4 +45,7 @@ lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
-  .settings(libraryDependencies ++= AppDependencies.it)
+  .settings(
+    libraryDependencies ++= AppDependencies.it,
+    scalacOptions ++= commonSettings
+  )

@@ -105,6 +105,7 @@ class SaveForLaterServiceISpec extends BaseISpec {
               "qropsFullName" -> "Test Scheme"
             )
           )
+        case _ => assert(true)
       }
     }
 
