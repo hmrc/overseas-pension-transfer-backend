@@ -77,7 +77,7 @@ trait BaseISpec
     new GuiceApplicationBuilder()
       .in(Environment.simple(mode = Mode.Test))
       .configure(servicesConfig)
-      .overrides(moduleOverrides: _*)
+      .overrides(moduleOverrides*)
       .overrides(
         bind[Clock].toInstance(fixedClock)
       )
@@ -143,5 +143,6 @@ trait BaseISpec
   def assertCountry(js: JsLookupResult, expectedCode: String, expectedName: String): Unit = {
     (js \ "code").as[String] mustBe expectedCode
     (js \ "name").as[String] mustBe expectedName
+    ()
   }
 }

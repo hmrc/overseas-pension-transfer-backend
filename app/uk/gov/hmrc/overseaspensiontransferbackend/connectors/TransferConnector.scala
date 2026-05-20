@@ -33,7 +33,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
-import java.time.format.DateTimeFormatter
 import java.time.{Clock, Instant, LocalDate}
 import java.util.{Base64, UUID}
 import javax.inject.Inject
@@ -115,7 +114,7 @@ class TransferConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
-      .transform(_.addQueryStringParameters(queryStringParams: _*))
+      .transform(_.addQueryStringParameters(queryStringParams *))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }
