@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.utils
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 trait JsonHelpers {
 
@@ -102,26 +102,19 @@ trait JsonHelpers {
 
   private def setNested(json: JsObject, path: JsPath, value: JsValue): Either[JsError, JsObject] = {
     path.path match {
-      case Nil                               => Right(json)
-      case Seq(KeyPathNode(key))             =>
+      case Nil                           => Right(json)
+      case Seq(KeyPathNode(key))         =>
         Right(json + (key -> value))
-      case Seq(KeyPathNode(head), tail @ _*) =>
+      case Seq(KeyPathNode(head), tail*) =>
         val remaining = JsPath(tail.toList)
         val nestedObj = json.value.get(head).collect {
           case obj: JsObject => obj
         }.getOrElse(Json.obj())
-
-        setNested(nestedObj, remaining, value).map { nested =>
-          val rebuilt = json + (head -> nested)
-
-          if (nested.fields.isEmpty) {
-            rebuilt - head
-          } else {
-            rebuilt
-          }
+        setNested(nestedObj, remaining, value).map {
+          case nested if nested.fields.isEmpty => json - head
+          case nested                          => json + (head -> nested)
         }
-
-      case _ => Left(JsError(s"Unsupported path: $path"))
+      case _                             => Left(JsError(s"Unsupported path: $path"))
     }
   }
 
