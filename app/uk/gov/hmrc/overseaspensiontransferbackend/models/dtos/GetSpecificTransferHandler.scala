@@ -37,10 +37,10 @@ object GetSpecificTransferHandler {
       case (AmendInProgress | Submitted | Compiled, Some(version)) =>
         referenceId match {
           case qtNumber: QtNumber => Right(GetEtmpRecord(qtNumber, pstr, qtStatus, version))
-          case _                  => Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
+          case _                  => Left(TransferIdentifierInvalid("[GetSpecificTransferHandler][apply] QtNumber is invalid format"))
         }
       case _                                                       =>
-        Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
+        Left(TransferIdentifierInvalid("[GetSpecificTransferHandler][apply] request parameters invalid for request for transfer data"))
     }
   }
 }
