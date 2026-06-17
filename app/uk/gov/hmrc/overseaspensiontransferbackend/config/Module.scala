@@ -29,8 +29,6 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[SaveForLaterService]).to(classOf[SaveForLaterServiceImpl])
-    bind(classOf[TransferService]).to(classOf[TransferServiceImpl])
     bind(classOf[IdentifierAction]).to(classOf[IdentifierActionImpl]).asEagerSingleton()
     bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }

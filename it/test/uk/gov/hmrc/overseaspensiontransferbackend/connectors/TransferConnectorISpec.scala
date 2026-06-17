@@ -35,11 +35,6 @@ import java.time.{Instant, LocalDate}
 
 class TransferConnectorISpec extends BaseISpec {
 
-  override protected def moduleOverrides: Seq[GuiceableModule] =
-    Seq(
-      inject.bind[TransferConnector].to[TransferConnectorImpl]
-    )
-
   private val now  = Instant.now(fixedClock)
   private val pstr = PstrNumber("12345678AB")
 

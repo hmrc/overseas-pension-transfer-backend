@@ -36,7 +36,7 @@ class SaveForLaterServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAf
 
   private val mockRepository  = mock[SaveForLaterRepository]
   private val mockTransformer = mock[UserAnswersTransformer]
-  private val service         = new SaveForLaterServiceImpl(mockRepository, mockTransformer)
+  private val service         = new SaveForLaterService(mockRepository, mockTransformer)
 
   private val validData: JsObject = Json.obj(
     "memberDetails" -> Json.obj(

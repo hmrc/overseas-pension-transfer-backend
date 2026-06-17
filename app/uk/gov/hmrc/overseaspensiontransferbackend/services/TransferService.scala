@@ -37,28 +37,8 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait TransferService {
-
-  def submitTransfer(
-      submission: NormalisedSubmission
-    )(implicit
-      hc: HeaderCarrier
-    ): Future[Either[SubmissionError, SubmissionResponse]]
-
-  def getAllTransfers(
-      pstrNumber: PstrNumber
-    )(implicit hc: HeaderCarrier,
-      config: AppConfig
-    ): Future[Either[AllTransfersResponseError, AllTransfersResponse]]
-
-  def getTransfer(
-      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
-    )(implicit hc: HeaderCarrier
-    ): Future[Either[TransferRetrievalError, UserAnswersDTO]]
-}
-
 @Singleton
-class TransferServiceImpl @Inject() (
+class TransferService @Inject() (
     repository: SaveForLaterRepository,
     validator: SubmissionValidator,
     schemaValidator: SubmissionSchemaValidator,
@@ -66,10 +46,9 @@ class TransferServiceImpl @Inject() (
     connector: TransferConnector,
     auditService: AuditService
   )(implicit ec: ExecutionContext
-  ) extends TransferService
-    with Logging {
+  ) extends Logging {
 
-  override def submitTransfer(
+  def submitTransfer(
       submission: NormalisedSubmission
     )(implicit hc: HeaderCarrier
     ): Future[Either[SubmissionError, SubmissionResponse]] =
@@ -234,7 +213,7 @@ class TransferServiceImpl @Inject() (
         Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
     }
 
-  override def getAllTransfers(
+  def getAllTransfers(
       pstrNumber: PstrNumber
     )(implicit hc: HeaderCarrier,
       config: AppConfig

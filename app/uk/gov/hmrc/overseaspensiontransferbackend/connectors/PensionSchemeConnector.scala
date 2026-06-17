@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 import com.google.inject.Inject
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{AuthenticatedUser, PsaUser, PspUser}
 

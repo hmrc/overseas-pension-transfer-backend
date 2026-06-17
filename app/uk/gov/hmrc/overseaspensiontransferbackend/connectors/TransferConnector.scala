@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.Singleton
 import play.api.Logging
 import play.api.http.Status.CREATED
 import play.api.libs.json.*
@@ -33,41 +33,20 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
 
-import java.time.format.DateTimeFormatter
 import java.time.{Clock, Instant, LocalDate}
 import java.util.{Base64, UUID}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[TransferConnectorImpl])
-trait TransferConnector {
-  def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]]
-
-  def getTransfer(
-      pstr: PstrNumber,
-      qtNumber: QtNumber,
-      versionNumber: String
-    )(implicit hc: HeaderCarrier
-    ): Future[Either[DownstreamError, DownstreamTransferData]]
-
-  def getAllTransfers(
-      pstrNumber: PstrNumber,
-      fromDate: LocalDate,
-      toDate: LocalDate,
-      qtRef: Option[QtNumber]
-    )(implicit hs: HeaderCarrier
-    ): Future[Either[DownstreamError, DownstreamAllTransfersData]]
-}
-
 @Singleton
-class TransferConnectorImpl @Inject() (
+class TransferConnector @Inject() (
     httpClientV2: HttpClientV2,
     appConfig: AppConfig,
     clock: Clock
   )(implicit ec: ExecutionContext
-  ) extends TransferConnector with Logging {
+  ) extends Logging {
 
-  override def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
+  def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
 
     val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
 
@@ -91,7 +70,7 @@ class TransferConnectorImpl @Inject() (
       .map(resp => handleResponse[DownstreamSuccess](resp, CREATED))
   }
 
-  override def getTransfer(
+  def getTransfer(
       pstr: PstrNumber,
       qtNumber: QtNumber,
       versionNumber: String
@@ -115,12 +94,12 @@ class TransferConnectorImpl @Inject() (
         "X-Regime-Type"         -> "PODS",
         "X-Transmitting-System" -> "HIP"
       )
-      .transform(_.addQueryStringParameters(queryStringParams: _*))
+      .transform(_.addQueryStringParameters(queryStringParams *))
       .execute
       .map(resp => handleResponse[DownstreamTransferData](resp))
   }
 
-  override def getAllTransfers(
+  def getAllTransfers(
       pstrNumber: PstrNumber,
       fromDate: LocalDate,
       toDate: LocalDate,
