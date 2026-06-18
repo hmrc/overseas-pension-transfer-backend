@@ -42,17 +42,17 @@ class GetSpecificTransferHandlerSpec extends AnyFreeSpec with Matchers {
     "return Left TransferIdentifierInvalid" - {
       "qtStatus is InProgress and versionNumber is definined" in {
         GetSpecificTransferHandler.apply(TransferNumber("refId"), PstrNumber("12345678AB"), InProgress, Some("001")) mustBe
-          Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
+          Left(TransferIdentifierInvalid("[GetSpecificTransferHandler][apply] request parameters invalid for request for transfer data"))
       }
 
       "qtStatus is Submitted and versionNumber is None" in {
         GetSpecificTransferHandler.apply(QtNumber("QT123456"), PstrNumber("12345678AB"), Submitted, None) mustBe
-          Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] request parameters invalid for request for transfer data"))
+          Left(TransferIdentifierInvalid("[GetSpecificTransferHandler][apply] request parameters invalid for request for transfer data"))
       }
 
       "qtNumber is invalid" in {
         GetSpecificTransferHandler.apply(TransferNumber("refId"), PstrNumber("12345678AB"), Submitted, Some("001")) mustBe
-          Left(TransferIdentifierInvalid("[GetSpecificTransferDTO][apply] QtNumber is invalid format"))
+          Left(TransferIdentifierInvalid("[GetSpecificTransferHandler][apply] QtNumber is invalid format"))
       }
     }
   }
