@@ -23,10 +23,10 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.{Declaration, QtDeclara
 
 class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
 
-  "SubmissionValidatorImpl" - {
+  "SubmissionValidator" - {
 
     "must return Right(ValidatedSubmission) when valid psa submission is passed" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePsaSubmission)
 
@@ -34,7 +34,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return Right(ValidatedSubmission) when valid psp submission is passed" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePspSubmission)
 
@@ -42,7 +42,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psa submits with no Psa Declaration" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePsaSubmission.copy(psaDeclaration = None))
 
@@ -50,7 +50,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psp submits with no Psp Declaration" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePspSubmission.copy(pspDeclaration = None))
 
@@ -58,7 +58,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psp submits with no PsaId in QtDeclaration" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePspSubmission.copy(qtDeclaration = QtDeclaration(Psp, PspId("12345678"), None)))
 
@@ -66,7 +66,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psa submits with declaration1 = false" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePsaSubmission.copy(psaDeclaration = Some(Declaration(declaration1 = false, declaration2 = true))))
 
@@ -74,7 +74,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psa submits with declaration2 = false" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePsaSubmission.copy(psaDeclaration = Some(Declaration(declaration1 = true, declaration2 = false))))
 
@@ -82,7 +82,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psp submits with declaration1 = false" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePspSubmission.copy(pspDeclaration = Some(Declaration(declaration1 = false, declaration2 = true))))
 
@@ -90,7 +90,7 @@ class SubmissionValidatorSpec extends AnyFreeSpec with SpecBase {
     }
 
     "must return a Left of ValidationError when Psp submits with declaration2 = false" in {
-      val validator = new SubmissionValidatorImpl()
+      val validator = new SubmissionValidator()
 
       val result = validator.validate(samplePspSubmission.copy(pspDeclaration = Some(Declaration(declaration1 = true, declaration2 = false))))
 

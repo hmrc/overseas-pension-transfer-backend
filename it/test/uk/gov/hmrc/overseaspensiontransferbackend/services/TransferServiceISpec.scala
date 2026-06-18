@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.auth.core.AffinityGroup.Individual
 import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{BaseISpec, UserAnswersTestData}
-import uk.gov.hmrc.overseaspensiontransferbackend.connectors.{TransferConnector, TransferConnectorImpl}
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaId, PsaUser, PspId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{PsaSubmissionDTO, PspSubmissionDTO, SubmissionDTO}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
@@ -33,11 +33,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepos
 class TransferServiceISpec extends BaseISpec {
 
   implicit override val hc: HeaderCarrier = HeaderCarrier(requestId = Some(RequestId("id")))
-
-  override protected def moduleOverrides: Seq[GuiceableModule] = Seq(
-    inject.bind[TransferService].to[TransferServiceImpl],
-    inject.bind[TransferConnector].to[TransferConnectorImpl]
-  )
 
   private lazy val repository: SaveForLaterRepository = app.injector.instanceOf[SaveForLaterRepository]
   private lazy val service: TransferService           = app.injector.instanceOf[TransferService]

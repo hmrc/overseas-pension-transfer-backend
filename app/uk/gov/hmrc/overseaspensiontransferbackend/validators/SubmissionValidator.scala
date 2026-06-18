@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
-import com.google.inject.ImplementedBy
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.*
@@ -85,15 +84,10 @@ object Submission {
 }
 final case class ValidationError(message: String) extends ValidationResponse
 
-@ImplementedBy(classOf[SubmissionValidatorImpl])
-trait SubmissionValidator {
-  def validate(prepared: Submission): Either[ValidationError, Submission]
-}
-
 @Singleton
-class SubmissionValidatorImpl @Inject() extends SubmissionValidator {
+class SubmissionValidator @Inject() {
 
-  override def validate(prepared: Submission): Either[ValidationError, Submission] =
+  def validate(prepared: Submission): Either[ValidationError, Submission] =
     (prepared.qtDeclaration.submittedBy, prepared.psaDeclaration, prepared.pspDeclaration) match {
       case (Psa, Some(Declaration(true, true)), None) => Right(prepared)
       case (Psa, None, _)                             => Left(ValidationError("PsaDeclaration missing from submission"))

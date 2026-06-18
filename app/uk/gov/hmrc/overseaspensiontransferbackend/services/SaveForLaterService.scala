@@ -39,20 +39,14 @@ object SaveForLaterError {
   case object DeleteFailed                    extends SaveForLaterError
 }
 
-trait SaveForLaterService {
-  def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]]
-  def saveAnswer(answers: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]]
-  def deleteAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]]
-}
-
 @Singleton
-class SaveForLaterServiceImpl @Inject() (
+class SaveForLaterService @Inject() (
     repository: SaveForLaterRepository,
     userAnswersTransformer: UserAnswersTransformer
   )(implicit ec: ExecutionContext
-  ) extends SaveForLaterService with Logging with JsonHelpers {
+  ) extends Logging with JsonHelpers {
 
-  override def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
+  def getAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, UserAnswersDTO]] = {
     repository.get(id.value).map {
       case Some(saved) =>
         deconstructSavedAnswers(Json.toJsObject(saved.data)) match {
@@ -68,7 +62,7 @@ class SaveForLaterServiceImpl @Inject() (
     }
   }
 
-  override def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
+  def saveAnswer(dto: UserAnswersDTO)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Unit]] = {
     constructSavedAnswers(dto.data) match {
       case Left(err)               =>
         Future.successful(Left(err))
@@ -132,7 +126,7 @@ class SaveForLaterServiceImpl @Inject() (
     }
   }
 
-  override def deleteAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]] =
+  def deleteAnswers(id: TransferId)(implicit hc: HeaderCarrier): Future[Either[SaveForLaterError, Done]] =
     repository.clear(id.value) map {
       case true  => Right(Done)
       case false => Left(SaveForLaterError.DeleteFailed)

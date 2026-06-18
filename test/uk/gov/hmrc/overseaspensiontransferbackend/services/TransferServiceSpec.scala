@@ -48,7 +48,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
   private val mockTransformer     = mock[UserAnswersTransformer]
   private val mockAuditService    = mock[AuditService]
 
-  private val service = new TransferServiceImpl(
+  private val service = new TransferService(
     mockRepo,
     mockValidator,
     mockSchemaValidator,
@@ -105,7 +105,7 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
     super.beforeEach()
   }
 
-  "TransferServiceImpl" - {
+  "TransferService" - {
     "submitTransfer" - {
       "must return Right(SubmissionResponse) on happy path and audit correctly" in {
         when(mockRepo.get(eqTo(testId.value))).thenReturn(Future.successful(Some(saved)))
