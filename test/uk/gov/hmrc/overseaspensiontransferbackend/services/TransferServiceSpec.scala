@@ -65,6 +65,9 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
     authenticatedUser    = psaUser
   )
 
+  private val hipOriginFailures =
+    HipOriginFailures("HIP", List(HipOriginFailures.Failure("exception", "Unexpected failure occurred while processing the request.")))
+
   private val newData                 = sampleAnswersData.copy(transferringMember =
     Some(TransferringMember(Some(MemberDetails(
       Some("Forename"),
@@ -242,12 +245,22 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           result mustBe Left(TransferNotFound(s"Unable to find transferId: $testId from save-for-later"))
         }
 
-        "qtStatus is Submitted and Repo returns None" in {
-          when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(HipOriginFailures("Failed", List()))))
+        "qtStatus is Submitted and Repo returns None and connector returns not found" in {
+          when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(NotFound)))
 
           val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), PstrNumber("12345678AB"), Submitted, "001"))))
 
           result mustBe Left(TransferNotFound(s"Unable to find transferId: QT123456 from HoD"))
+        }
+      }
+
+      "return Left TransferFailedDownstream" - {
+        "qtStatus is Submitted and Repo returns None and connector returns a hip origin failure" in {
+          when(mockConnector.getTransfer(any, any, any)(any)).thenReturn(Future.successful(Left(hipOriginFailures)))
+          val result = await(service.getTransfer(Right(GetEtmpRecord(QtNumber("QT123456"), PstrNumber("12345678AB"), Submitted, "001"))))
+          result mustBe Left(
+            TransferFailedDownstream("Unable to find transferId: QT123456 due to error received from HoD: HIP failures origin=HIP count=1 sample=[exception:Unexpected failure occurred while processing the request.]")
+          )
         }
       }
 
@@ -347,16 +360,15 @@ class TransferServiceSpec extends AnyFreeSpec with SpecBase with BeforeAndAfterE
           result mustBe Left(TransferNotFound(s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"))
         }
 
-        "return Left(TransferNotFound) when connector fails to fetch record" in {
+        "return Left(TransferFailedDownstream) when connector fails to fetch record" in {
           val qtNumber = QtNumber("QT111111")
           val pstr     = PstrNumber("12345678AB")
 
           when(mockRepo.get(eqTo(qtNumber.value))).thenReturn(Future.successful(None))
           when(mockConnector.getTransfer(eqTo(pstr), eqTo(qtNumber), eqTo("001"))(any))
             .thenReturn(Future.successful(Left(ServerError)))
-
           val result = await(service.getTransfer(Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, "001"))))
-          result mustBe Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
+          result mustBe Left(TransferFailedDownstream("Unable to find transferId: QT111111 due to error received from HoD: 500 InternalServerError"))
         }
       }
 

@@ -21,6 +21,7 @@ trait TransferRetrievalError {
 }
 
 case class TransferNotFound(msg: String)                                     extends TransferRetrievalError
+case class TransferFailedDownstream(msg: String)                             extends TransferRetrievalError
 case class TransferDeconstructionError(msg: String)                          extends TransferRetrievalError
 case class TransferIdentifierInvalid(msg: String)                            extends TransferRetrievalError
 case class TransferMissingQtDetails(msg: String = "Error QTDetails missing") extends TransferRetrievalError

@@ -53,7 +53,11 @@ class GetTransferDataController @Inject() (
         transferService.getTransfer(transferType) map {
           case Right(value)              => Ok(Json.toJson(value))
           case Left(TransferNotFound(_)) => NotFound
-          case Left(_)                   => InternalServerError
+          case Left(e)                   =>
+            InternalServerError(Json.obj(
+              "error"   -> "Internal server error",
+              "details" -> e.toString
+            ))
         }
     }
 
