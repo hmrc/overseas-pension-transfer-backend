@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.models.downstream
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 
 sealed trait DownstreamError {
   def log: String

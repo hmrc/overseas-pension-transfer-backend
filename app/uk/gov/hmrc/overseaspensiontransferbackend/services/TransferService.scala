@@ -162,7 +162,7 @@ class TransferService @Inject() (
             Future.successful(deconstructSavedAnswers(userAnswers))
           case None              =>
             connector.getTransfer(pstr, qtNumber, versionNumber) flatMap {
-              case Right(value) =>
+              case Right(value)   =>
                 val savedUserAnswers = value.toSavedUserAnswers
                 repository.set(savedUserAnswers) map {
                   case true  => deconstructSavedAnswers(savedUserAnswers)
@@ -176,19 +176,29 @@ class TransferService @Inject() (
                       )
                     )
                 }
-              case Left(err)    =>
+              case Left(NotFound) =>
                 logger.error(
-                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}"
+                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD"
                 )
                 Future.successful(Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD")))
+              case Left(err)      =>
+                logger.error(
+                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber due to error received from HoD: ${err.log}"
+                )
+                Future.successful(Left(TransferFailedDownstream(s"Unable to find transferId: ${qtNumber.value} due to error received from HoD: ${err.log}")))
             }
         }
       case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
         connector.getTransfer(pstr, qtNumber, versionNumber) map {
-          case Right(value) => deconstructSavedAnswers(value.toSavedUserAnswers)
-          case Left(err)    =>
-            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD: ${err.log}")
+          case Right(value)   => deconstructSavedAnswers(value.toSavedUserAnswers)
+          case Left(NotFound) =>
+            logger.error(
+              s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD"
+            )
             Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
+          case Left(err)      =>
+            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber due to error received from HoD: ${err.log}")
+            Left(TransferFailedDownstream(s"Unable to find transferId: ${qtNumber.value} due to error received from HoD: ${err.log}"))
         }
       case Right(err)                                                                =>
         logger.warn(s"[TransferService][getTransfer] Request made for Invalid Identifier: $err")
