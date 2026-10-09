@@ -16,15 +16,32 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 
-import play.api.libs.json.{JsError, JsObject}
+import play.api.libs.json.{__, JsError, JsObject, JsPath}
 
-trait Transformer {
+trait Transformer extends Steps {
+  val jsonKey: String                     = ""
+  val externalPath: JsPath                = __
+  val internalPath: JsPath                = __
+  val constructor: Seq[TransformerStep]   = Seq.empty
+  val deconstructor: Seq[TransformerStep] = Seq.empty
+
+  private val moveAsIs: Seq[TransformerStep] =
+    if (jsonKey == "") {
+      Seq(moveStep(externalPath \ jsonKey, internalPath \ jsonKey))
+    } else {
+      Seq(moveStep(externalPath, internalPath))
+    }
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
-  def construct(input: JsObject): Either[JsError, JsObject]
+  def construct(input: JsObject): Either[JsError, JsObject] = {
+    applyPipeline(input, moveAsIs ++ constructor)(identity)
+  }
 
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
-  def deconstruct(input: JsObject): Either[JsError, JsObject]
+  def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+    applyPipeline(input, deconstructor ++ moveAsIs)(identity)
+  }
+
 }

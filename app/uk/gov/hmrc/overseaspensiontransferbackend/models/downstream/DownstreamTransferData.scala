@@ -20,6 +20,7 @@ import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 
+//Downstream
 case class DownstreamTransferData(
     pstr: PstrNumber,
     qtDetails: QtDetails,

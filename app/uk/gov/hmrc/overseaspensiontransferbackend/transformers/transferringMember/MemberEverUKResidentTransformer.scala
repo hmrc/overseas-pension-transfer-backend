@@ -16,42 +16,15 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.JsPath
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.BooleanTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberEverUKResidentTransformer extends PathAwareTransformer with JsonHelpers with BooleanTransformerStep {
-
-  val jsonKey                       = "memEverUkResident"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
-
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      constructBool(
-        internalPath
-      )
-    )
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
-
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructBool(
-        internalPath
-      ),
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+class MemberEverUKResidentTransformer extends Transformer with JsonHelpers with BooleanTransformerStep {
+  override val jsonKey                             = "memEverUkResident"
+  override val externalPath: JsPath                = JsPath \ "memberDetails"
+  override val internalPath: JsPath                = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails"
+  override val constructor: Seq[TransformerStep]   = Seq(constructBool(internalPath \ jsonKey))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructBool(internalPath \ jsonKey))
 }

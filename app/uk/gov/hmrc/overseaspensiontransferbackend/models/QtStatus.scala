@@ -18,54 +18,23 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models
 
 import play.api.libs.json._
 
-trait QtStatus {
-  val downstreamValue: String
+enum QtStatus {
+  case Compiled, Submitted, InProgress, AmendInProgress
 }
 
 object QtStatus {
 
-  def apply(input: String): QtStatus =
-    input match {
-      case Compiled.downstreamValue        => Compiled
-      case Submitted.downstreamValue       => Submitted
-      case InProgress.downstreamValue      => InProgress
-      case AmendInProgress.downstreamValue => AmendInProgress
-    }
+  def apply(input: String): QtStatus = {
+    QtStatus.values.find(_.toString == input).get
+  }
 
-  implicit val reads: Reads[QtStatus] =
+  implicit val format: Format[QtStatus] = Format(
     Reads {
-      case JsString("Compiled")        => JsSuccess(Compiled)
-      case JsString("Submitted")       => JsSuccess(Submitted)
-      case JsString("InProgress")      => JsSuccess(InProgress)
-      case JsString("AmendInProgress") => JsSuccess(AmendInProgress)
-      case _                           => JsError("Invalid value provided for QtStatus")
-    }
-
-  implicit val writes: Writes[QtStatus] =
+      case JsString(value) => QtStatus.values.find(_.toString == value).map(JsSuccess(_)).getOrElse(JsError("Invalid value provided for QtStatus"))
+      case _               => JsError("Invalid value provided for QtStatus")
+    },
     Writes {
-      qtStatus => JsString(qtStatus.downstreamValue)
+      qtStatus => JsString(qtStatus.toString)
     }
-
-  implicit val format: Format[QtStatus] =
-    Format(reads, writes)
-}
-
-case object Compiled extends QtStatus {
-  override def toString: String        = "Compiled"
-  override val downstreamValue: String = toString
-}
-
-case object Submitted extends QtStatus {
-  override def toString: String        = "Submitted"
-  override val downstreamValue: String = toString
-}
-
-case object InProgress extends QtStatus {
-  override def toString: String        = "InProgress"
-  override val downstreamValue: String = toString
-}
-
-case object AmendInProgress extends QtStatus {
-  override def toString: String        = "AmendInProgress"
-  override val downstreamValue: String = toString
+  )
 }

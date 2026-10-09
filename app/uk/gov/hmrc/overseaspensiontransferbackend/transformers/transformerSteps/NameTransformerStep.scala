@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.*
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Steps
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait NameTransformerStep extends JsonHelpers {
+trait NameTransformerStep extends Steps with JsonHelpers {
 
   /** Flattens a nested JSON representation of a person's name into a flat structure.
     *
@@ -66,9 +66,9 @@ trait NameTransformerStep extends JsonHelpers {
   /** Unflattens a nested JSON representation of a person's name into a flat structure.
     */
   def unflattenName(
+      path: JsPath,
       foreNameKey: String = "foreName",
-      lastNameKey: String = "lastName",
-      path: JsPath
+      lastNameKey: String = "lastName"
     ): TransformerStep = { json =>
     val parentPath = JsPath(path.path.dropRight(1))
     val parentOpt  = parentPath.asSingleJson(json).asOpt[JsObject]

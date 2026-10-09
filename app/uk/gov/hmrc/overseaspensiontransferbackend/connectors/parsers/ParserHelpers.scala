@@ -21,6 +21,7 @@ import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
 
+//TODO To be deleted as it will be replaced by HttpClientResponse
 object ParserHelpers {
   private[parsers] val MaxSnippet = 512
 

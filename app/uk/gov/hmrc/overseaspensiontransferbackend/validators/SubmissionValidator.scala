@@ -20,6 +20,7 @@ import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, QtNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.*
 
 import javax.inject.{Inject, Singleton}
 

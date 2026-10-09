@@ -76,6 +76,7 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
     new OtherAssetsTransformer
   )
 
+// TODO lists transformer sequence
   def build(): UserAnswersTransformer = {
     val allTransformers =
       memberDetailsTransformers ++ qropsDetailsTransformers ++ qropsSchemeManagerDetailsTransformers ++ transferDetailsTransformers

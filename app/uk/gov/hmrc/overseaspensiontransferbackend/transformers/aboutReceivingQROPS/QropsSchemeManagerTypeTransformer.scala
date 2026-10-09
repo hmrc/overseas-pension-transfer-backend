@@ -16,50 +16,23 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.{JsError, JsObject, JsPath, JsString}
+import play.api.libs.json.{JsPath, JsString}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.SchemeManagerType
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
-class QropsSchemeManagerTypeTransformer extends PathAwareTransformer with EnumTransformerStep {
+class QropsSchemeManagerTypeTransformer extends Transformer with EnumTransformerStep {
+  override val jsonKey              = "schemeManagerType"
+  override val externalPath: JsPath = JsPath \ "schemeManagerDetails"
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType"
 
-  val jsonKey = "schemeManagerType"
-
-  override def externalPath: JsPath = JsPath \ "schemeManagerDetails" \ jsonKey
-
-  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ jsonKey
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  override def construct(input: JsObject): Either[JsError, JsObject] = {
+  override val constructor: Seq[TransformerStep] = {
     val enumConversion: SchemeManagerType => JsString = schemeManagerType => JsString(schemeManagerType.downstreamValue)
-
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      constructEnum[SchemeManagerType](
-        internalPath,
-        enumConversion
-      )
-    )
-    TransformerUtils.applyPipeline(input, steps)(identity)
+    Seq(constructEnum[SchemeManagerType](internalPath \ jsonKey, enumConversion))
   }
 
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
+  override val deconstructor: Seq[TransformerStep] = {
     val stringConversion: String => SchemeManagerType = string => SchemeManagerType(string)
-
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructEnum[SchemeManagerType](internalPath, stringConversion),
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-    TransformerUtils.applyPipeline(input, steps)(identity)
+    Seq(deconstructEnum[SchemeManagerType](internalPath, stringConversion))
   }
 }

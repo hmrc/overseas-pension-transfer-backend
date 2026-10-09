@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.overseaspensiontransferbackend.transformers
+package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
-import play.api.libs.json.JsPath
+object PathParameterValidator {
+  private val qtNumberPattern   = "^QT[0-9]{6}$".r
+  private val pstrNumberPattern = "^[0-9]{8}[A-Z]{2}$".r
 
-trait PathAwareTransformer extends Transformer {
-  def externalPath: JsPath
-  def internalPath: JsPath
+  private def normalise(s: String): String =
+    s.replaceAll("\\s+", "").toUpperCase
+
+  def isQtNumber(value: String): Boolean = qtNumberPattern.matches(value)
+
+  def isPstrNumber(value: String): Boolean = pstrNumberPattern.matches(normalise(value))
 }

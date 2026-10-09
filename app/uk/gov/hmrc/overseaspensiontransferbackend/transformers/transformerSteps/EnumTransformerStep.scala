@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
+import play.api.libs.json.*
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Steps
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait EnumTransformerStep extends JsonHelpers {
+trait EnumTransformerStep extends Steps with JsonHelpers {
 
   def constructEnum[A](path: JsPath, func: A => JsValue)(implicit reads: Reads[A]): TransformerStep = json =>
     path.asSingleJson(json).validate[A] match {

@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.*
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Steps
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-trait BooleanTransformerStep extends JsonHelpers {
+trait BooleanTransformerStep extends Steps with JsonHelpers {
 
   /** Converts a boolean at the given path into a Yes/No string */
   def constructBool(path: JsPath): TransformerStep = { json =>

@@ -17,50 +17,37 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import com.google.inject.Inject
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class MemberAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
+class MemberAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends Transformer with AddressTransformerStep with JsonHelpers {
 
-  val jsonKey                       = "principalResAddDetails"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
+  override val jsonKey              = "principalResAddDetails"
+  override val externalPath: JsPath = JsPath \ "memberDetails"
+  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails"
   private val nestedKey             = "addressDetails"
 
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      constructAddressAt(
-        path = internalPath,
-        Some(nestedKey)
-      )
+  override val constructor: Seq[TransformerStep] = Seq(
+    constructAddressAt(
+      path = internalPath \ jsonKey,
+      Some(nestedKey)
     )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+  )
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        internalPath \
-          nestedKey
-      ),
+    val deconstructToExternal: TransformerStep = { json =>
+      for {
+        withAddress <- moveStep(internalPath \ jsonKey \ nestedKey, externalPath \ jsonKey)(json)
+        withPoBox   <- moveStep(internalPath \ jsonKey \ "poBoxNumber", externalPath \ jsonKey \ "poBoxNumber")(withAddress)
+      } yield withPoBox
+    }
+    val steps: Seq[TransformerStep]            = Seq(
+      deconstructAddressAt(internalPath \ nestedKey),
       deconstructToExternal
     )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
+    applyPipeline(json, steps)(identity)
   }
 
-  private val deconstructToExternal: TransformerStep = { json =>
-    for {
-      withAddress <- moveStep(internalPath \ nestedKey, externalPath)(json)
-      withPoBox   <- moveStep(internalPath \ "poBoxNumber", externalPath \ "poBoxNumber")(withAddress)
-    } yield withPoBox
-  }
 }

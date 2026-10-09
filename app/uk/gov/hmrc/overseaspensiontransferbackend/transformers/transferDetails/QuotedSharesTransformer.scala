@@ -16,35 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
-class QuotedSharesTransformer extends PathAwareTransformer with EnumTransformerStep {
-
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "quotedShares"
-
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "quotedShares"
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(externalPath, internalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(internalPath, externalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
-
+class QuotedSharesTransformer extends Transformer with EnumTransformerStep {
+  override val externalPath: JsPath = JsPath \ "transferDetails" \ "quotedShares"
+  override val internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "quotedShares"
 }

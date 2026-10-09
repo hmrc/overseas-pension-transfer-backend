@@ -17,19 +17,22 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.services
 
 import play.api.Logging
-import play.api.libs.json.Json
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND}
+import play.api.libs.json.*
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.TransferConnector
-import uk.gov.hmrc.overseaspensiontransferbackend.models._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.JourneySubmittedType.SubmissionSucceeded
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.{AuditUserInfo, JourneySubmittedType, ReportSubmittedAuditModel}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{PsaUser, PspUser}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream._
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.{GetEtmpRecord, GetSaveForLaterRecord, GetSpecificTransferHandler, UserAnswersDTO}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer._
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.*
 import uk.gov.hmrc.overseaspensiontransferbackend.repositories.SaveForLaterRepository
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.UserAnswersTransformer
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.PathParameterValidator.isQtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.{Submission, SubmissionSchemaValidator, SubmissionValidator}
 
 import java.time.{LocalDate, ZoneOffset}
@@ -144,73 +147,60 @@ class TransferService @Inject() (
   }
 
   def getTransfer(
-      transferType: Either[TransferRetrievalError, GetSpecificTransferHandler]
+      referenceId: String,
+      pstr: String,
+      qtStatus: QtStatus,
+      versionNumber: Option[String]
     )(implicit hc: HeaderCarrier
-    ): Future[Either[TransferRetrievalError, UserAnswersDTO]] =
-    transferType match {
-      case Right(GetSaveForLaterRecord(transferId, _, InProgress))                   =>
-        repository.get(transferId.value) map {
-          case Some(userAnswers) =>
-            deconstructSavedAnswers(userAnswers)
-          case None              =>
-            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $transferId from save-for-later")
-            Left(TransferNotFound(s"Unable to find transferId: $transferId from save-for-later"))
+    ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] = {
+    (qtStatus, versionNumber) match {
+      case (InProgress, None)                                               =>
+        repository.get(referenceId).map {
+          case Some(transferDetails) => deconstructSavedAnswers(transferDetails)
+          case None                  =>
+            logger.warn(s"In Progress record not found in SaveForLaterRepository for $referenceId")
+            Left(UpstreamErrorResponse("NOT_FOUND", NOT_FOUND))
         }
-      case Right(GetEtmpRecord(qtNumber, pstr, AmendInProgress, versionNumber))      =>
-        repository.get(qtNumber.value) flatMap {
-          case Some(userAnswers) =>
-            Future.successful(deconstructSavedAnswers(userAnswers))
-          case None              =>
-            connector.getTransfer(pstr, qtNumber, versionNumber) flatMap {
-              case Right(value)   =>
-                val savedUserAnswers = value.toSavedUserAnswers
-                repository.set(savedUserAnswers) map {
-                  case true  => deconstructSavedAnswers(savedUserAnswers)
-                  case false =>
-                    logger.error(
-                      s"[TransferService][getTransfer] Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"
-                    )
-                    Left(
-                      TransferNotFound(
-                        s"Unable to set AmendInProgress for transferId: $qtNumber.value in save-for-later"
-                      )
-                    )
-                }
-              case Left(NotFound) =>
-                logger.error(
-                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD"
-                )
-                Future.successful(Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD")))
-              case Left(err)      =>
-                logger.error(
-                  s"[TransferService][getTransfer] Unable to find transferId: $qtNumber due to error received from HoD: ${err.log}"
-                )
-                Future.successful(Left(TransferFailedDownstream(s"Unable to find transferId: ${qtNumber.value} due to error received from HoD: ${err.log}")))
-            }
+      case (AmendInProgress, Some(version)) if isQtNumber(referenceId)      =>
+        for {
+          transferFromRepo      <- repository.get(referenceId)
+          transferNotFoundInRepo = transferFromRepo.isEmpty
+          transfer              <- if (transferNotFoundInRepo) {
+                                     fetchTransferFromDownstream(pstr, referenceId, version)
+                                   } else {
+                                     Future(deconstructSavedAnswers(transferFromRepo.get))
+                                   }
+        } yield transfer
+      case (Compiled | Submitted, Some(version)) if isQtNumber(referenceId) =>
+        fetchTransferFromDownstream(pstr, referenceId, version)
+      case _                                                                =>
+        logger.error(s"Request parameters are invalid - transfer status: $qtStatus and  version: $versionNumber")
+        Future(Left[UpstreamErrorResponse, UserAnswersDTO](UpstreamErrorResponse("Request parameters are invalid", INTERNAL_SERVER_ERROR)))
+    }
+  }
+
+  private def fetchTransferFromDownstream(
+      pstr: String,
+      transferId: String,
+      versionNumber: String
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] =
+    connector.getTransfer(pstr, transferId, versionNumber) map {
+      case Right(downstreamTransferDetails) =>
+        downstreamTransferDetails.json.validate[DownstreamTransferData] match {
+          case JsSuccess(validResponse, _) =>
+            deconstructSavedAnswers(validResponse.toSavedUserAnswers)
+          case er: JsError                 =>
+            logger.error(s"(${transferId} - ${versionNumber}) Error validating transfer details from downstream: ${er.errors}")
+            Left(UpstreamErrorResponse(s"Json Validation error in the transfer recieved from downstream", INTERNAL_SERVER_ERROR))
         }
-      case Right(GetEtmpRecord(qtNumber, pstr, Submitted | Compiled, versionNumber)) =>
-        connector.getTransfer(pstr, qtNumber, versionNumber) map {
-          case Right(value)   => deconstructSavedAnswers(value.toSavedUserAnswers)
-          case Left(NotFound) =>
-            logger.error(
-              s"[TransferService][getTransfer] Unable to find transferId: $qtNumber from HoD"
-            )
-            Left(TransferNotFound(s"Unable to find transferId: ${qtNumber.value} from HoD"))
-          case Left(err)      =>
-            logger.error(s"[TransferService][getTransfer] Unable to find transferId: $qtNumber due to error received from HoD: ${err.log}")
-            Left(TransferFailedDownstream(s"Unable to find transferId: ${qtNumber.value} due to error received from HoD: ${err.log}"))
-        }
-      case Right(err)                                                                =>
-        logger.warn(s"[TransferService][getTransfer] Request made for Invalid Identifier: $err")
-        Future.successful(Left(TransferIdentifierInvalid(err.toString)))
-      case Left(err)                                                                 =>
-        logger.warn(s"[TransferService][getTransfer] Invalid request: $err")
-        Future.successful(Left(err))
+      case Left(x)                          => Left(x)
     }
 
+//ToDo: Can be made common for this and Save for later service
   private def deconstructSavedAnswers(
       savedUserAnswers: SavedUserAnswers
-    ): Either[TransferRetrievalError, UserAnswersDTO] =
+    ): Either[UpstreamErrorResponse, UserAnswersDTO] =
     transformer.deconstruct(Json.toJsObject(savedUserAnswers.data)) match {
       case Right(jsObject) =>
         Right(
@@ -218,9 +208,9 @@ class TransferService @Inject() (
         )
       case Left(jsError)   =>
         logger.error(
-          s"[TransferService][getTransfer] to deconstruct transferId: ${savedUserAnswers.transferId} json with error: ${jsError.errors}"
+          s"(${savedUserAnswers.transferId}) Error deconstructing from SaveForLaterRepository: ${jsError.errors}"
         )
-        Left(TransferDeconstructionError(s"Unable to deconstruct json with error: $jsError"))
+        Left(UpstreamErrorResponse(s"Unable to deconstruct json with error: $jsError", INTERNAL_SERVER_ERROR))
     }
 
   def getAllTransfers(
