@@ -16,7 +16,14 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.validators
 
-object PathParameterValidator {
+import play.api.Logging
+import play.api.libs.json.Json
+import play.api.mvc.Result
+import play.api.mvc.Results.InternalServerError
+
+import scala.concurrent.Future
+
+object PathParameterValidator extends Logging {
   private val qtNumberPattern   = "^QT[0-9]{6}$".r
   private val pstrNumberPattern = "^[0-9]{8}[A-Z]{2}$".r
 
@@ -26,4 +33,15 @@ object PathParameterValidator {
   def isQtNumber(value: String): Boolean = qtNumberPattern.matches(value)
 
   def isPstrNumber(value: String): Boolean = pstrNumberPattern.matches(normalise(value))
+  
+  def withPstrNumber(pstr: String)(block: String => Future[Result]) : Future[Result] =
+    if (isPstrNumber(pstr)) {
+      block(pstr)
+    } else {
+      logger.error("PstrNumber has an invalid format. PstrNumber: " + pstr)
+      Future.successful(InternalServerError(Json.obj(
+        "error" -> "Invalid Pstr",
+        "details" -> pstr
+      )))
+    }
 }

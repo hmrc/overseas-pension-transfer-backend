@@ -191,7 +191,7 @@ class TransferService @Inject() (
           case JsSuccess(validResponse, _) =>
             deconstructSavedAnswers(validResponse.toSavedUserAnswers)
           case er: JsError                 =>
-            logger.error(s"(${transferId} - ${versionNumber}) Error validating transfer details from downstream: ${er.errors}")
+            logger.error(s"($transferId - $versionNumber) Error validating transfer details from downstream: ${er.errors}")
             Left(UpstreamErrorResponse(s"Json Validation error in the transfer recieved from downstream", INTERNAL_SERVER_ERROR))
         }
       case Left(x)                          => Left(x)

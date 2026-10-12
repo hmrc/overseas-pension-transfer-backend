@@ -38,6 +38,7 @@ class HttpClientResponse @Inject() ()(implicit ec: ExecutionContext) extends Log
       )
   }
 
+  //TODO Add json validation to reads - Produce 500 on JsError
   def read(
       response: Future[Either[UpstreamErrorResponse, HttpResponse]]
     ): Future[Either[UpstreamErrorResponse, HttpResponse]] =
