@@ -75,7 +75,7 @@ class UserAnswersTransformerFactory @Inject() (countryCodeReader: CountryCodeRea
     new PropertyTransformer(countryCodeReader),
     new OtherAssetsTransformer
   )
-  
+
   def build(): UserAnswersTransformer = {
     val allTransformers =
       memberDetailsTransformers ++ qropsDetailsTransformers ++ qropsSchemeManagerDetailsTransformers ++ transferDetailsTransformers

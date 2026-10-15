@@ -3,7 +3,7 @@ import sbt.*
 object AppDependencies {
 
   private val bootstrapVersion = "10.7.0"
-  private val hmrcMongoVersion = "2.12.0"
+  private val hmrcMongoVersion = "2.14.0"
 
   val compile: Seq[ModuleID] = Seq(
     "com.networknt"      % "json-schema-validator"     % "3.0.8",
