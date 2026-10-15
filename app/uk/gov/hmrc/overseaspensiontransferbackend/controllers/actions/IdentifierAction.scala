@@ -57,7 +57,7 @@ class IdentifierActionImpl @Inject() (
           throw AgentAffinityGroupNotAllowed
         }
         val internalId                           = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
-//TODO Get a better internalID or throw an error? Also, what is internalId used for?
+
         val authenticatedUser: AuthenticatedUser = extractUser(enrolments, config, internalId, affinityGroup)
 
         request.headers.get("schemeReferenceNumber").fold(Future.successful(BadRequest)) {

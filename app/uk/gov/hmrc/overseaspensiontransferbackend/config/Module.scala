@@ -33,7 +33,6 @@ class Module extends AbstractModule {
     bind(classOf[Clock]).toInstance(Clock.systemUTC()) // explicit UTC Clock
   }
 
-//TODO This is where the transformer sequence is added
   @Provides
   @Singleton
   def provideUserAnswersTransformer(countryCodeReader: CountryCodeReader): UserAnswersTransformer =
