@@ -23,8 +23,7 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
 class ReasonNoOverseasTransferTransformer extends Transformer with EnumTransformerStep {
 
-  override val jsonKey              = "reasonNoOverseasTransfer"
-  override val externalPath: JsPath = JsPath \ "transferDetails"
+  override val externalPath: JsPath = JsPath \ "transferDetails" \ "reasonNoOverseasTransfer"
   override val internalPath: JsPath = externalPath
 
   override def construct(input: JsObject): Either[JsError, JsObject] = {

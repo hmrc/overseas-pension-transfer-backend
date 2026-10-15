@@ -37,24 +37,23 @@ class GetTransferDataController @Inject() (
   ) extends BackendController(cc) {
 
   def getTransfer(
-                   referenceId: String,
-                   pstr: String,
-                   qtStatus: String,
-                   versionNumber: Option[String]
-                 ): Action[AnyContent] = identify.async {
-      implicit request =>
-        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-        withPstrNumber(pstr)(
-          implicit validPstr =>
-          transferService.getTransfer(referenceId, validPstr, QtStatus(qtStatus), versionNumber) map {
-            case Right(value) => Ok(Json.toJson(value))
-            case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => NotFound
-            case Left(e) =>
-              InternalServerError(Json.obj(
-                "error" -> "Internal server error",
-                "details" -> e.toString
-              ))
-          }
-        )
-    }
+      referenceId: String,
+      pstr: String,
+      qtStatus: String,
+      versionNumber: Option[String]
+    ): Action[AnyContent] = identify.async {
+    implicit request =>
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+      withPstrNumber(pstr)(implicit validPstr =>
+        transferService.getTransfer(referenceId, validPstr, QtStatus(qtStatus), versionNumber) map {
+          case Right(value)                                    => Ok(Json.toJson(value))
+          case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => NotFound
+          case Left(e)                                         =>
+            InternalServerError(Json.obj(
+              "error"   -> "Internal server error",
+              "details" -> e.toString
+            ))
+        }
+      )
+  }
 }

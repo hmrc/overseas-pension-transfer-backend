@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.JsPath
+import play.api.libs.json.{JsError, JsObject, JsPath}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
@@ -24,11 +24,17 @@ class QropsSchemeManagerOrganisationContactNameTransformer extends Transformer w
   override val externalPath: JsPath = JsPath \ "schemeManagerDetails" \ "organisationContactName"
   override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsOrganisation"
 
-  override val constructor: Seq[TransformerStep] = Seq(flattenName(
-    internalPath \ "name",
-    "orgForename",
-    "orgSurname"
-  ))
+  override def construct(input: JsObject): Either[JsError, JsObject] = {
+    val steps: Seq[TransformerStep] = Seq(
+      moveStep(externalPath, internalPath \ "name"),
+      flattenName(
+        internalPath \ "name",
+        "orgForename",
+        "orgSurname"
+      )
+    )
+    applyPipeline(input, steps)(identity)
+  }
 
   override val deconstructor: Seq[TransformerStep] = Seq(deconstructName(
     "orgForename",

@@ -29,12 +29,12 @@ class WhyTaxableTransformer extends Transformer with EnumTransformerStep {
   override val constructor: Seq[TransformerStep] = {
     val enumConversion: WhyTransferTaxable => JsString =
       whyTransferTaxable => JsString(whyTransferTaxable.downstreamValue)
-    Seq(constructEnum[WhyTransferTaxable](internalPath, enumConversion))
+    Seq(constructEnum[WhyTransferTaxable](internalPath \ jsonKey, enumConversion))
   }
 
   override val deconstructor: Seq[TransformerStep] = {
     val enumConversion: WhyTransferTaxable => JsString =
       whyTransferTaxable => JsString(whyTransferTaxable.toString)
-    Seq(constructEnum[WhyTransferTaxable](internalPath, enumConversion))
+    Seq(constructEnum[WhyTransferTaxable](internalPath \ jsonKey, enumConversion))
   }
 }

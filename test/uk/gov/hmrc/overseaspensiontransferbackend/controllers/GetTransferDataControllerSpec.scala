@@ -25,9 +25,10 @@ import play.api.inject.bind
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferDeconstructionError, TransferNotFound, TransferNumber}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.TransferNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
 
 import scala.concurrent.Future
@@ -44,7 +45,7 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     "Return 200 with Json when service returns Right UserAnswersDTO" in {
       val json = Json.obj("key" -> "value")
 
-      when(mockTransferService.getTransfer(any)(any))
+      when(mockTransferService.getTransfer(any, any, any, any)(any))
         .thenReturn(Future.successful(Right(UserAnswersDTO(TransferNumber("id"), pstr, json, now))))
 
       running(application) {
@@ -63,8 +64,8 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 404 when service returns Left TransferNotFound" in {
-      when(mockTransferService.getTransfer(any)(any))
-        .thenReturn(Future.successful(Left(TransferNotFound("No Transfer found"))))
+      when(mockTransferService.getTransfer(any, any, any, any)(any))
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("NOT_FOUND", NOT_FOUND))))
 
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")
@@ -76,8 +77,8 @@ class GetTransferDataControllerSpec extends AnyFreeSpec with Matchers with SpecB
     }
 
     "return 500 when service returns Left TransferDeconstructionError" in {
-      when(mockTransferService.getTransfer(any)(any))
-        .thenReturn(Future.successful(Left(TransferDeconstructionError("Error"))))
+      when(mockTransferService.getTransfer(any, any, any, any)(any))
+        .thenReturn(Future.successful(Left(UpstreamErrorResponse("Error", INTERNAL_SERVER_ERROR))))
 
       running(application) {
         val request = FakeRequest(GET, "/overseas-pension-transfer-backend/get-transfer/transfer-id?pstr=12345678AB&qtStatus=InProgress")

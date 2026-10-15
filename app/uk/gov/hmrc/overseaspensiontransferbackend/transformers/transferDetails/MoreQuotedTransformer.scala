@@ -23,6 +23,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 class MoreQuotedTransformer extends Transformer with BooleanTransformerStep {
   override val externalPath: JsPath                = JsPath \ "transferDetails" \ "moreQuoted"
   override val internalPath: JsPath                = JsPath \ "transferDetails" \ "typeOfAssets" \ "moreQuoted"
-  override val constructor: Seq[TransformerStep]   = Seq(constructBool(externalPath))
+  override val constructor: Seq[TransformerStep]   = Seq(constructBool(internalPath))
   override val deconstructor: Seq[TransformerStep] = Seq(deconstructBool(internalPath))
 }

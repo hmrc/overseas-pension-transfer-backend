@@ -33,14 +33,14 @@ object PathParameterValidator extends Logging {
   def isQtNumber(value: String): Boolean = qtNumberPattern.matches(value)
 
   def isPstrNumber(value: String): Boolean = pstrNumberPattern.matches(normalise(value))
-  
-  def withPstrNumber(pstr: String)(block: String => Future[Result]) : Future[Result] =
+
+  def withPstrNumber(pstr: String)(block: String => Future[Result]): Future[Result] =
     if (isPstrNumber(pstr)) {
       block(pstr)
     } else {
       logger.error("PstrNumber has an invalid format. PstrNumber: " + pstr)
       Future.successful(InternalServerError(Json.obj(
-        "error" -> "Invalid Pstr",
+        "error"   -> "Invalid Pstr",
         "details" -> pstr
       )))
     }

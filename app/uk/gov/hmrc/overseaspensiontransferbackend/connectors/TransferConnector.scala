@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, Upstream
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
-import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamAllTransfersData, DownstreamError, DownstreamSuccess, DownstreamTransferData}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
@@ -74,14 +74,14 @@ class TransferConnector @Inject() (
       qtNumber: String,
       versionNumber: String
     )(implicit hc: HeaderCarrier
-    ): Future[Either[UpstreamErrorResponse, HttpResponse]] = {
+    ): Future[Either[UpstreamErrorResponse, DownstreamTransferData]] = {
     val queryStringParams = Seq("pstr" -> pstr, "qtNumber" -> qtNumber, "versionNumber" -> versionNumber)
     httpClientResponse.read(
       httpClientV2
         .get(url"$baseUrl/qrops-transfer")
         .setHeader(buildHeaders("GetQROPSTransfer")*)
         .transform(_.addQueryStringParameters(queryStringParams*))
-        .execute[Either[UpstreamErrorResponse, HttpResponse]]
+        .execute[Either[UpstreamErrorResponse, DownstreamTransferData]]
     )
   }
 

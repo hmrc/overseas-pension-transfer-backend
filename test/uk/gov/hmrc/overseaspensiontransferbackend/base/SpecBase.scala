@@ -30,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.{FakeIdentifierAction, IdentifierAction}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.Submitted
 import uk.gov.hmrc.overseaspensiontransferbackend.models.audit.AuditUserInfo
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.UserAnswersDTO

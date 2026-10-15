@@ -33,6 +33,6 @@ class QropsSchemeManagerTypeTransformer extends Transformer with EnumTransformer
 
   override val deconstructor: Seq[TransformerStep] = {
     val stringConversion: String => SchemeManagerType = string => SchemeManagerType(string)
-    Seq(deconstructEnum[SchemeManagerType](internalPath, stringConversion))
+    Seq(deconstructEnum[SchemeManagerType](internalPath \ jsonKey, stringConversion))
   }
 }

@@ -25,23 +25,16 @@ trait Transformer extends Steps {
   val constructor: Seq[TransformerStep]   = Seq.empty
   val deconstructor: Seq[TransformerStep] = Seq.empty
 
-  private val moveAsIs: Seq[TransformerStep] =
-    if (jsonKey == "") {
-      Seq(moveStep(externalPath \ jsonKey, internalPath \ jsonKey))
-    } else {
-      Seq(moveStep(externalPath, internalPath))
-    }
-
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     */
   def construct(input: JsObject): Either[JsError, JsObject] = {
-    applyPipeline(input, moveAsIs ++ constructor)(identity)
+    applyPipeline(input, Seq(moveStep(externalPath, internalPath, jsonKey)) ++ constructor)(identity)
   }
 
   /** Applies the reverse transformation to make stored data suitable for frontend rendering.
     */
   def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    applyPipeline(input, deconstructor ++ moveAsIs)(identity)
+    applyPipeline(input, deconstructor ++ Seq(moveStep(internalPath, externalPath, jsonKey)))(identity)
   }
 
 }

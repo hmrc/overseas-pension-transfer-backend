@@ -23,6 +23,6 @@ import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.
 class MoreOtherAssetTransformer extends Transformer with BooleanTransformerStep {
   override val externalPath: JsPath                = JsPath \ "transferDetails" \ "moreAsset"
   override val internalPath: JsPath                = JsPath \ "transferDetails" \ "typeOfAssets" \ "moreAsset"
-  override val constructor: Seq[TransformerStep]   = Seq(constructBool(externalPath))
+  override val constructor: Seq[TransformerStep]   = Seq(constructBool(internalPath))
   override val deconstructor: Seq[TransformerStep] = Seq(deconstructBool(internalPath))
 }

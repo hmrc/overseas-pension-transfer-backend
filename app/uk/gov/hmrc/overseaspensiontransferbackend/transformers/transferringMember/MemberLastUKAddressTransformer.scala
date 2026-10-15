@@ -24,10 +24,13 @@ import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, Json
 
 class MemberLastUKAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends Transformer with AddressTransformerStep
     with JsonHelpers {
-  override val jsonKey                             = "lastPrincipalAddDetails"
-  override val externalPath: JsPath                = JsPath \ "memberDetails"
-  override val internalPath: JsPath                = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails"
+  override val externalPath: JsPath                = JsPath \ "memberDetails" \ "lastPrincipalAddDetails"
+  override val internalPath: JsPath                = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails"
   private val nestedKey                            = "addressDetails"
-  override val constructor: Seq[TransformerStep]   = Seq(constructAddressAt(internalPath \ jsonKey, Some(nestedKey)))
-  override val deconstructor: Seq[TransformerStep] = Seq(deconstructAddressAt(internalPath \ jsonKey \ nestedKey))
+  override val constructor: Seq[TransformerStep]   = Seq(constructAddressAt(internalPath, Some(nestedKey)))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructAddressAt(internalPath \ nestedKey))
+
+  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
+    applyPipeline(json, Seq(deconstructAddressAt(internalPath \ nestedKey), moveStep(internalPath \ nestedKey, externalPath)))(identity)
+  }
 }

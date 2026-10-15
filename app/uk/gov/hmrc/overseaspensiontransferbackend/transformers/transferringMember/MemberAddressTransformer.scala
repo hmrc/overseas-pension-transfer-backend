@@ -44,7 +44,7 @@ class MemberAddressTransformer @Inject() (val countryCodeReader: CountryCodeRead
       } yield withPoBox
     }
     val steps: Seq[TransformerStep]            = Seq(
-      deconstructAddressAt(internalPath \ nestedKey),
+      deconstructAddressAt(internalPath \ jsonKey \ nestedKey),
       deconstructToExternal
     )
     applyPipeline(json, steps)(identity)

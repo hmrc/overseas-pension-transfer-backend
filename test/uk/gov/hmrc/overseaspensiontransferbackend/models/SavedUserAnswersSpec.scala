@@ -20,6 +20,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.{SpecBase, TestAppConfig}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.{AmendInProgress, InProgress}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, QtNumber, TransferNumber}
 import uk.gov.hmrc.overseaspensiontransferbackend.services.EncryptionService
 
