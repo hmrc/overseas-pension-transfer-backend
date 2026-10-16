@@ -178,13 +178,13 @@ class TransferService @Inject() (
         Future(Left[UpstreamErrorResponse, UserAnswersDTO](UpstreamErrorResponse("Request parameters are invalid", INTERNAL_SERVER_ERROR)))
     }
   }
-  
+
   private def fetchAndSaveTransferFromDownstream(
-                                                  pstr: String,
-                                                  transferId: String,
-                                                  versionNumber: String
-                                                )(implicit hc: HeaderCarrier
-                                                ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] =
+      pstr: String,
+      transferId: String,
+      versionNumber: String
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] =
     connector.getTransfer(pstr, transferId, versionNumber) flatMap {
       case Right(downstreamTransferDetails) =>
         val savedAnswers = downstreamTransferDetails.toSavedUserAnswers
