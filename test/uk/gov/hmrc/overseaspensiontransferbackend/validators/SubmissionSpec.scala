@@ -21,7 +21,8 @@ import org.scalatest.matchers.must.Matchers
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{NormalisedSubmission, QtNumber, TransferNumber}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{Declaration, QtDeclaration, ReportDetails, Submitted}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.{Declaration, QtDeclaration, ReportDetails}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.Submitted
 
 import java.util.UUID
 

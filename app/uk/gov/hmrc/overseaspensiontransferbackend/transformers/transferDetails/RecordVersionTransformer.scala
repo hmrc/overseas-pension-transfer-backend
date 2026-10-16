@@ -16,34 +16,12 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import play.api.libs.json.JsPath
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class RecordVersionTransformer extends PathAwareTransformer with JsonHelpers {
-
-  val jsonKey                       = "recordVersion"
-  override val externalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssetsVersion" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ jsonKey
-
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      )
-    )
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
-
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+class RecordVersionTransformer extends Transformer with JsonHelpers {
+  override val jsonKey              = "recordVersion"
+  override val externalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssetsVersion"
+  override val internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
 }

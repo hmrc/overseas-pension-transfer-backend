@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -28,6 +28,7 @@ import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.HttpClientResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetAllTransfersDTO
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.*
@@ -93,9 +94,10 @@ class GetAllTransfersControllerSpec
     }
 
     "must return 400 when PSTR is invalid" in {
-      val app: Application =
+      val mockHttpClientResponse = mock[HttpClientResponse]
+      val app: Application       =
         applicationBuilder()
-          .overrides(bind[Clock].toInstance(fixedClock))
+          .overrides(bind[HttpClientResponse].toInstance(mockHttpClientResponse))
           .build()
 
       running(app) {

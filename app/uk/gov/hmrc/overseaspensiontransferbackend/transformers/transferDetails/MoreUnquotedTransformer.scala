@@ -16,36 +16,13 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import play.api.libs.json.JsPath
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.BooleanTransformerStep
 
-class MoreUnquotedTransformer extends PathAwareTransformer with BooleanTransformerStep {
-
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "moreUnquoted"
-
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "moreUnquoted"
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      constructBool(externalPath),
-      moveStep(externalPath, internalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructBool(internalPath),
-      moveStep(internalPath, externalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
+class MoreUnquotedTransformer extends Transformer with BooleanTransformerStep {
+  override val externalPath: JsPath                = JsPath \ "transferDetails" \ "moreUnquoted"
+  override val internalPath: JsPath                = JsPath \ "transferDetails" \ "typeOfAssets" \ "moreUnquoted"
+  override val constructor: Seq[TransformerStep]   = Seq(constructBool(internalPath))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructBool(internalPath))
 }

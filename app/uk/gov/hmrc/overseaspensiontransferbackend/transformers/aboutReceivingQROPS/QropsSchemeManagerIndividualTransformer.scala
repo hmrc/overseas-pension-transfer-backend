@@ -17,18 +17,13 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
-class QropsSchemeManagerIndividualTransformer extends PathAwareTransformer with NameTransformerStep {
+class QropsSchemeManagerIndividualTransformer extends Transformer with NameTransformerStep {
+  override val externalPath: JsPath = JsPath \ "schemeManagerDetails" \ "individualContactName"
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsIndividual"
 
-  override def externalPath: JsPath = JsPath \ "schemeManagerDetails" \ "individualContactName"
-
-  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType" \ "qropsIndividual"
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     val steps: Seq[TransformerStep] = Seq(
       moveStep(
@@ -41,25 +36,12 @@ class QropsSchemeManagerIndividualTransformer extends PathAwareTransformer with 
         "individualSurname"
       )
     )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
+    applyPipeline(input, steps)(identity)
   }
 
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructName(
-        "individualForename",
-        "individualSurname",
-        internalPath
-      ),
-      moveStep(
-        internalPath,
-        externalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructName(
+    "individualForename",
+    "individualSurname",
+    internalPath
+  ))
 }

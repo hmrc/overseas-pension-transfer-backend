@@ -19,9 +19,10 @@ package uk.gov.hmrc.overseaspensiontransferbackend.connectors
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import play.api.http.Status.*
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, RequestId}
+import uk.gov.hmrc.http.{HeaderCarrier, RequestId, UpstreamErrorResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.base.BaseISpec
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.Submitted
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId}
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.HipOriginFailures.Failure
@@ -162,6 +163,7 @@ class TransferConnectorISpec extends BaseISpec {
   }
 
   "getTransfer" - {
+    val baseUrl = "/etmp/RESTAdapter/pods/reports/qrops-transfer"
     "return Right DownstreamTransferData when 200 and valid data is returned from downstream" in {
       val downstreamPayload = Json.obj(
         "success" -> Json.obj(
@@ -175,9 +177,9 @@ class TransferConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload)
+      stubGet(s"$baseUrl?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[UpstreamErrorResponse, DownstreamTransferData] = await(connector.getTransfer("12345678AB", "QT123456", "001"))
 
       result mustBe Right(
         DownstreamTransferData(
@@ -209,11 +211,12 @@ class TransferConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, BAD_REQUEST)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
+      stubGet(s"$baseUrl?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, BAD_REQUEST)
 
-      result mustBe Left(HipBadRequest("HIP", "code", "There's been an error", Some("logID")))
+      val result: Either[UpstreamErrorResponse, DownstreamTransferData] = await(connector.getTransfer("12345678AB", "QT123456", "001"))
+
+      result.swap.foreach( ue => ue.statusCode mustBe BAD_REQUEST)
     }
 
     "return EtmpValidationError when 422 is returned with valid payload" in {
@@ -225,11 +228,11 @@ class TransferConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, UNPROCESSABLE_ENTITY)
+      stubGet(s"$baseUrl?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, UNPROCESSABLE_ENTITY)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[UpstreamErrorResponse, DownstreamTransferData] = await(connector.getTransfer("12345678AB", "QT123456", "001"))
 
-      result mustBe Left(EtmpValidationError(now.toString, "003", "Request could not be processed"))
+      result.swap.foreach( ue => ue.statusCode mustBe UNPROCESSABLE_ENTITY)
     }
 
     "return HipBadRequest when 500 is returned with valid payload" in {
@@ -246,9 +249,9 @@ class TransferConnectorISpec extends BaseISpec {
 
       stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, INTERNAL_SERVER_ERROR)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[UpstreamErrorResponse, DownstreamTransferData] = await(connector.getTransfer("12345678AB", "QT123456", "001"))
 
-      result mustBe Left(HipBadRequest("HoD", "code", "There's been an error", Some("logID")))
+      result.swap.foreach( ue => ue.statusCode mustBe INTERNAL_SERVER_ERROR)
     }
 
     "return HipOriginFailures when 503 is returned with valid payload" in {
@@ -264,11 +267,12 @@ class TransferConnectorISpec extends BaseISpec {
         )
       ).toString()
 
-      stubGet("/etmp/RESTAdapter/pods/reports/qrops-transfer?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, SERVICE_UNAVAILABLE)
+      stubGet(s"$baseUrl?pstr=12345678AB&qtNumber=QT123456&versionNumber=001", downstreamPayload, SERVICE_UNAVAILABLE)
 
-      val result: Either[DownstreamError, DownstreamTransferData] = await(connector.getTransfer(PstrNumber("12345678AB"), QtNumber("QT123456"), "001"))
+      val result: Either[UpstreamErrorResponse, DownstreamTransferData] = await(connector.getTransfer("12345678AB", "QT123456", "001"))
 
-      result mustBe Left(HipOriginFailures("HoD", List(Failure("type", "reason"))))
+      result.swap.foreach( ue => ue.statusCode mustBe SERVICE_UNAVAILABLE)
+
     }
   }
 

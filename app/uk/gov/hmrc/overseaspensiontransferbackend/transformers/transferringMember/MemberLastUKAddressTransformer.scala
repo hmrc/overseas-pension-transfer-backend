@@ -17,46 +17,20 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
 import com.google.inject.Inject
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class MemberLastUKAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep
+class MemberLastUKAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends Transformer with AddressTransformerStep
     with JsonHelpers {
-
-  val jsonKey                       = "lastPrincipalAddDetails"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ jsonKey
-  private val nestedKey             = "addressDetails"
-
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      constructAddressAt(
-        internalPath,
-        Some(nestedKey)
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+  override val externalPath: JsPath                = JsPath \ "memberDetails" \ "lastPrincipalAddDetails"
+  override val internalPath: JsPath                = JsPath \ "transferringMember" \ "memberDetails" \ "memberResidencyDetails" \ "lastPrincipalAddDetails"
+  private val nestedKey                            = "addressDetails"
+  override val constructor: Seq[TransformerStep]   = Seq(constructAddressAt(internalPath, Some(nestedKey)))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructAddressAt(internalPath \ nestedKey))
 
   override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        internalPath \ nestedKey
-      ),
-      moveStep(
-        from = internalPath \ nestedKey,
-        to   = externalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
+    applyPipeline(json, Seq(deconstructAddressAt(internalPath \ nestedKey), moveStep(internalPath \ nestedKey, externalPath)))(identity)
   }
 }

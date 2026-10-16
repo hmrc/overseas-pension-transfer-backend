@@ -20,6 +20,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 import uk.gov.hmrc.overseaspensiontransferbackend.models.*
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.Submitted
 import uk.gov.hmrc.overseaspensiontransferbackend.models.authentication.{Psa, PsaId}
 
 class SubmissionSchemaValidatorSpec extends AnyWordSpec with Matchers {

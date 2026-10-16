@@ -17,7 +17,7 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 
 import org.apache.pekko.Done
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.when
 import org.scalatest.freespec.AnyFreeSpec
 import play.api.Application
@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.overseaspensiontransferbackend.base.SpecBase
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.HttpClientResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.services.SaveForLaterError.DeleteFailed
 import uk.gov.hmrc.overseaspensiontransferbackend.services.{SaveForLaterError, SaveForLaterService}
 
@@ -33,7 +34,8 @@ import scala.concurrent.Future
 
 class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
-  private val routePrefix = "/overseas-pension-transfer-backend"
+  private val routePrefix            = "/overseas-pension-transfer-backend"
+  private val mockHttpClientResponse = mock[HttpClientResponse]
 
   "SaveForLaterController" - {
 
@@ -45,7 +47,10 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .overrides(
+            bind[HttpClientResponse].toInstance(mockHttpClientResponse),
+            bind[SaveForLaterService].toInstance(mockService)
+          )
           .build()
 
       running(app) {
@@ -65,7 +70,10 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .overrides(
+            bind[HttpClientResponse].toInstance(mockHttpClientResponse),
+            bind[SaveForLaterService].toInstance(mockService)
+          )
           .build()
 
       running(app) {
@@ -84,7 +92,10 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .overrides(
+            bind[HttpClientResponse].toInstance(mockHttpClientResponse),
+            bind[SaveForLaterService].toInstance(mockService)
+          )
           .build()
 
       running(app) {
@@ -106,7 +117,10 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .overrides(
+            bind[HttpClientResponse].toInstance(mockHttpClientResponse),
+            bind[SaveForLaterService].toInstance(mockService)
+          )
           .build()
 
       running(app) {
@@ -128,7 +142,10 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
 
       val app: Application =
         applicationBuilder()
-          .overrides(bind[SaveForLaterService].toInstance(mockService))
+          .overrides(
+            bind[HttpClientResponse].toInstance(mockHttpClientResponse),
+            bind[SaveForLaterService].toInstance(mockService)
+          )
           .build()
 
       running(app) {
@@ -150,6 +167,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val app: Application =
           applicationBuilder()
             .overrides(
+              bind[HttpClientResponse].toInstance(mockHttpClientResponse),
               bind[SaveForLaterService].toInstance(mockService)
             )
             .build()
@@ -171,6 +189,7 @@ class SaveForLaterControllerSpec extends AnyFreeSpec with SpecBase {
         val app: Application =
           applicationBuilder()
             .overrides(
+              bind[HttpClientResponse].toInstance(mockHttpClientResponse),
               bind[SaveForLaterService].toInstance(mockService)
             )
             .build()

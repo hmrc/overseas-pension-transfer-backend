@@ -16,35 +16,11 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 
-import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
+import play.api.libs.json.JsPath
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
-class CashValueTransformer extends PathAwareTransformer {
-
-  private val jsonKey: String = "cashValue"
-
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ jsonKey
-
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ jsonKey
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(externalPath, internalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(internalPath, externalPath)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
+class CashValueTransformer extends Transformer {
+  override val jsonKey: String      = "cashValue"
+  override val externalPath: JsPath = JsPath \ "transferDetails"
+  override val internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
 }
