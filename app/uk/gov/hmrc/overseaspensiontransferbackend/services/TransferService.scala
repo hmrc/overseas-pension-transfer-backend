@@ -166,39 +166,47 @@ class TransferService @Inject() (
           transferFromRepo      <- repository.get(referenceId)
           transferNotFoundInRepo = transferFromRepo.isEmpty
           transfer              <- if (transferNotFoundInRepo) {
-                                     fetchTransferFromDownstream(pstr, referenceId, qtStatus, version)
+                                     fetchAndSaveTransferFromDownstream(pstr, referenceId, version)
                                    } else {
                                      Future(deconstructSavedAnswers(transferFromRepo.get))
                                    }
         } yield transfer
       case (Compiled | Submitted, Some(version)) if isQtNumber(referenceId) =>
-        fetchTransferFromDownstream(pstr, referenceId, qtStatus, version)
+        fetchTransferFromDownstream(pstr, referenceId, version)
       case _                                                                =>
         logger.error(s"Request parameters are invalid - transfer status: $qtStatus and  version: $versionNumber")
         Future(Left[UpstreamErrorResponse, UserAnswersDTO](UpstreamErrorResponse("Request parameters are invalid", INTERNAL_SERVER_ERROR)))
     }
   }
+  
+  private def fetchAndSaveTransferFromDownstream(
+                                                  pstr: String,
+                                                  transferId: String,
+                                                  versionNumber: String
+                                                )(implicit hc: HeaderCarrier
+                                                ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] =
+    connector.getTransfer(pstr, transferId, versionNumber) flatMap {
+      case Right(downstreamTransferDetails) =>
+        val savedAnswers = downstreamTransferDetails.toSavedUserAnswers
+        repository.set(savedAnswers) map {
+          case true  => deconstructSavedAnswers(savedAnswers)
+          case false =>
+            logger.error(s"Unable to set AmendInProgress for transferId: $transferId in save-for-later")
+            Left(UpstreamErrorResponse(s"Unable to set AmendInProgress for transferId: $transferId in save-for-later", INTERNAL_SERVER_ERROR))
+        }
+      case Left(x)                          => Future(Left[UpstreamErrorResponse, UserAnswersDTO](x))
+    }
 
   private def fetchTransferFromDownstream(
       pstr: String,
       transferId: String,
-      qtStatus: QtStatus,
       versionNumber: String
     )(implicit hc: HeaderCarrier
     ): Future[Either[UpstreamErrorResponse, UserAnswersDTO]] =
     connector.getTransfer(pstr, transferId, versionNumber) flatMap {
       case Right(downstreamTransferDetails) =>
         val savedAnswers = downstreamTransferDetails.toSavedUserAnswers
-        if (qtStatus == AmendInProgress) {
-          repository.set(savedAnswers) map {
-            case true  => deconstructSavedAnswers(downstreamTransferDetails.toSavedUserAnswers)
-            case false =>
-              logger.error(s"Unable to set AmendInProgress for transferId: $transferId in save-for-later")
-              Left(UpstreamErrorResponse(s"Unable to set AmendInProgress for transferId: $transferId in save-for-later", INTERNAL_SERVER_ERROR))
-          }
-        } else {
-          Future(deconstructSavedAnswers(downstreamTransferDetails.toSavedUserAnswers))
-        }
+        Future(deconstructSavedAnswers(savedAnswers))
       case Left(x)                          => Future(Left[UpstreamErrorResponse, UserAnswersDTO](x))
     }
 
