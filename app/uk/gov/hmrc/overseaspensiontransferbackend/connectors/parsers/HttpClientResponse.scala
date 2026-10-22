@@ -28,10 +28,10 @@ class HttpClientResponse @Inject() ()(implicit ec: ExecutionContext) extends Log
 
   private def logErrorResponses[T]: PartialFunction[Try[Either[UpstreamErrorResponse, T]], Either[UpstreamErrorResponse, T]] = {
     case Success(Left(r)) if r.statusCode == NOT_FOUND =>
-      logger.warn(s"Response of ${r.statusCode} returned")
+      logger.warn(s"Response of ${r.statusCode} returned", r)
       Left[UpstreamErrorResponse, T](UpstreamErrorResponse(s"Transfer not found: ${r.message}", NOT_FOUND))
     case Success(Left(r))                              =>
-      logger.error(s"Response of ${r.statusCode} returned")
+      logger.error(s"Response of ${r.statusCode} returned", r)
       Left[UpstreamErrorResponse, T](UpstreamErrorResponse(s"Error retrieving transfer: ${r.message}", r.statusCode))
     case Failure(ex: HttpException)                    =>
       logger.error(s"HttpException thrown: ${ex.message}", ex)
