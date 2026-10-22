@@ -19,12 +19,11 @@ package uk.gov.hmrc.overseaspensiontransferbackend.controllers
 import com.google.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.controllers.actions.IdentifierAction
-import uk.gov.hmrc.overseaspensiontransferbackend.models.dtos.GetSpecificTransferHandler
-import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{TransferId, TransferNotFound, TransferRetrievalError}
-import uk.gov.hmrc.overseaspensiontransferbackend.models.{PstrNumber, QtStatus}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus
 import uk.gov.hmrc.overseaspensiontransferbackend.services.TransferService
+import uk.gov.hmrc.overseaspensiontransferbackend.validators.PathParameterValidator.withPstrNumber
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
@@ -38,27 +37,23 @@ class GetTransferDataController @Inject() (
   ) extends BackendController(cc) {
 
   def getTransfer(
-      referenceId: TransferId,
+      referenceId: String,
       pstr: String,
       qtStatus: String,
       versionNumber: Option[String]
-    ): Action[AnyContent] =
-    identify.async {
-      implicit request =>
-        implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
-
-        val transferType: Either[TransferRetrievalError, GetSpecificTransferHandler] =
-          GetSpecificTransferHandler.apply(referenceId, PstrNumber(pstr), QtStatus(qtStatus), versionNumber)
-
-        transferService.getTransfer(transferType) map {
-          case Right(value)              => Ok(Json.toJson(value))
-          case Left(TransferNotFound(_)) => NotFound
-          case Left(e)                   =>
+    ): Action[AnyContent] = identify.async {
+    implicit request =>
+      implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+      withPstrNumber(pstr)(implicit validPstr =>
+        transferService.getTransfer(referenceId, validPstr, QtStatus(qtStatus), versionNumber) map {
+          case Right(value)                                    => Ok(Json.toJson(value))
+          case Left(UpstreamErrorResponse(_, NOT_FOUND, _, _)) => NotFound
+          case Left(e)                                         =>
             InternalServerError(Json.obj(
               "error"   -> "Internal server error",
               "details" -> e.toString
             ))
         }
-    }
-
+      )
+  }
 }

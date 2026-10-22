@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.config
 import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 @Singleton
@@ -34,8 +35,9 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val getAllTransfersYearsOffset: Int = config.get[Int]("getAllTransfers.yearsOffset")
 
-  val clientId: String     = config.get[String]("microservice.services.hip.clientId")
-  val clientSecret: String = config.get[String]("microservice.services.hip.clientSecret")
+  private val clientId: String     = config.get[String]("microservice.services.hip.clientId")
+  private val clientSecret: String = config.get[String]("microservice.services.hip.clientSecret")
+  val authorization                = s"Basic ${Base64.getEncoder.encodeToString(s"$clientId:$clientSecret".getBytes("UTF-8"))}"
 
   case class EnrolmentConfig(serviceName: String, identifierKey: String)
 

@@ -56,7 +56,8 @@ class IdentifierActionImpl @Inject() (
         if (affinityGroup == AffinityGroup.Agent) {
           throw AgentAffinityGroupNotAllowed
         }
-        val internalId                           = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
+        val internalId = getOrElseFailWithUnauthorised(optInternalId, "Unable to retrieve internalId")
+
         val authenticatedUser: AuthenticatedUser = extractUser(enrolments, config, internalId, affinityGroup)
 
         request.headers.get("schemeReferenceNumber").fold(Future.successful(BadRequest)) {

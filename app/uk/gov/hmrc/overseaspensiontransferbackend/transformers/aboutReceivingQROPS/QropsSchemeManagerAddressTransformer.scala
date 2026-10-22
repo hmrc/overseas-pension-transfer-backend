@@ -17,48 +17,15 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import com.google.inject.Inject
-import play.api.libs.json.{JsError, JsObject, JsPath}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.{moveStep, TransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import play.api.libs.json.JsPath
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.CountryCodeReader
 
-class QropsSchemeManagerAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep {
-
-  val jsonKey = "schemeManagerAddress"
-
-  override def externalPath: JsPath = JsPath \ "schemeManagerDetails"
-
-  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType"
-
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
-  override def construct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from      = externalPath \ jsonKey,
-        to        = internalPath \ jsonKey
-      ),
-      constructAddressAt(
-        path      = internalPath \ jsonKey,
-        nestedKey = None
-      )
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        internalPath \
-          jsonKey
-      ),
-      moveStep(internalPath \ jsonKey, externalPath \ jsonKey)
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
-  }
+class QropsSchemeManagerAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends Transformer with AddressTransformerStep {
+  override val jsonKey                             = "schemeManagerAddress"
+  override val externalPath: JsPath                = JsPath \ "schemeManagerDetails"
+  override val internalPath: JsPath                = JsPath \ "aboutReceivingQROPS" \ "qropsSchemeManagerType"
+  override val constructor: Seq[TransformerStep]   = Seq(constructAddressAt(internalPath \ jsonKey))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructAddressAt(internalPath \ jsonKey))
 }

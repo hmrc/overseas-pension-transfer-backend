@@ -16,44 +16,20 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
-import play.api.libs.json.*
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.*
+import play.api.libs.json.JsPath
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class QropsEstablishedOtherTransformer extends PathAwareTransformer with EnumTransformerStep with JsonHelpers {
+class QropsEstablishedOtherTransformer extends Transformer with EnumTransformerStep with JsonHelpers {
 
-  val jsonKey = "qropsEstablishedOther"
-
-  override def externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
-
-  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ jsonKey
+  override val jsonKey              = "qropsEstablishedOther"
+  override val externalPath: JsPath = JsPath \ "qropsDetails"
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     *
     * If the free-text "other" field is being set by the frontend, this removes any conflicting structured country value.
     */
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      )
-    )
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
-
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+  // TODO Check if these comments need to be implemented
 }

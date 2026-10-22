@@ -17,42 +17,17 @@
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQROPS
 
 import com.google.inject.Inject
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.JsPath
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.AddressTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class QropsAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends PathAwareTransformer with AddressTransformerStep with JsonHelpers {
+class QropsAddressTransformer @Inject() (val countryCodeReader: CountryCodeReader) extends Transformer with AddressTransformerStep with JsonHelpers {
 
-  val jsonKey                       = "receivingQropsAddress"
-  override val externalPath: JsPath = JsPath \ "qropsDetails"
-  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS"
+  override val jsonKey                             = "receivingQropsAddress"
+  override val externalPath: JsPath                = JsPath \ "qropsDetails"
+  override val internalPath: JsPath                = JsPath \ "aboutReceivingQROPS"
+  override val constructor: Seq[TransformerStep]   = Seq(constructAddressAt(internalPath \ jsonKey))
+  override val deconstructor: Seq[TransformerStep] = Seq(deconstructAddressAt(internalPath \ jsonKey))
 
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from      = externalPath \ jsonKey,
-        to        = internalPath \ jsonKey
-      ),
-      constructAddressAt(
-        path      = internalPath \ jsonKey,
-        nestedKey = None
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
-
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      deconstructAddressAt(
-        internalPath \
-          jsonKey
-      ),
-      moveStep(internalPath \ jsonKey, externalPath \ jsonKey)
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
 }

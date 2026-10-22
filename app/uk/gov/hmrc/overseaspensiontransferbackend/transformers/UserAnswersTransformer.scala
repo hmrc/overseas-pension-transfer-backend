@@ -23,11 +23,12 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class UserAnswersTransformer @Inject() (
     transformers: Seq[Transformer]
-  ) extends Transformer {
+  ) extends Steps with Transformer {
 
-  def construct(json: JsObject): Either[JsError, JsObject] =
-    TransformerUtils.applyPipeline(json, transformers)(_.construct)
+  override def construct(json: JsObject): Either[JsError, JsObject] =
+    applyPipeline(json, transformers)(_.construct)
 
-  def deconstruct(json: JsObject): Either[JsError, JsObject] =
-    TransformerUtils.applyPipeline(json, transformers)(_.deconstruct)
+  override def deconstruct(json: JsObject): Either[JsError, JsObject] =
+    applyPipeline(json, transformers)(_.deconstruct)
+
 }

@@ -22,9 +22,8 @@ import play.api.http.Status.CREATED
 import play.api.libs.json.*
 import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.http.HeaderNames.authorisation
-import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.overseaspensiontransferbackend.config.AppConfig
 import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.ParserHelpers.handleResponse
 import uk.gov.hmrc.overseaspensiontransferbackend.models.PstrNumber
@@ -32,9 +31,11 @@ import uk.gov.hmrc.overseaspensiontransferbackend.models.downstream.{DownstreamA
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.QtNumber
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.DateTimeFormats.localDate
 import uk.gov.hmrc.overseaspensiontransferbackend.validators.Submission
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.overseaspensiontransferbackend.connectors.parsers.HttpClientResponse
 
-import java.time.{Clock, Instant, LocalDate}
-import java.util.{Base64, UUID}
+import java.time.{Instant, LocalDate}
+import java.util.UUID
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,61 +43,46 @@ import scala.concurrent.{ExecutionContext, Future}
 class TransferConnector @Inject() (
     httpClientV2: HttpClientV2,
     appConfig: AppConfig,
-    clock: Clock
+    httpClientResponse: HttpClientResponse
   )(implicit ec: ExecutionContext
   ) extends Logging {
 
+  private def buildHeaders(xMessage: String, correlationId: String = UUID.randomUUID().toString): Seq[(String, String)] =
+    Seq(
+      authorisation           -> appConfig.authorization,
+      "correlationid"         -> correlationId,
+      "X-Message-Type"        -> xMessage,
+      "X-Originating-System"  -> "MDTP",
+      "X-Receipt-Date"        -> Instant.now().toString,
+      "X-Regime-Type"         -> "PODS",
+      "X-Transmitting-System" -> "HIP"
+    )
+
+  private val baseUrl = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports"
+
   def submitTransfer(validated: Submission, correlationId: String)(implicit hc: HeaderCarrier): Future[Either[DownstreamError, DownstreamSuccess]] = {
-
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
-
-    val payload: JsValue = Json.toJson(validated)
-
-    val receiptDate: String = Instant.now(clock).toString // UTC ISO-8601 per spec
-
     httpClientV2
-      .post(url)
-      .setHeader(
-        authorisation           -> authorization(),
-        "correlationid"         -> correlationId,
-        "X-Message-Type"        -> "FileQROPSTransfer",
-        "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
-        "X-Regime-Type"         -> "PODS",
-        "X-Transmitting-System" -> "HIP"
-      )
-      .withBody(payload)
+      .post(url"$baseUrl/qrops-transfer")
+      .setHeader(buildHeaders("FileQROPSTransfer", correlationId)*)
+      .withBody(Json.toJson(validated))
       .execute[HttpResponse]
       .map(resp => handleResponse[DownstreamSuccess](resp, CREATED))
   }
 
   def getTransfer(
-      pstr: PstrNumber,
-      qtNumber: QtNumber,
+      pstr: String,
+      qtNumber: String,
       versionNumber: String
     )(implicit hc: HeaderCarrier
-    ): Future[Either[DownstreamError, DownstreamTransferData]] = {
-
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer"
-
-    val correlationId     = UUID.randomUUID().toString
-    val receiptDate       = Instant.now(clock).toString
-    val queryStringParams = Seq("pstr" -> pstr.value, "qtNumber" -> qtNumber.value, "versionNumber" -> versionNumber)
-
-    httpClientV2
-      .get(url)
-      .setHeader(
-        authorisation           -> authorization(),
-        "correlationid"         -> correlationId,
-        "X-Message-Type"        -> "GetQROPSTransfer",
-        "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
-        "X-Regime-Type"         -> "PODS",
-        "X-Transmitting-System" -> "HIP"
-      )
-      .transform(_.addQueryStringParameters(queryStringParams*))
-      .execute
-      .map(resp => handleResponse[DownstreamTransferData](resp))
+    ): Future[Either[UpstreamErrorResponse, DownstreamTransferData]] = {
+    val queryStringParams = Seq("pstr" -> pstr, "qtNumber" -> qtNumber, "versionNumber" -> versionNumber)
+    httpClientResponse.read(
+      httpClientV2
+        .get(url"$baseUrl/qrops-transfer")
+        .setHeader(buildHeaders("GetQROPSTransfer")*)
+        .transform(_.addQueryStringParameters(queryStringParams*))
+        .execute[Either[UpstreamErrorResponse, DownstreamTransferData]]
+    )
   }
 
   def getAllTransfers(
@@ -106,42 +92,18 @@ class TransferConnector @Inject() (
       qtRef: Option[QtNumber]
     )(implicit hc: HeaderCarrier
     ): Future[Either[DownstreamError, DownstreamAllTransfersData]] = {
-
-    val url = url"${appConfig.etmpBaseUrl}/etmp/RESTAdapter/pods/reports/qrops-transfer-overview"
-
-    val correlationId = UUID.randomUUID().toString
-
-    val receiptDate = Instant.now(clock).toString // UTC ISO-8601 per spec
-
     val params =
       Seq(
         "dateFrom" -> fromDate.format(localDate),
         "dateTo"   -> toDate.format(localDate),
         "pstr"     -> pstrNumber.normalised
       ) ++ qtRef.map(qt => "qtRef" -> qt.value)
-
     httpClientV2
-      .get(url)
+      .get(url"$baseUrl/qrops-transfer-overview")
       .transform(_.addQueryStringParameters(params*))
-      .setHeader(
-        authorisation           -> authorization(),
-        "correlationid"         -> correlationId,
-        "X-Message-Type"        -> "GetQTReportOverview",
-        "X-Originating-System"  -> "MDTP",
-        "X-Receipt-Date"        -> receiptDate,
-        "X-Regime-Type"         -> "PODS",
-        "X-Transmitting-System" -> "HIP"
-      )
+      .setHeader(buildHeaders("GetQTReportOverview")*)
       .execute[HttpResponse]
       .map(resp => handleResponse[DownstreamAllTransfersData](resp))
-  }
-
-  private def authorization(): String = {
-    val clientId = appConfig.clientId
-    val secret   = appConfig.clientSecret
-
-    val encoded = Base64.getEncoder.encodeToString(s"$clientId:$secret".getBytes("UTF-8"))
-    s"Basic $encoded"
   }
 
 }

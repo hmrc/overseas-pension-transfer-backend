@@ -19,20 +19,15 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferDetails
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.AssetType.Cash
 import uk.gov.hmrc.overseaspensiontransferbackend.models.TypeOfAssets
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.TransformerStep
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.{BooleanTransformerStep, EnumTransformerStep}
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 
-class CashAssetsTransformer extends PathAwareTransformer with BooleanTransformerStep with EnumTransformerStep {
+class CashAssetsTransformer extends Transformer with BooleanTransformerStep with EnumTransformerStep {
 
-  override def externalPath: JsPath = JsPath \ "transferDetails" \ "cashOnlyTransfer"
-
-  override def internalPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets" \ "cashAssets"
-
+  override val externalPath: JsPath    = JsPath \ "transferDetails" \ "cashOnlyTransfer"
+  override val internalPath: JsPath    = JsPath \ "transferDetails" \ "typeOfAssets" \ "cashAssets"
   private val typeOfAssetsPath: JsPath = JsPath \ "transferDetails" \ "typeOfAssets"
 
-  /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
-    */
   override def construct(input: JsObject): Either[JsError, JsObject] = {
     def setCashAssets(): TransformerStep = json => {
       externalPath.asSingleJson(json).validate[String] match {
@@ -40,15 +35,9 @@ class CashAssetsTransformer extends PathAwareTransformer with BooleanTransformer
         case _                                     => Right(json)
       }
     }
-    val steps: Seq[TransformerStep]      = Seq(
-      setCashAssets()
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
+    applyPipeline(input, Seq(setCashAssets()))(identity)
   }
 
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
   override def deconstruct(input: JsObject): Either[JsError, JsObject] = {
     def setCashOnlyTransfer(): TransformerStep = json => {
       typeOfAssetsPath.asSingleJson(json).validate[TypeOfAssets] match {
@@ -61,11 +50,6 @@ class CashAssetsTransformer extends PathAwareTransformer with BooleanTransformer
         case _                   => Right(input)
       }
     }
-
-    val steps: Seq[TransformerStep] = Seq(
-      setCashOnlyTransfer()
-    )
-
-    TransformerUtils.applyPipeline(input, steps)(identity)
+    applyPipeline(input, Seq(setCashOnlyTransfer()))(identity)
   }
 }

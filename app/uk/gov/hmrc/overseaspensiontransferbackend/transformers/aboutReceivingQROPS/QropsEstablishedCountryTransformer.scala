@@ -19,52 +19,28 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers.aboutReceivingQR
 import com.google.inject.Inject
 import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.models.Country
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.EnumTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.{CountryCodeReader, JsonHelpers}
 
-class QropsEstablishedCountryTransformer @Inject() (countryCodeReader: CountryCodeReader) extends PathAwareTransformer with EnumTransformerStep
+class QropsEstablishedCountryTransformer @Inject() (countryCodeReader: CountryCodeReader) extends Transformer with EnumTransformerStep
     with JsonHelpers {
 
-  val jsonKey = "qropsEstablished"
-
-  override def externalPath: JsPath = JsPath \ "qropsDetails" \ jsonKey
-
-  override def internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails" \ jsonKey
+  override val jsonKey              = "qropsEstablished"
+  override val externalPath: JsPath = JsPath \ "qropsDetails"
+  override val internalPath: JsPath = JsPath \ "aboutReceivingQROPS" \ "receivingQropsEstablishedDetails"
 
   /** Applies a transformation from raw frontend input (e.g. UserAnswersDTO.data) into the correct internal shape for AnswersData.
     *
     * If the structured country is being set by the frontend, this removes any conflicting 'other' text-based value.
     */
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: Country => JsValue = country => JsString(country.code)
-
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      constructEnum[Country](internalPath, enumConversion)
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
+  override val constructor: Seq[TransformerStep] = {
+    val enumFromCountry: Country => JsValue = country => JsString(country.code)
+    Seq(constructEnum[Country](internalPath \ jsonKey, enumFromCountry))
   }
 
-  /** Applies the reverse transformation to make stored data suitable for frontend rendering.
-    */
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val enumConversion: String => JsValue = string =>
-      Json.toJson(countryCodeReader.readCountryCode(string))
-
-    val steps: Seq[TransformerStep] = Seq(
-      constructEnum[String](internalPath, enumConversion),
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
+  override val deconstructor: Seq[TransformerStep] = {
+    val enumFromString: String => JsValue = string => Json.toJson(countryCodeReader.readCountryCode(string))
+    Seq(constructEnum[String](internalPath \ jsonKey, enumFromString))
   }
 }

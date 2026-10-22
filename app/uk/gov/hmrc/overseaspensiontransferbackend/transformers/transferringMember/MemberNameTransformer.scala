@@ -16,43 +16,15 @@
 
 package uk.gov.hmrc.overseaspensiontransferbackend.transformers.transferringMember
 
-import play.api.libs.json._
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.steps._
+import play.api.libs.json.*
 import uk.gov.hmrc.overseaspensiontransferbackend.transformers.transformerSteps.NameTransformerStep
-import uk.gov.hmrc.overseaspensiontransferbackend.transformers.{PathAwareTransformer, TransformerUtils}
+import uk.gov.hmrc.overseaspensiontransferbackend.transformers.Transformer
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-class MemberNameTransformer extends PathAwareTransformer with NameTransformerStep with JsonHelpers {
-
-  val jsonKey                       = "name"
-  override val externalPath: JsPath = JsPath \ "memberDetails" \ jsonKey
-  override val internalPath: JsPath = JsPath \ "transferringMember" \ "memberDetails" \ jsonKey
-
-  override def construct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      moveStep(
-        from = externalPath,
-        to   = internalPath
-      ),
-      flattenName(
-        path = internalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
-
-  override def deconstruct(json: JsObject): Either[JsError, JsObject] = {
-    val steps: Seq[TransformerStep] = Seq(
-      unflattenName(
-        path = internalPath
-      ),
-      moveStep(
-        from = internalPath,
-        to   = externalPath
-      )
-    )
-
-    TransformerUtils.applyPipeline(json, steps)(identity)
-  }
+class MemberNameTransformer extends Transformer with NameTransformerStep with JsonHelpers {
+  override val jsonKey                             = "name"
+  override val externalPath: JsPath                = JsPath \ "memberDetails"
+  override val internalPath: JsPath                = JsPath \ "transferringMember" \ "memberDetails"
+  override val constructor: Seq[TransformerStep]   = Seq(flattenName(internalPath \ jsonKey))
+  override val deconstructor: Seq[TransformerStep] = Seq(unflattenName(internalPath \ jsonKey))
 }

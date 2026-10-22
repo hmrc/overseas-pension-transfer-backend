@@ -19,6 +19,7 @@ package uk.gov.hmrc.overseaspensiontransferbackend.models.testOnly
 import play.api.libs.json.{JsObject, Json, OFormat}
 import uk.gov.hmrc.overseaspensiontransferbackend.models._
 import uk.gov.hmrc.overseaspensiontransferbackend.models.transfer.{AllTransfersItem, TransferId}
+import uk.gov.hmrc.overseaspensiontransferbackend.models.QtStatus.*
 
 import java.time.Instant
 

@@ -19,11 +19,16 @@ package uk.gov.hmrc.overseaspensiontransferbackend.transformers
 import play.api.libs.json._
 import uk.gov.hmrc.overseaspensiontransferbackend.utils.JsonHelpers
 
-package object steps extends JsonHelpers {
+trait Steps extends JsonHelpers {
   type TransformerStep = JsObject => Either[JsError, JsObject]
 
-  def moveStep(from: JsPath, to: JsPath): TransformerStep =
-    (json: JsObject) => movePath(from, to, json)
+  def moveStep(from: JsPath, to: JsPath, jsonKey: String = ""): TransformerStep = {
+    if (jsonKey == "") {
+      (json: JsObject) => movePath(from, to, json)
+    } else {
+      (json: JsObject) => movePath(from \ jsonKey, to \ jsonKey, json)
+    }
+  }
 
   /** This function conditionally prunes an internal JSON key if the *external* key is being set.
     *
@@ -48,4 +53,15 @@ package object steps extends JsonHelpers {
       }
     }
 
+  def applyPipeline[T](
+      json: JsObject,
+      steps: Seq[T]
+    )(
+      stepFn: T => TransformerStep
+    ): Either[JsError, JsObject] = {
+    steps.foldLeft(Right(json): Either[JsError, JsObject]) {
+      case (Right(current), transformer) => stepFn(transformer)(current)
+      case (err @ Left(_), _)            => err
+    }
+  }
 }
