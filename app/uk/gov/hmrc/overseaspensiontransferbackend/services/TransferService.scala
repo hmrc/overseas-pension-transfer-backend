@@ -64,7 +64,7 @@ class TransferService @Inject() (
             val schemaErrors = schemaValidator.validate(Json.toJson(validated))
             if (schemaErrors.nonEmpty) {
               logger.warn(
-                s"[submitTransfer] referenceId=${submission.referenceId} schema validation failed: ${schemaErrors.map(_.getMessage).mkString("; ")}"
+                s"Schema validation failed for referenceId=${submission.referenceId} : ${schemaErrors.map(_.getMessage).mkString("; ")}"
               )
               Future.successful(Left(SubmissionTransformationError("Schema validation failed")))
             } else {
@@ -92,7 +92,7 @@ class TransferService @Inject() (
 
                     Right(SubmissionResponse(success.qtNumber, success.processingDate))
                   case Left(err)      =>
-                    logger.info(s"[submitTransfer] referenceId=${submission.referenceId} ${err.log}")
+                    logger.info(s"Submission failed for referenceId=${submission.referenceId} ${err.log}")
                     auditService.audit(
                       ReportSubmittedAuditModel.build(
                         referenceId              = saved.transferId,
@@ -114,7 +114,7 @@ class TransferService @Inject() (
         }
       case None        =>
         logger.info(
-          s"[submitTransfer] referenceId=${submission.referenceId} No submission found in save for later repository"
+          s"No submission found in save-for-later for referenceId=${submission.referenceId}"
         )
         Future.successful(
           Left(
@@ -244,7 +244,7 @@ class TransferService @Inject() (
 
     val inProgressF: Future[Seq[AllTransfersItem]] =
       repository.getRecords(pstrNumber).recover { case e =>
-        logger.warn("[getAllTransfers] in-progress lookup failed with error:", e)
+        logger.warn("In-progress lookup failed with error:", e)
         Seq.empty
       }
 
