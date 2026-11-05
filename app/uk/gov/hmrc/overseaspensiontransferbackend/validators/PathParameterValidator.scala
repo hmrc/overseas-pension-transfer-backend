@@ -38,7 +38,7 @@ object PathParameterValidator extends Logging {
     if (isPstrNumber(pstr)) {
       block(pstr)
     } else {
-      logger.error("PstrNumber has an invalid format. PstrNumber: " + pstr)
+      logger.error(s"PstrNumber has an invalid format. PstrNumber: $pstr")
       Future.successful(InternalServerError(Json.obj(
         "error"   -> "Invalid Pstr",
         "details" -> pstr

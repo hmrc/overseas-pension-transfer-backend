@@ -87,7 +87,7 @@ class SaveForLaterService @Inject() (
   private def constructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
     userAnswersTransformer.construct(json).left.map { err =>
       val formatErr = Json.prettyPrint(JsError.toJson(err))
-      logger.warn(formatErr)
+      logger.warn(s"Failed to construct saved answers: $formatErr")
       SaveForLaterError.TransformationError(formatErr)
     }
   }
@@ -95,7 +95,7 @@ class SaveForLaterService @Inject() (
   private def deconstructSavedAnswers(json: JsObject): Either[SaveForLaterError, JsObject] = {
     userAnswersTransformer.deconstruct(json).left.map { err =>
       val formatErr = Json.prettyPrint(JsError.toJson(err))
-      logger.warn(formatErr)
+      logger.warn(s"Failed to deconstruct saved answers: $formatErr")
       SaveForLaterError.TransformationError(formatErr)
     }
   }
@@ -110,7 +110,7 @@ class SaveForLaterService @Inject() (
       }
       case JsError(err)       =>
         val formatErr = Json.prettyPrint(JsError.toJson(err))
-        logger.warn(formatErr)
+        logger.warn(s"Failed to validate saved answers: $formatErr")
         Left(SaveForLaterError.TransformationError(formatErr))
     }
   }
